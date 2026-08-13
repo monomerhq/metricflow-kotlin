@@ -1,0 +1,848 @@
+{
+  "metrics": [
+    {
+      "name": "bookings",
+      "type": "simple",
+      "description": null,
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "bookings",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "bookings",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "extended_bookings_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/extended_bookings_source.yaml",
+        "file_slice": {
+          "filename": "extended_bookings_source.yaml",
+          "content": "name: bookings\nexpr: \"1\"\nagg: sum\ncreate_metric: true\n",
+          "start_line_number": 14,
+          "end_line_number": 17
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking__ds",
+          "qualified_name": "booking__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "extended_bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/extended_bookings_source.yaml",
+            "file_slice": {
+              "filename": "extended_bookings_source.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 24,
+              "end_line_number": 28
+            }
+          }
+        },
+        {
+          "name": "ds",
+          "dunder_name": "listing__ds",
+          "qualified_name": "listing__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings_extended_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "listing_creation_ds",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/listings_extended_source.yaml",
+            "file_slice": {
+              "filename": "listings_extended_source.yaml",
+              "content": "name: ds\nexpr: listing_creation_ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 11,
+              "end_line_number": 16
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__day",
+          "qualified_name": "metric_time__day",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "extended_bookings_source"
+      ]
+    },
+    {
+      "name": "bookings_last_month",
+      "type": "derived",
+      "description": "bookings the prior month, based on dimension with month granularity",
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": "bookings_last_month",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": [
+          {
+            "name": "bookings_monthly",
+            "filter": null,
+            "alias": "bookings_last_month",
+            "offset_window": {
+              "count": 1,
+              "granularity": "month"
+            },
+            "offset_to_grain": null
+          }
+        ],
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "bookings_monthly",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/metrics/bookings_last_month.yaml",
+        "file_slice": {
+          "filename": "bookings_last_month.yaml",
+          "content": "name: bookings_last_month\ndescription: bookings the prior month, based on dimension with month granularity\ntype: derived\ntype_params:\n  expr: bookings_last_month\n  metrics:\n  - name: bookings_monthly\n    offset_window: 1 month\n    alias: bookings_last_month\n",
+          "start_line_number": 2,
+          "end_line_number": 10
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking_monthly__ds",
+          "qualified_name": "booking_monthly__ds",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [
+            "booking_monthly"
+          ],
+          "semantic_model_name": "monthly_bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/bookings_monthly_source.yaml",
+            "file_slice": {
+              "filename": "bookings_monthly_source.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: month\n",
+              "start_line_number": 23,
+              "end_line_number": 27
+            }
+          }
+        },
+        {
+          "name": "ds",
+          "dunder_name": "listing__ds",
+          "qualified_name": "listing__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings_extended_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "listing_creation_ds",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/listings_extended_source.yaml",
+            "file_slice": {
+              "filename": "listings_extended_source.yaml",
+              "content": "name: ds\nexpr: listing_creation_ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 11,
+              "end_line_number": 16
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__month",
+          "qualified_name": "metric_time__month",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "monthly_bookings_source"
+      ]
+    },
+    {
+      "name": "bookings_monthly",
+      "type": "simple",
+      "description": null,
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "bookings_monthly",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "bookings_monthly",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "bookings_monthly",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "monthly_bookings_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/bookings_monthly_source.yaml",
+        "file_slice": {
+          "filename": "bookings_monthly_source.yaml",
+          "content": "name: bookings_monthly\nagg: sum\ncreate_metric: true\n",
+          "start_line_number": 16,
+          "end_line_number": 19
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking_monthly__ds",
+          "qualified_name": "booking_monthly__ds",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [
+            "booking_monthly"
+          ],
+          "semantic_model_name": "monthly_bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/bookings_monthly_source.yaml",
+            "file_slice": {
+              "filename": "bookings_monthly_source.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: month\n",
+              "start_line_number": 23,
+              "end_line_number": 27
+            }
+          }
+        },
+        {
+          "name": "ds",
+          "dunder_name": "listing__ds",
+          "qualified_name": "listing__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings_extended_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "listing_creation_ds",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/listings_extended_source.yaml",
+            "file_slice": {
+              "filename": "listings_extended_source.yaml",
+              "content": "name: ds\nexpr: listing_creation_ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 11,
+              "end_line_number": 16
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__month",
+          "qualified_name": "metric_time__month",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "monthly_bookings_source"
+      ]
+    },
+    {
+      "name": "monthly_bookings_to_daily_bookings",
+      "type": "ratio",
+      "description": "Ratio of daily bookings that are included in the monthly bookings total as a derived metric.",
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": {
+          "name": "bookings",
+          "filter": null,
+          "alias": null,
+          "offset_window": null,
+          "offset_to_grain": null
+        },
+        "denominator": {
+          "name": "bookings_monthly",
+          "filter": null,
+          "alias": null,
+          "offset_window": null,
+          "offset_to_grain": null
+        },
+        "expr": null,
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "bookings",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          },
+          {
+            "name": "bookings_monthly",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/metrics/monthly_bookings_to_daily_bookings_ratio.yaml",
+        "file_slice": {
+          "filename": "monthly_bookings_to_daily_bookings_ratio.yaml",
+          "content": "name: monthly_bookings_to_daily_bookings\ndescription: Ratio of daily bookings that are included in the monthly bookings total\n  as a derived metric.\ntype: ratio\ntype_params:\n  numerator:\n    name: bookings\n  denominator:\n    name: bookings_monthly\n",
+          "start_line_number": 3,
+          "end_line_number": 10
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "listing__ds",
+          "qualified_name": "listing__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings_extended_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "listing_creation_ds",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/listings_extended_source.yaml",
+            "file_slice": {
+              "filename": "listings_extended_source.yaml",
+              "content": "name: ds\nexpr: listing_creation_ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 11,
+              "end_line_number": 16
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "extended_bookings_source",
+        "monthly_bookings_source"
+      ]
+    },
+    {
+      "name": "trailing_3_months_bookings",
+      "type": "cumulative",
+      "description": "Prior 3 months' bookings. Tests a cumulative metric with non-day granularity.",
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "bookings_monthly",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": null,
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": {
+          "window": {
+            "count": 3,
+            "granularity": "month"
+          },
+          "grain_to_date": null,
+          "period_agg": "first",
+          "metric": {
+            "name": "bookings_monthly",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        },
+        "input_measures": [
+          {
+            "name": "bookings_monthly",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/metrics/bookings_monthly_cumulative.yaml",
+        "file_slice": {
+          "filename": "bookings_monthly_cumulative.yaml",
+          "content": "name: trailing_3_months_bookings\ndescription: Prior 3 months' bookings. Tests a cumulative metric with non-day granularity.\ntype: cumulative\ntype_params:\n  measure: bookings_monthly\n  cumulative_type_params:\n    window: 3 month\n",
+          "start_line_number": 2,
+          "end_line_number": 8
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking_monthly__ds",
+          "qualified_name": "booking_monthly__ds",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [
+            "booking_monthly"
+          ],
+          "semantic_model_name": "monthly_bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/bookings_monthly_source.yaml",
+            "file_slice": {
+              "filename": "bookings_monthly_source.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: month\n",
+              "start_line_number": 23,
+              "end_line_number": 27
+            }
+          }
+        },
+        {
+          "name": "ds",
+          "dunder_name": "listing__ds",
+          "qualified_name": "listing__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings_extended_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "listing_creation_ds",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/listings_extended_source.yaml",
+            "file_slice": {
+              "filename": "listings_extended_source.yaml",
+              "content": "name: ds\nexpr: listing_creation_ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 11,
+              "end_line_number": 16
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__month",
+          "qualified_name": "metric_time__month",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "monthly_bookings_source"
+      ]
+    },
+    {
+      "name": "unique_listings_booked",
+      "type": "simple",
+      "description": null,
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "unique_listings_booked",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "listing_id",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "unique_listings_booked",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "extended_bookings_source",
+          "agg": "count_distinct",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/extended_bookings_source.yaml",
+        "file_slice": {
+          "filename": "extended_bookings_source.yaml",
+          "content": "name: unique_listings_booked\nexpr: listing_id\nagg: count_distinct\ncreate_metric: true\n",
+          "start_line_number": 18,
+          "end_line_number": 22
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking__ds",
+          "qualified_name": "booking__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "extended_bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/extended_bookings_source.yaml",
+            "file_slice": {
+              "filename": "extended_bookings_source.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 24,
+              "end_line_number": 28
+            }
+          }
+        },
+        {
+          "name": "ds",
+          "dunder_name": "listing__ds",
+          "qualified_name": "listing__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings_extended_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "listing_creation_ds",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/listings_extended_source.yaml",
+            "file_slice": {
+              "filename": "listings_extended_source.yaml",
+              "content": "name: ds\nexpr: listing_creation_ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 11,
+              "end_line_number": 16
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__day",
+          "qualified_name": "metric_time__day",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "extended_bookings_source"
+      ]
+    },
+    {
+      "name": "weekly_bookers",
+      "type": "cumulative",
+      "description": "weekly_bookers",
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "bookings",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": null,
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": {
+          "window": {
+            "count": 7,
+            "granularity": "day"
+          },
+          "grain_to_date": null,
+          "period_agg": "first",
+          "metric": {
+            "name": "bookings",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        },
+        "input_measures": [
+          {
+            "name": "bookings",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/metrics/bookings_cumulative.yaml",
+        "file_slice": {
+          "filename": "bookings_cumulative.yaml",
+          "content": "name: \"weekly_bookers\"\ndescription: \"weekly_bookers\"\ntype: cumulative\ntype_params:\n  measure: bookings\n  cumulative_type_params:\n    window: 7 days\n",
+          "start_line_number": 2,
+          "end_line_number": 8
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking__ds",
+          "qualified_name": "booking__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "extended_bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/extended_bookings_source.yaml",
+            "file_slice": {
+              "filename": "extended_bookings_source.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 24,
+              "end_line_number": 28
+            }
+          }
+        },
+        {
+          "name": "ds",
+          "dunder_name": "listing__ds",
+          "qualified_name": "listing__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings_extended_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "listing_creation_ds",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/listings_extended_source.yaml",
+            "file_slice": {
+              "filename": "listings_extended_source.yaml",
+              "content": "name: ds\nexpr: listing_creation_ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 11,
+              "end_line_number": 16
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__day",
+          "qualified_name": "metric_time__day",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "extended_bookings_source"
+      ]
+    }
+  ]
+}

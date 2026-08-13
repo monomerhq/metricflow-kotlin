@@ -1,0 +1,348 @@
+syntax = "proto3";
+
+package monomer.metricflow.v1;
+
+// Wire contract for the MetricFlow Kotlin port. Every RPC corresponds 1:1 to
+// one of the eight `MetricFlowEngine` entry points listed in CLAUDE.md
+// ("엔진 인터페이스 표면"), which in turn match the eight subcommands of the
+// Python oracle CLI (see python_oracle/cli/SCHEMA.md).
+//
+// The contract preserves MetricFlow's domain vocabulary on the wire:
+// `qualified_name`, `dunder_name`, `metric_time`, `entity_links`, `query_spec`,
+// `bind_parameters`, `semantic_model_reference`, …  When Python returns a dict
+// here we use a `message`; when Python returns a list we use `repeated`.
+//
+// `RenderSql` preserves MetricFlow's established domain verb while the public
+// artifact uses a clean Monomer v1 namespace.
+
+option java_package = "cc.monomer.metricflow.protocol.v1";
+option java_multiple_files = true;
+option java_outer_classname = "MetricFlowSqlEngineProto";
+
+// -----------------------------------------------------------------------------
+// Service
+// -----------------------------------------------------------------------------
+
+service MetricFlowSqlEngine {
+  // explain(): render the SQL for a metric query without executing it.
+  rpc RenderSql(RenderSqlRequest) returns (RenderSqlResponse) {}
+
+  // list_metrics(): the compiled metric catalogue.
+  rpc ListMetrics(ListMetricsRequest) returns (ListMetricsResponse) {}
+
+  // list_dimensions(): dimensions per metric set (or all dims for the manifest).
+  rpc ListDimensions(ListDimensionsRequest) returns (ListDimensionsResponse) {}
+
+  // entities_for_metrics(): entities reachable from a metric set.
+  rpc EntitiesForMetrics(EntitiesForMetricsRequest) returns (EntitiesForMetricsResponse) {}
+
+  // list_group_bys(): dimensions + entities unified for downstream group-by UIs.
+  rpc ListGroupBys(ListGroupBysRequest) returns (ListGroupBysResponse) {}
+
+  // list_saved_queries(): named pre-canned queries declared in the manifest.
+  rpc ListSavedQueries(ListSavedQueriesRequest) returns (ListSavedQueriesResponse) {}
+
+  // explain_get_dimension_values(): render the SQL that fetches distinct
+  // values for a single dimension (does not execute).
+  rpc ExplainGetDimensionValues(ExplainGetDimensionValuesRequest)
+      returns (ExplainGetDimensionValuesResponse) {}
+
+  // validate_manifest(): run SemanticManifestValidator over the manifest after
+  // transformations. Does NOT throw on blocking issues (see PROGRESS.md
+  // Phase 3 insight) — issues are always returned.
+  rpc ValidateManifest(ValidateManifestRequest) returns (ValidateManifestResponse) {}
+}
+
+// -----------------------------------------------------------------------------
+// Shared input envelope
+//
+// Every RPC carries the semantic manifest in `PydanticSemanticManifest`-shaped
+// JSON. We send the four pieces as JSON strings rather than re-modelling the
+// manifest at proto level — Phase 0 mapped 70 manifest types; replicating
+// them on the wire would be redundant since the Kotlin engine hydrates from
+// kotlinx-serialization JSON anyway.
+// -----------------------------------------------------------------------------
+
+message ManifestEnvelope {
+  // Each entry is one PydanticSemanticModel JSON object (string).
+  repeated string semantic_models_json = 1;
+  // Each entry is one PydanticMetric JSON object.
+  repeated string metrics_json = 2;
+  // PydanticProjectConfiguration JSON object.
+  string project_configuration_json = 3;
+  // Optional PydanticSavedQuery JSON objects. Defaults to empty.
+  repeated string saved_queries_json = 4;
+  // Dialect selector. Case-insensitive. Default = TRINO.
+  SqlEngineType sql_engine = 5;
+}
+
+// Matches Python `MetricFlowEngine.sql_engine_type` (the dialect enum).
+enum SqlEngineType {
+  SQL_ENGINE_TYPE_UNSPECIFIED = 0;
+  SQL_ENGINE_TYPE_TRINO = 1;
+  SQL_ENGINE_TYPE_BIGQUERY = 2;
+  SQL_ENGINE_TYPE_SNOWFLAKE = 3;
+  SQL_ENGINE_TYPE_DATABRICKS = 4;
+  SQL_ENGINE_TYPE_REDSHIFT = 5;
+  SQL_ENGINE_TYPE_DUCKDB = 6;
+  SQL_ENGINE_TYPE_POSTGRES = 7;
+}
+
+// -----------------------------------------------------------------------------
+// Shared output pieces
+// -----------------------------------------------------------------------------
+
+// `bind_parameters` body (matches the SCHEMA.md `param_items` block exactly).
+message SqlBindParameterSet {
+  repeated SqlBindParameter param_items = 1;
+}
+
+message SqlBindParameter {
+  string key = 1;
+  // Serialized value (JSON-string).
+  string value_json = 2;
+  // The Python type name (e.g. "int", "str") — preserved to match
+  // SCHEMA.md `python_type`. Not used by the Kotlin engine but kept for
+  // wire-equivalence with the oracle.
+  string python_type = 3;
+}
+
+// `metadata.query_spec_summary`: per `python_oracle/cli/SCHEMA.md`.
+message QuerySpecSummary {
+  repeated string metric_specs = 1;          // qualified names
+  repeated string dimension_specs = 2;
+  repeated string time_dimension_specs = 3;
+  repeated string entity_specs = 4;
+  bool min_max_only = 5;
+}
+
+message ExplainMetadata {
+  // The dialect's display string (e.g. "Trino", "BigQuery"). Preserved
+  // verbatim from MetricFlow (NOT the proto enum name).
+  string sql_engine = 1;
+  // DAG id of the produced dataflow plan.
+  string dataflow_plan_id = 2;
+  QuerySpecSummary query_spec_summary = 3;
+}
+
+// One dimension as MetricFlow renders it.
+message Dimension {
+  string name = 1;
+  string dunder_name = 2;
+  string qualified_name = 3;
+  // "categorical" or "time".
+  string type = 4;
+  // Present only for type=time (e.g. "day", "week").
+  string granularity = 5;
+  repeated string entity_links = 6;
+  // null when this is `metric_time` (use is_metric_time below).
+  string semantic_model_name = 7;
+  bool is_partition = 8;
+  bool is_metric_time = 9;
+  string description = 10;
+  string label = 11;
+  string expr = 12;
+  // Pydantic metadata dump, JSON-string. Empty when absent.
+  string metadata_json = 13;
+}
+
+// One entity (semantic-model join key).
+message Entity {
+  string name = 1;
+  // "primary" | "foreign" | "unique" | "natural"
+  string type = 2;
+  string role = 3;
+  string semantic_model_name = 4;
+  string description = 5;
+  string expr = 6;
+}
+
+// One metric.
+message Metric {
+  string name = 1;
+  // "simple" | "derived" | "ratio" | "cumulative" | "conversion"
+  string type = 2;
+  string description = 3;
+  string label = 4;
+  string type_params_json = 5;
+  string filter_json = 6;
+  string metadata_json = 7;
+  string config_json = 8;
+  repeated Dimension dimensions = 9;
+  repeated string semantic_models = 10;
+}
+
+// Saved query.
+message SavedQuery {
+  string name = 1;
+  string description = 2;
+  string label = 3;
+  string query_params_json = 4;
+  string metadata_json = 5;
+  repeated Export exports = 6;
+  repeated string tags = 7;
+}
+
+message Export {
+  string name = 1;
+  string export_destination_type = 2;
+  string schema_name = 3;
+  string alias = 4;
+}
+
+// -----------------------------------------------------------------------------
+// `RenderSql` (explain)
+// -----------------------------------------------------------------------------
+
+message RenderSqlRequest {
+  ManifestEnvelope manifest = 1;
+  repeated string metric_names = 2;
+  repeated string group_by_names = 3;
+  repeated string where_constraints = 4;
+  repeated string order_by_names = 5;
+  // 0 = unset (proto3 doesn't carry presence on scalar fields without optional).
+  optional int32 limit = 6;
+  optional string time_constraint_start = 7;
+  optional string time_constraint_end = 8;
+  optional string saved_query_name = 9;
+  bool min_max_only = 10;
+  bool apply_group_by = 11;
+  bool order_output_columns_by_input_order = 12;
+}
+
+message RenderSqlResponse {
+  string sql = 1;
+  SqlBindParameterSet bind_parameters = 2;
+  ExplainMetadata metadata = 3;
+}
+
+// -----------------------------------------------------------------------------
+// `ListMetrics`
+// -----------------------------------------------------------------------------
+
+message ListMetricsRequest {
+  ManifestEnvelope manifest = 1;
+  // Default = true (matches Python).
+  bool include_dimensions = 2;
+}
+
+message ListMetricsResponse {
+  repeated Metric metrics = 1;
+}
+
+// -----------------------------------------------------------------------------
+// `ListDimensions`
+// -----------------------------------------------------------------------------
+
+message ListDimensionsRequest {
+  ManifestEnvelope manifest = 1;
+  // null/empty => all dimensions in the manifest.
+  repeated string metric_names = 2;
+}
+
+message ListDimensionsResponse {
+  repeated Dimension dimensions = 1;
+}
+
+// -----------------------------------------------------------------------------
+// `EntitiesForMetrics`
+// -----------------------------------------------------------------------------
+
+message EntitiesForMetricsRequest {
+  ManifestEnvelope manifest = 1;
+  repeated string metric_names = 2;
+}
+
+message EntitiesForMetricsResponse {
+  repeated Entity entities = 1;
+}
+
+// -----------------------------------------------------------------------------
+// `ListGroupBys`
+// -----------------------------------------------------------------------------
+
+message ListGroupBysRequest {
+  ManifestEnvelope manifest = 1;
+  repeated string metric_names = 2;
+  bool include_derived_time_granularities = 3;
+  GroupBysOrderBy order_by = 4;
+}
+
+enum GroupBysOrderBy {
+  GROUP_BYS_ORDER_BY_UNSPECIFIED = 0;
+  GROUP_BYS_ORDER_BY_DUNDER_NAME = 1;
+  GROUP_BYS_ORDER_BY_SEMANTIC_MODEL_NAME = 2;
+}
+
+message ListGroupBysResponse {
+  repeated Dimension dimensions = 1;
+  repeated Entity entities = 2;
+}
+
+// -----------------------------------------------------------------------------
+// `ListSavedQueries`
+// -----------------------------------------------------------------------------
+
+message ListSavedQueriesRequest {
+  ManifestEnvelope manifest = 1;
+}
+
+message ListSavedQueriesResponse {
+  repeated SavedQuery saved_queries = 1;
+}
+
+// -----------------------------------------------------------------------------
+// `ExplainGetDimensionValues`
+// -----------------------------------------------------------------------------
+
+message ExplainGetDimensionValuesRequest {
+  ManifestEnvelope manifest = 1;
+  repeated string metric_names = 2;
+  // The dimension whose distinct values would be fetched (e.g. "metric_time__day").
+  string get_group_by_values = 3;
+  optional string time_constraint_start = 4;
+  optional string time_constraint_end = 5;
+  bool min_max_only = 6;
+}
+
+message ExplainGetDimensionValuesResponse {
+  string sql = 1;
+  SqlBindParameterSet bind_parameters = 2;
+  // metadata.sql_engine only (no dataflow_plan_id per SCHEMA.md).
+  string sql_engine = 3;
+}
+
+// -----------------------------------------------------------------------------
+// `ValidateManifest`
+// -----------------------------------------------------------------------------
+
+message ValidateManifestRequest {
+  ManifestEnvelope manifest = 1;
+}
+
+enum ValidationIssueLevel {
+  VALIDATION_ISSUE_LEVEL_UNSPECIFIED = 0;
+  VALIDATION_ISSUE_LEVEL_ERROR = 1;
+  VALIDATION_ISSUE_LEVEL_FUTURE_ERROR = 2;
+  VALIDATION_ISSUE_LEVEL_WARNING = 3;
+}
+
+message ValidationIssue {
+  ValidationIssueLevel level = 1;
+  string message = 2;
+  // Pydantic dump of ValidationContext, JSON-string. May be empty.
+  string context_json = 3;
+  string context_str = 4;
+  string extra_detail = 5;
+  string readable = 6;
+  // ISO 8601, only present for FUTURE_ERROR.
+  string error_date = 7;
+}
+
+message ValidateManifestResponse {
+  repeated ValidationIssue issues = 1;
+  int32 error_count = 2;
+  int32 future_error_count = 3;
+  int32 warning_count = 4;
+  bool has_blocking_issues = 5;
+}

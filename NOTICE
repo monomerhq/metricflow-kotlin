@@ -1,0 +1,9 @@
+Monomer metricflow-kotlin
+Copyright 2026 Monomer contributors
+
+This product includes a Kotlin port derived from MetricFlow,
+Copyright 2025 dbt Labs, Inc.
+
+MetricFlow is licensed under the Apache License, Version 2.0.
+The preserved Python oracle under python_oracle/upstream is included for
+compatibility research and differential verification.

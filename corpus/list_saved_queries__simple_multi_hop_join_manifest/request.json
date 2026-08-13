@@ -1,0 +1,1059 @@
+{
+  "semantic_models": [
+    {
+      "name": "entity_0_dimension_source",
+      "defaults": null,
+      "description": "Contains dimensions for \"entity_0\"",
+      "node_relation": {
+        "alias": "entity_0_dimension_table",
+        "schema_name": "mf_corpus_2026_05_11_static",
+        "database": null,
+        "relation_name": "mf_corpus_2026_05_11_static.entity_0_dimension_table"
+      },
+      "primary_entity": null,
+      "entities": [
+        {
+          "name": "entity_0",
+          "description": null,
+          "type": "primary",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_0_dimension_source.yaml",
+            "file_slice": {
+              "filename": "entity_0_dimension_source.yaml",
+              "content": "name: entity_0\ntype: primary\n",
+              "start_line_number": 15,
+              "end_line_number": 16
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [],
+      "dimensions": [
+        {
+          "name": "country",
+          "description": null,
+          "type": "categorical",
+          "is_partition": false,
+          "type_params": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_0_dimension_source.yaml",
+            "file_slice": {
+              "filename": "entity_0_dimension_source.yaml",
+              "content": "name: country\ntype: categorical\n",
+              "start_line_number": 11,
+              "end_line_number": 13
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "label": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_0_dimension_source.yaml",
+        "file_slice": {
+          "filename": "entity_0_dimension_source.yaml",
+          "content": "name: entity_0_dimension_source\ndescription: Contains dimensions for \"entity_0\"\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: entity_0_dimension_table\ndimensions:\n- name: country\n  type: categorical\nentities:\n- name: entity_0\n  type: primary\n",
+          "start_line_number": 3,
+          "end_line_number": 16
+        }
+      },
+      "config": null
+    },
+    {
+      "name": "entity_2_to_entity_0_mapping_source",
+      "defaults": null,
+      "description": "Maps \"entity_2\" to \"entity_0\"",
+      "node_relation": {
+        "alias": "entity_2_to_entity_0_mapping_table",
+        "schema_name": "mf_corpus_2026_05_11_static",
+        "database": null,
+        "relation_name": "mf_corpus_2026_05_11_static.entity_2_to_entity_0_mapping_table"
+      },
+      "primary_entity": null,
+      "entities": [
+        {
+          "name": "entity_2",
+          "description": null,
+          "type": "primary",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_2_to_entity_0_mapping_source.yaml",
+            "file_slice": {
+              "filename": "entity_2_to_entity_0_mapping_source.yaml",
+              "content": "name: entity_2\ntype: primary\n",
+              "start_line_number": 11,
+              "end_line_number": 12
+            }
+          },
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "entity_0",
+          "description": null,
+          "type": "foreign",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_2_to_entity_0_mapping_source.yaml",
+            "file_slice": {
+              "filename": "entity_2_to_entity_0_mapping_source.yaml",
+              "content": "name: entity_0\ntype: foreign\n",
+              "start_line_number": 13,
+              "end_line_number": 14
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [],
+      "dimensions": [],
+      "label": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_2_to_entity_0_mapping_source.yaml",
+        "file_slice": {
+          "filename": "entity_2_to_entity_0_mapping_source.yaml",
+          "content": "name: entity_2_to_entity_0_mapping_source\ndescription: Maps \"entity_2\" to \"entity_0\"\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: entity_2_to_entity_0_mapping_table\nentities:\n- name: entity_2\n  type: primary\n- name: entity_0\n  type: foreign\n",
+          "start_line_number": 3,
+          "end_line_number": 14
+        }
+      },
+      "config": null
+    },
+    {
+      "name": "entity_1_to_entity_0_mapping_source",
+      "defaults": null,
+      "description": "Maps \"entity_1\" to \"entity_0\"",
+      "node_relation": {
+        "alias": "entity_1_to_entity_0_mapping_table",
+        "schema_name": "mf_corpus_2026_05_11_static",
+        "database": null,
+        "relation_name": "mf_corpus_2026_05_11_static.entity_1_to_entity_0_mapping_table"
+      },
+      "primary_entity": null,
+      "entities": [
+        {
+          "name": "entity_1",
+          "description": null,
+          "type": "primary",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_to_entity_0_mapping_source.yaml",
+            "file_slice": {
+              "filename": "entity_1_to_entity_0_mapping_source.yaml",
+              "content": "name: entity_1\ntype: primary\n",
+              "start_line_number": 11,
+              "end_line_number": 12
+            }
+          },
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "entity_0",
+          "description": null,
+          "type": "foreign",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_to_entity_0_mapping_source.yaml",
+            "file_slice": {
+              "filename": "entity_1_to_entity_0_mapping_source.yaml",
+              "content": "name: entity_0\ntype: foreign\n",
+              "start_line_number": 13,
+              "end_line_number": 14
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [],
+      "dimensions": [],
+      "label": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_to_entity_0_mapping_source.yaml",
+        "file_slice": {
+          "filename": "entity_1_to_entity_0_mapping_source.yaml",
+          "content": "name: entity_1_to_entity_0_mapping_source\ndescription: Maps \"entity_1\" to \"entity_0\"\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: entity_1_to_entity_0_mapping_table\nentities:\n- name: entity_1\n  type: primary\n- name: entity_0\n  type: foreign\n",
+          "start_line_number": 3,
+          "end_line_number": 14
+        }
+      },
+      "config": null
+    },
+    {
+      "name": "entity_1_and_entity_2_measure_source",
+      "defaults": {
+        "agg_time_dimension": "ds"
+      },
+      "description": "A measure source associated with \"entity_1\" and \"entity_2\".",
+      "node_relation": {
+        "alias": "entity_1_and_entity_2_measure_table",
+        "schema_name": "mf_corpus_2026_05_11_static",
+        "database": null,
+        "relation_name": "mf_corpus_2026_05_11_static.entity_1_and_entity_2_measure_table"
+      },
+      "primary_entity": null,
+      "entities": [
+        {
+          "name": "composite_entity",
+          "description": null,
+          "type": "primary",
+          "role": null,
+          "expr": "entity_1 || entity_2",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_and_entity_2_measure_source.yaml",
+            "file_slice": {
+              "filename": "entity_1_and_entity_2_measure_source.yaml",
+              "content": "name: composite_entity\ntype: primary\nexpr: entity_1 || entity_2\n",
+              "start_line_number": 25,
+              "end_line_number": 27
+            }
+          },
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "entity_1",
+          "description": null,
+          "type": "foreign",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_and_entity_2_measure_source.yaml",
+            "file_slice": {
+              "filename": "entity_1_and_entity_2_measure_source.yaml",
+              "content": "name: entity_1\ntype: foreign\n",
+              "start_line_number": 28,
+              "end_line_number": 29
+            }
+          },
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "entity_2",
+          "description": null,
+          "type": "foreign",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_and_entity_2_measure_source.yaml",
+            "file_slice": {
+              "filename": "entity_1_and_entity_2_measure_source.yaml",
+              "content": "name: entity_2\ntype: foreign\n",
+              "start_line_number": 30,
+              "end_line_number": 31
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [
+        {
+          "name": "entity_1_and_entity_2_measure",
+          "agg": "sum",
+          "description": null,
+          "create_metric": null,
+          "expr": "1",
+          "agg_params": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_and_entity_2_measure_source.yaml",
+            "file_slice": {
+              "filename": "entity_1_and_entity_2_measure_source.yaml",
+              "content": "name: entity_1_and_entity_2_measure\nagg: sum\nexpr: \"1\"\n",
+              "start_line_number": 14,
+              "end_line_number": 17
+            }
+          },
+          "non_additive_dimension": null,
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "dimensions": [
+        {
+          "name": "ds",
+          "description": null,
+          "type": "time",
+          "is_partition": false,
+          "type_params": {
+            "time_granularity": "day",
+            "validity_params": null
+          },
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_and_entity_2_measure_source.yaml",
+            "file_slice": {
+              "filename": "entity_1_and_entity_2_measure_source.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 19,
+              "end_line_number": 23
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "label": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_and_entity_2_measure_source.yaml",
+        "file_slice": {
+          "filename": "entity_1_and_entity_2_measure_source.yaml",
+          "content": "name: entity_1_and_entity_2_measure_source\ndescription: A measure source associated with \"entity_1\" and \"entity_2\".\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: entity_1_and_entity_2_measure_table\ndefaults:\n  agg_time_dimension: ds\nmeasures:\n- name: entity_1_and_entity_2_measure\n  agg: sum\n  expr: \"1\"\ndimensions:\n- name: ds\n  type: time\n  type_params:\n    time_granularity: day\nentities:\n- name: composite_entity\n  type: primary\n  expr: entity_1 || entity_2\n- name: entity_1\n  type: foreign\n- name: entity_2\n  type: foreign\n",
+          "start_line_number": 3,
+          "end_line_number": 31
+        }
+      },
+      "config": null
+    },
+    {
+      "name": "entity_1_dimension_source",
+      "defaults": null,
+      "description": "Contains dimensions for \"entity_1\"",
+      "node_relation": {
+        "alias": "entity_1_dimension_table",
+        "schema_name": "mf_corpus_2026_05_11_static",
+        "database": null,
+        "relation_name": "mf_corpus_2026_05_11_static.entity_1_dimension_table"
+      },
+      "primary_entity": null,
+      "entities": [
+        {
+          "name": "entity_1",
+          "description": null,
+          "type": "primary",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_dimension_source.yaml",
+            "file_slice": {
+              "filename": "entity_1_dimension_source.yaml",
+              "content": "name: entity_1\ntype: primary\n",
+              "start_line_number": 15,
+              "end_line_number": 16
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [],
+      "dimensions": [
+        {
+          "name": "country",
+          "description": null,
+          "type": "categorical",
+          "is_partition": false,
+          "type_params": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_dimension_source.yaml",
+            "file_slice": {
+              "filename": "entity_1_dimension_source.yaml",
+              "content": "name: country\ntype: categorical\n",
+              "start_line_number": 11,
+              "end_line_number": 13
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "label": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_dimension_source.yaml",
+        "file_slice": {
+          "filename": "entity_1_dimension_source.yaml",
+          "content": "name: entity_1_dimension_source\ndescription: Contains dimensions for \"entity_1\"\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: entity_1_dimension_table\ndimensions:\n- name: country\n  type: categorical\nentities:\n- name: entity_1\n  type: primary\n",
+          "start_line_number": 3,
+          "end_line_number": 16
+        }
+      },
+      "config": null
+    },
+    {
+      "name": "all_entity_measure_source",
+      "defaults": {
+        "agg_time_dimension": "ds"
+      },
+      "description": "A measure source associated with [\"entity_0\", \"entity_1\", \"entity_2\"]",
+      "node_relation": {
+        "alias": "all_entity_measure_table",
+        "schema_name": "mf_corpus_2026_05_11_static",
+        "database": null,
+        "relation_name": "mf_corpus_2026_05_11_static.all_entity_measure_table"
+      },
+      "primary_entity": null,
+      "entities": [
+        {
+          "name": "all_entity_composite",
+          "description": null,
+          "type": "primary",
+          "role": null,
+          "expr": "entity_0 || entity_1 || entity_2",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/all_entity_measure_source.yaml",
+            "file_slice": {
+              "filename": "all_entity_measure_source.yaml",
+              "content": "name: all_entity_composite\ntype: primary\nexpr: entity_0 || entity_1 || entity_2\n",
+              "start_line_number": 25,
+              "end_line_number": 27
+            }
+          },
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "entity_0",
+          "description": null,
+          "type": "foreign",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/all_entity_measure_source.yaml",
+            "file_slice": {
+              "filename": "all_entity_measure_source.yaml",
+              "content": "name: entity_0\ntype: foreign\n",
+              "start_line_number": 28,
+              "end_line_number": 29
+            }
+          },
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "entity_1",
+          "description": null,
+          "type": "foreign",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/all_entity_measure_source.yaml",
+            "file_slice": {
+              "filename": "all_entity_measure_source.yaml",
+              "content": "name: entity_1\ntype: foreign\n",
+              "start_line_number": 30,
+              "end_line_number": 31
+            }
+          },
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "entity_2",
+          "description": null,
+          "type": "foreign",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/all_entity_measure_source.yaml",
+            "file_slice": {
+              "filename": "all_entity_measure_source.yaml",
+              "content": "name: entity_2\ntype: foreign\n",
+              "start_line_number": 32,
+              "end_line_number": 33
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [
+        {
+          "name": "all_entity_measure",
+          "agg": "sum",
+          "description": null,
+          "create_metric": null,
+          "expr": "1",
+          "agg_params": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/all_entity_measure_source.yaml",
+            "file_slice": {
+              "filename": "all_entity_measure_source.yaml",
+              "content": "name: all_entity_measure\nagg: sum\nexpr: \"1\"\n",
+              "start_line_number": 14,
+              "end_line_number": 17
+            }
+          },
+          "non_additive_dimension": null,
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "dimensions": [
+        {
+          "name": "ds",
+          "description": null,
+          "type": "time",
+          "is_partition": false,
+          "type_params": {
+            "time_granularity": "day",
+            "validity_params": null
+          },
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/all_entity_measure_source.yaml",
+            "file_slice": {
+              "filename": "all_entity_measure_source.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 19,
+              "end_line_number": 23
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "label": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/all_entity_measure_source.yaml",
+        "file_slice": {
+          "filename": "all_entity_measure_source.yaml",
+          "content": "name: all_entity_measure_source\ndescription: A measure source associated with [\"entity_0\", \"entity_1\", \"entity_2\"]\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: all_entity_measure_table\ndefaults:\n  agg_time_dimension: ds\nmeasures:\n- name: all_entity_measure\n  agg: sum\n  expr: \"1\"\ndimensions:\n- name: ds\n  type: time\n  type_params:\n    time_granularity: day\nentities:\n- name: all_entity_composite\n  type: primary\n  expr: entity_0 || entity_1 || entity_2\n- name: entity_0\n  type: foreign\n- name: entity_1\n  type: foreign\n- name: entity_2\n  type: foreign\n",
+          "start_line_number": 3,
+          "end_line_number": 33
+        }
+      },
+      "config": null
+    },
+    {
+      "name": "entity_0_measure_source",
+      "defaults": {
+        "agg_time_dimension": "ds"
+      },
+      "description": "A measure source associated with \"entity_0\".",
+      "node_relation": {
+        "alias": "entity_0_measure_table",
+        "schema_name": "mf_corpus_2026_05_11_static",
+        "database": null,
+        "relation_name": "mf_corpus_2026_05_11_static.entity_0_measure_table"
+      },
+      "primary_entity": null,
+      "entities": [
+        {
+          "name": "entity_0",
+          "description": null,
+          "type": "primary",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_0_measure_source.yaml",
+            "file_slice": {
+              "filename": "entity_0_measure_source.yaml",
+              "content": "name: entity_0\ntype: primary\n",
+              "start_line_number": 24,
+              "end_line_number": 25
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [
+        {
+          "name": "entity_0_measure",
+          "agg": "sum",
+          "description": null,
+          "create_metric": null,
+          "expr": null,
+          "agg_params": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_0_measure_source.yaml",
+            "file_slice": {
+              "filename": "entity_0_measure_source.yaml",
+              "content": "name: entity_0_measure\nagg: sum\n",
+              "start_line_number": 14,
+              "end_line_number": 16
+            }
+          },
+          "non_additive_dimension": null,
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "dimensions": [
+        {
+          "name": "ds",
+          "description": null,
+          "type": "time",
+          "is_partition": false,
+          "type_params": {
+            "time_granularity": "day",
+            "validity_params": null
+          },
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_0_measure_source.yaml",
+            "file_slice": {
+              "filename": "entity_0_measure_source.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 18,
+              "end_line_number": 22
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "label": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_0_measure_source.yaml",
+        "file_slice": {
+          "filename": "entity_0_measure_source.yaml",
+          "content": "name: entity_0_measure_source\ndescription: A measure source associated with \"entity_0\".\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: entity_0_measure_table\ndefaults:\n  agg_time_dimension: ds\nmeasures:\n- name: entity_0_measure\n  agg: sum\ndimensions:\n- name: ds\n  type: time\n  type_params:\n    time_granularity: day\nentities:\n- name: entity_0\n  type: primary\n",
+          "start_line_number": 3,
+          "end_line_number": 25
+        }
+      },
+      "config": null
+    },
+    {
+      "name": "entity_1_measure_source",
+      "defaults": {
+        "agg_time_dimension": "ds"
+      },
+      "description": "A measure source associated with \"entity_1\".",
+      "node_relation": {
+        "alias": "entity_1_measure_table",
+        "schema_name": "mf_corpus_2026_05_11_static",
+        "database": null,
+        "relation_name": "mf_corpus_2026_05_11_static.entity_1_measure_table"
+      },
+      "primary_entity": null,
+      "entities": [
+        {
+          "name": "entity_1",
+          "description": null,
+          "type": "primary",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_measure_source.yaml",
+            "file_slice": {
+              "filename": "entity_1_measure_source.yaml",
+              "content": "name: entity_1\ntype: primary\n",
+              "start_line_number": 24,
+              "end_line_number": 25
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [
+        {
+          "name": "entity_1_measure",
+          "agg": "sum",
+          "description": null,
+          "create_metric": null,
+          "expr": null,
+          "agg_params": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_measure_source.yaml",
+            "file_slice": {
+              "filename": "entity_1_measure_source.yaml",
+              "content": "name: entity_1_measure\nagg: sum\n",
+              "start_line_number": 14,
+              "end_line_number": 16
+            }
+          },
+          "non_additive_dimension": null,
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "dimensions": [
+        {
+          "name": "ds",
+          "description": null,
+          "type": "time",
+          "is_partition": false,
+          "type_params": {
+            "time_granularity": "day",
+            "validity_params": null
+          },
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_measure_source.yaml",
+            "file_slice": {
+              "filename": "entity_1_measure_source.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 18,
+              "end_line_number": 22
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "label": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_measure_source.yaml",
+        "file_slice": {
+          "filename": "entity_1_measure_source.yaml",
+          "content": "name: entity_1_measure_source\ndescription: A measure source associated with \"entity_1\".\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: entity_1_measure_table\ndefaults:\n  agg_time_dimension: ds\nmeasures:\n- name: entity_1_measure\n  agg: sum\ndimensions:\n- name: ds\n  type: time\n  type_params:\n    time_granularity: day\nentities:\n- name: entity_1\n  type: primary\n",
+          "start_line_number": 3,
+          "end_line_number": 25
+        }
+      },
+      "config": null
+    }
+  ],
+  "metrics": [
+    {
+      "name": "entity_0_metric",
+      "description": "Metric based on a measure defined with \"entity_0\".",
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "entity_0_measure",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "entity_0_measure",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "entity_0_measure",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "entity_0_measure_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: entity_0_metric\ndescription: Metric based on a measure defined with \"entity_0\".\ntype: simple\ntype_params:\n  measure: entity_0_measure\n",
+          "start_line_number": 3,
+          "end_line_number": 7
+        }
+      },
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "entity_1_metric",
+      "description": "Metric based on a measure defined with \"entity_1\"",
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "entity_1_measure",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "entity_1_measure",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "entity_1_measure",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "entity_1_measure_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: entity_1_metric\ndescription: Metric based on a measure defined with \"entity_1\"\ntype: simple\ntype_params:\n  measure: entity_1_measure\n",
+          "start_line_number": 10,
+          "end_line_number": 14
+        }
+      },
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "entity_1_and_entity_2_metric",
+      "description": "Metric based on a measure defined with \"entity_1\" and \"entity_2\"",
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "entity_1_and_entity_2_measure",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "entity_1_and_entity_2_measure",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "entity_1_and_entity_2_measure_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: entity_1_and_entity_2_metric\ndescription: Metric based on a measure defined with \"entity_1\" and \"entity_2\"\ntype: simple\ntype_params:\n  measure: entity_1_and_entity_2_measure\n",
+          "start_line_number": 17,
+          "end_line_number": 21
+        }
+      },
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "all_entity_metric",
+      "description": "Metric based on a defined with [\"entity_0\", \"entity_1\", \"entity_2\"].",
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "all_entity_measure",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "all_entity_measure",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "all_entity_measure_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: all_entity_metric\ndescription: Metric based on a defined with [\"entity_0\", \"entity_1\", \"entity_2\"].\ntype: simple\ntype_params:\n  measure: all_entity_measure\n",
+          "start_line_number": 24,
+          "end_line_number": 28
+        }
+      },
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    }
+  ],
+  "project_configuration": {
+    "time_spine_table_configurations": [
+      {
+        "location": "mf_corpus_2026_05_11_static.mf_time_spine",
+        "column_name": "ds",
+        "grain": "day"
+      }
+    ],
+    "metadata": {
+      "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/project_configuration.yaml",
+      "file_slice": {
+        "filename": "project_configuration.yaml",
+        "content": "time_spine_table_configurations:\n- location: mf_corpus_2026_05_11_static.mf_time_spine\n  column_name: ds\n  grain: day\ntime_spines:\n- node_relation:\n    alias: mf_time_spine_nanosecond\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: nanosecond\n- node_relation:\n    alias: mf_time_spine_microsecond\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: microsecond\n- node_relation:\n    alias: mf_time_spine_millisecond\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: millisecond\n- node_relation:\n    alias: mf_time_spine_second\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: second\n- node_relation:\n    alias: mf_time_spine_minute\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: minute\n- node_relation:\n    alias: mf_time_spine_hour\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: hour\n- node_relation:\n    alias: mf_time_spine\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ds\n    time_granularity: day\n  custom_granularities:\n  - name: alien_day\n",
+        "start_line_number": 4,
+        "end_line_number": 52
+      }
+    },
+    "dsi_package_version": {
+      "major_version": "0",
+      "minor_version": "210",
+      "patch_version": "0"
+    },
+    "time_spines": [
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_nanosecond",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_nanosecond"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "nanosecond"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_microsecond",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_microsecond"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "microsecond"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_millisecond",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_millisecond"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "millisecond"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_second",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_second"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "second"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_minute",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_minute"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "minute"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_hour",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_hour"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "hour"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine"
+        },
+        "primary_column": {
+          "name": "ds",
+          "time_granularity": "day"
+        },
+        "custom_granularities": [
+          {
+            "name": "alien_day",
+            "column_name": null
+          }
+        ]
+      }
+    ]
+  },
+  "saved_queries": [],
+  "args": {}
+}

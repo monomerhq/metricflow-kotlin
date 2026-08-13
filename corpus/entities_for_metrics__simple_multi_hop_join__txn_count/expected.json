@@ -1,0 +1,28 @@
+{
+  "entities": [
+    {
+      "name": "account_id",
+      "type": "primary",
+      "role": null,
+      "semantic_model_name": "account_month_txns",
+      "description": null,
+      "expr": null
+    },
+    {
+      "name": "customer_id",
+      "type": "foreign",
+      "role": null,
+      "semantic_model_name": "bridge_table",
+      "description": null,
+      "expr": null
+    },
+    {
+      "name": "customer_third_hop_id",
+      "type": "unique",
+      "role": null,
+      "semantic_model_name": "customer_other_data",
+      "description": null,
+      "expr": null
+    }
+  ]
+}

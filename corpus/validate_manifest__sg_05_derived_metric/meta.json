@@ -1,0 +1,9 @@
+{
+  "case_id": "validate_manifest__sg_05_derived_metric",
+  "subcommand": "validate_manifest",
+  "manifest_id": "sg_05_derived_metric",
+  "args": {},
+  "dialect_set": [],
+  "source_test": "SemanticManifestValidator on canonical YAML manifest",
+  "notes": ""
+}

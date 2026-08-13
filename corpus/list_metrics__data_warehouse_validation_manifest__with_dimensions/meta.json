@@ -1,0 +1,11 @@
+{
+  "case_id": "list_metrics__data_warehouse_validation_manifest__with_dimensions",
+  "subcommand": "list_metrics",
+  "manifest_id": "data_warehouse_validation_manifest",
+  "args": {
+    "include_dimensions": true
+  },
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

@@ -1,0 +1,616 @@
+{
+  "issues": [
+    {
+      "level": "WARNING",
+      "message": "Cumulative metric 'trailing_2_months_revenue' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 134
+        },
+        "metric": {
+          "metric_name": "trailing_2_months_revenue"
+        }
+      },
+      "context_str": "with metric `trailing_2_months_revenue` in file `metrics.yaml` on line #134",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `trailing_2_months_revenue` in file `metrics.yaml` on line #134 - Cumulative metric 'trailing_2_months_revenue' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Cumulative metric 'revenue_all_time' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 144
+        },
+        "metric": {
+          "metric_name": "revenue_all_time"
+        }
+      },
+      "context_str": "with metric `revenue_all_time` in file `metrics.yaml` on line #144",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `revenue_all_time` in file `metrics.yaml` on line #144 - Cumulative metric 'revenue_all_time' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Cumulative metric 'every_two_days_bookers' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 153
+        },
+        "metric": {
+          "metric_name": "every_two_days_bookers"
+        }
+      },
+      "context_str": "with metric `every_two_days_bookers` in file `metrics.yaml` on line #153",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `every_two_days_bookers` in file `metrics.yaml` on line #153 - Cumulative metric 'every_two_days_bookers' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Cumulative metric 'revenue_mtd' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 161
+        },
+        "metric": {
+          "metric_name": "revenue_mtd"
+        }
+      },
+      "context_str": "with metric `revenue_mtd` in file `metrics.yaml` on line #161",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `revenue_mtd` in file `metrics.yaml` on line #161 - Cumulative metric 'revenue_mtd' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Cumulative metric 'bookings_all_time' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 505
+        },
+        "metric": {
+          "metric_name": "bookings_all_time"
+        }
+      },
+      "context_str": "with metric `bookings_all_time` in file `metrics.yaml` on line #505",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `bookings_all_time` in file `metrics.yaml` on line #505 - Cumulative metric 'bookings_all_time' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Cumulative metric 'every_two_days_bookers_fill_nulls_with_0' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 729
+        },
+        "metric": {
+          "metric_name": "every_two_days_bookers_fill_nulls_with_0"
+        }
+      },
+      "context_str": "with metric `every_two_days_bookers_fill_nulls_with_0` in file `metrics.yaml` on line #729",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `every_two_days_bookers_fill_nulls_with_0` in file `metrics.yaml` on line #729 - Cumulative metric 'every_two_days_bookers_fill_nulls_with_0' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Cumulative metric 'trailing_7_days_bookings' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 992
+        },
+        "metric": {
+          "metric_name": "trailing_7_days_bookings"
+        }
+      },
+      "context_str": "with metric `trailing_7_days_bookings` in file `metrics.yaml` on line #992",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `trailing_7_days_bookings` in file `metrics.yaml` on line #992 - Cumulative metric 'trailing_7_days_bookings' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Cumulative metric 'trailing_2_months_revenue_with_filter' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 1028
+        },
+        "metric": {
+          "metric_name": "trailing_2_months_revenue_with_filter"
+        }
+      },
+      "context_str": "with metric `trailing_2_months_revenue_with_filter` in file `metrics.yaml` on line #1028",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `trailing_2_months_revenue_with_filter` in file `metrics.yaml` on line #1028 - Cumulative metric 'trailing_2_months_revenue_with_filter' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Cumulative metric 'subdaily_cumulative_window_metric' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "user_sm_source.yaml",
+          "line_number": 64
+        },
+        "metric": {
+          "metric_name": "subdaily_cumulative_window_metric"
+        }
+      },
+      "context_str": "with metric `subdaily_cumulative_window_metric` in file `user_sm_source.yaml` on line #64",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `subdaily_cumulative_window_metric` in file `user_sm_source.yaml` on line #64 - Cumulative metric 'subdaily_cumulative_window_metric' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Cumulative metric 'subdaily_cumulative_grain_to_date_metric' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "user_sm_source.yaml",
+          "line_number": 73
+        },
+        "metric": {
+          "metric_name": "subdaily_cumulative_grain_to_date_metric"
+        }
+      },
+      "context_str": "with metric `subdaily_cumulative_grain_to_date_metric` in file `user_sm_source.yaml` on line #73",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `subdaily_cumulative_grain_to_date_metric` in file `user_sm_source.yaml` on line #73 - Cumulative metric 'subdaily_cumulative_grain_to_date_metric' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_7days' should not have both a base measure and a base metric as inputs. The base measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 623
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_7days"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_7days` in file `metrics.yaml` on line #623",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_7days` in file `metrics.yaml` on line #623 - Conversion metric 'visit_buy_conversion_rate_7days' should not have both a base measure and a base metric as inputs. The base measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_7days' should not have both a conversion measure and a conversion metric as inputs. The conversion measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 623
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_7days"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_7days` in file `metrics.yaml` on line #623",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_7days` in file `metrics.yaml` on line #623 - Conversion metric 'visit_buy_conversion_rate_7days' should not have both a conversion measure and a conversion metric as inputs. The conversion measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_7days' should not have both a base measure and a base metric as inputs. The measure input will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 623
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_7days"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_7days` in file `metrics.yaml` on line #623",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_7days` in file `metrics.yaml` on line #623 - Conversion metric 'visit_buy_conversion_rate_7days' should not have both a base measure and a base metric as inputs. The measure input will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_7days' should not have both a conversion measure and a conversion metric as inputs. The measure input will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 623
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_7days"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_7days` in file `metrics.yaml` on line #623",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_7days` in file `metrics.yaml` on line #623 - Conversion metric 'visit_buy_conversion_rate_7days' should not have both a conversion measure and a conversion metric as inputs. The measure input will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate' should not have both a base measure and a base metric as inputs. The base measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 635
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate` in file `metrics.yaml` on line #635",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate` in file `metrics.yaml` on line #635 - Conversion metric 'visit_buy_conversion_rate' should not have both a base measure and a base metric as inputs. The base measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate' should not have both a conversion measure and a conversion metric as inputs. The conversion measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 635
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate` in file `metrics.yaml` on line #635",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate` in file `metrics.yaml` on line #635 - Conversion metric 'visit_buy_conversion_rate' should not have both a conversion measure and a conversion metric as inputs. The conversion measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate' should not have both a base measure and a base metric as inputs. The measure input will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 635
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate` in file `metrics.yaml` on line #635",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate` in file `metrics.yaml` on line #635 - Conversion metric 'visit_buy_conversion_rate' should not have both a base measure and a base metric as inputs. The measure input will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate' should not have both a conversion measure and a conversion metric as inputs. The measure input will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 635
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate` in file `metrics.yaml` on line #635",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate` in file `metrics.yaml` on line #635 - Conversion metric 'visit_buy_conversion_rate' should not have both a conversion measure and a conversion metric as inputs. The measure input will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversions' should not have both a base measure and a base metric as inputs. The base measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 646
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversions"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversions` in file `metrics.yaml` on line #646",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversions` in file `metrics.yaml` on line #646 - Conversion metric 'visit_buy_conversions' should not have both a base measure and a base metric as inputs. The base measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversions' should not have both a conversion measure and a conversion metric as inputs. The conversion measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 646
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversions"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversions` in file `metrics.yaml` on line #646",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversions` in file `metrics.yaml` on line #646 - Conversion metric 'visit_buy_conversions' should not have both a conversion measure and a conversion metric as inputs. The conversion measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversions' should not have both a base measure and a base metric as inputs. The measure input will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 646
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversions"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversions` in file `metrics.yaml` on line #646",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversions` in file `metrics.yaml` on line #646 - Conversion metric 'visit_buy_conversions' should not have both a base measure and a base metric as inputs. The measure input will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversions' should not have both a conversion measure and a conversion metric as inputs. The measure input will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 646
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversions"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversions` in file `metrics.yaml` on line #646",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversions` in file `metrics.yaml` on line #646 - Conversion metric 'visit_buy_conversions' should not have both a conversion measure and a conversion metric as inputs. The measure input will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_with_monthly_conversion' should not have both a base measure and a base metric as inputs. The base measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 660
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_with_monthly_conversion"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_with_monthly_conversion` in file `metrics.yaml` on line #660",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_with_monthly_conversion` in file `metrics.yaml` on line #660 - Conversion metric 'visit_buy_conversion_rate_with_monthly_conversion' should not have both a base measure and a base metric as inputs. The base measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_with_monthly_conversion' should not have both a conversion measure and a conversion metric as inputs. The conversion measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 660
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_with_monthly_conversion"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_with_monthly_conversion` in file `metrics.yaml` on line #660",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_with_monthly_conversion` in file `metrics.yaml` on line #660 - Conversion metric 'visit_buy_conversion_rate_with_monthly_conversion' should not have both a conversion measure and a conversion metric as inputs. The conversion measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_with_monthly_conversion' should not have both a base measure and a base metric as inputs. The measure input will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 660
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_with_monthly_conversion"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_with_monthly_conversion` in file `metrics.yaml` on line #660",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_with_monthly_conversion` in file `metrics.yaml` on line #660 - Conversion metric 'visit_buy_conversion_rate_with_monthly_conversion' should not have both a base measure and a base metric as inputs. The measure input will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_with_monthly_conversion' should not have both a conversion measure and a conversion metric as inputs. The measure input will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 660
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_with_monthly_conversion"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_with_monthly_conversion` in file `metrics.yaml` on line #660",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_with_monthly_conversion` in file `metrics.yaml` on line #660 - Conversion metric 'visit_buy_conversion_rate_with_monthly_conversion' should not have both a conversion measure and a conversion metric as inputs. The measure input will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_by_session' should not have both a base measure and a base metric as inputs. The base measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 672
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_by_session"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_by_session` in file `metrics.yaml` on line #672",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_by_session` in file `metrics.yaml` on line #672 - Conversion metric 'visit_buy_conversion_rate_by_session' should not have both a base measure and a base metric as inputs. The base measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_by_session' should not have both a conversion measure and a conversion metric as inputs. The conversion measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 672
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_by_session"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_by_session` in file `metrics.yaml` on line #672",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_by_session` in file `metrics.yaml` on line #672 - Conversion metric 'visit_buy_conversion_rate_by_session' should not have both a conversion measure and a conversion metric as inputs. The conversion measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_by_session' should not have both a base measure and a base metric as inputs. The measure input will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 672
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_by_session"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_by_session` in file `metrics.yaml` on line #672",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_by_session` in file `metrics.yaml` on line #672 - Conversion metric 'visit_buy_conversion_rate_by_session' should not have both a base measure and a base metric as inputs. The measure input will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_by_session' should not have both a conversion measure and a conversion metric as inputs. The measure input will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 672
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_by_session"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_by_session` in file `metrics.yaml` on line #672",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_by_session` in file `metrics.yaml` on line #672 - Conversion metric 'visit_buy_conversion_rate_by_session' should not have both a conversion measure and a conversion metric as inputs. The measure input will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_7days_fill_nulls_with_0' should not have both a base measure and a base metric as inputs. The base measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 900
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_7days_fill_nulls_with_0"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_7days_fill_nulls_with_0` in file `metrics.yaml` on line #900",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_7days_fill_nulls_with_0` in file `metrics.yaml` on line #900 - Conversion metric 'visit_buy_conversion_rate_7days_fill_nulls_with_0' should not have both a base measure and a base metric as inputs. The base measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_7days_fill_nulls_with_0' should not have both a conversion measure and a conversion metric as inputs. The conversion measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 900
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_7days_fill_nulls_with_0"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_7days_fill_nulls_with_0` in file `metrics.yaml` on line #900",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_7days_fill_nulls_with_0` in file `metrics.yaml` on line #900 - Conversion metric 'visit_buy_conversion_rate_7days_fill_nulls_with_0' should not have both a conversion measure and a conversion metric as inputs. The conversion measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_7days_fill_nulls_with_0' should not have both a base measure and a base metric as inputs. The measure input will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 900
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_7days_fill_nulls_with_0"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_7days_fill_nulls_with_0` in file `metrics.yaml` on line #900",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_7days_fill_nulls_with_0` in file `metrics.yaml` on line #900 - Conversion metric 'visit_buy_conversion_rate_7days_fill_nulls_with_0' should not have both a base measure and a base metric as inputs. The measure input will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_7days_fill_nulls_with_0' should not have both a conversion measure and a conversion metric as inputs. The measure input will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 900
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_7days_fill_nulls_with_0"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_7days_fill_nulls_with_0` in file `metrics.yaml` on line #900",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_7days_fill_nulls_with_0` in file `metrics.yaml` on line #900 - Conversion metric 'visit_buy_conversion_rate_7days_fill_nulls_with_0' should not have both a conversion measure and a conversion metric as inputs. The measure input will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_with_filter' should not have both a base measure and a base metric as inputs. The base measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 1038
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_with_filter"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_with_filter` in file `metrics.yaml` on line #1038",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_with_filter` in file `metrics.yaml` on line #1038 - Conversion metric 'visit_buy_conversion_rate_with_filter' should not have both a base measure and a base metric as inputs. The base measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_with_filter' should not have both a conversion measure and a conversion metric as inputs. The conversion measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 1038
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_with_filter"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_with_filter` in file `metrics.yaml` on line #1038",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_with_filter` in file `metrics.yaml` on line #1038 - Conversion metric 'visit_buy_conversion_rate_with_filter' should not have both a conversion measure and a conversion metric as inputs. The conversion measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_with_filter' should not have both a base measure and a base metric as inputs. The measure input will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 1038
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_with_filter"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_with_filter` in file `metrics.yaml` on line #1038",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_with_filter` in file `metrics.yaml` on line #1038 - Conversion metric 'visit_buy_conversion_rate_with_filter' should not have both a base measure and a base metric as inputs. The measure input will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Conversion metric 'visit_buy_conversion_rate_with_filter' should not have both a conversion measure and a conversion metric as inputs. The measure input will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 1038
+        },
+        "metric": {
+          "metric_name": "visit_buy_conversion_rate_with_filter"
+        }
+      },
+      "context_str": "with metric `visit_buy_conversion_rate_with_filter` in file `metrics.yaml` on line #1038",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `visit_buy_conversion_rate_with_filter` in file `metrics.yaml` on line #1038 - Conversion metric 'visit_buy_conversion_rate_with_filter' should not have both a conversion measure and a conversion metric as inputs. The measure input will be ignored; please remove it to avoid confusion."
+    }
+  ],
+  "error_count": 0,
+  "future_error_count": 0,
+  "warning_count": 38,
+  "has_blocking_issues": false
+}

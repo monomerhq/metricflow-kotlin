@@ -1,0 +1,13 @@
+{
+  "case_id": "list_group_bys__simple_multi_hop_join__txn_count",
+  "subcommand": "list_group_bys",
+  "manifest_id": "multi_hop_join_manifest",
+  "args": {
+    "metric_names": [
+      "txn_count"
+    ]
+  },
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

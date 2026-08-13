@@ -1,0 +1,24 @@
+{
+  "case_id": "explain__simple__bookings_by_listing_country",
+  "subcommand": "explain",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "bookings"
+    ],
+    "group_by_names": [
+      "listing__country_latest"
+    ]
+  },
+  "dialect_set": [
+    "Trino",
+    "BigQuery",
+    "Snowflake",
+    "Databricks",
+    "Redshift",
+    "DuckDB",
+    "Postgres"
+  ],
+  "source_test": "tests_metricflow/query_rendering/test_query_rendering.py::test_local_dimension_using_local_entity (variant)",
+  "notes": ""
+}

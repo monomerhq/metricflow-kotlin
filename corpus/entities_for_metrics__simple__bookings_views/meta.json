@@ -1,0 +1,14 @@
+{
+  "case_id": "entities_for_metrics__simple__bookings_views",
+  "subcommand": "entities_for_metrics",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "bookings",
+      "views"
+    ]
+  },
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

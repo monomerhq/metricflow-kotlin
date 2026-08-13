@@ -1,0 +1,1546 @@
+{
+  "metrics": [
+    {
+      "name": "accumulate_last_2_months_metric",
+      "type": "cumulative",
+      "description": "A cumulative metric is currently restricted to querying by the grain of the defining measure.",
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "monthly_measure_0",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": null,
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": {
+          "window": {
+            "count": 2,
+            "granularity": "month"
+          },
+          "grain_to_date": null,
+          "period_agg": "first",
+          "metric": {
+            "name": "monthly_metric_0",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        },
+        "input_measures": [
+          {
+            "name": "monthly_measure_0",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: accumulate_last_2_months_metric\ndescription: A cumulative metric is currently restricted to querying by the grain\n  of the defining measure.\ntype: cumulative\ntype_params:\n  measure: monthly_measure_0\n  cumulative_type_params:\n    window: 2 months\n",
+          "start_line_number": 68,
+          "end_line_number": 74
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__month",
+          "qualified_name": "metric_time__month",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "creation_time",
+          "dunder_name": "monthly_measure_entity__creation_time",
+          "qualified_name": "monthly_measure_entity__creation_time",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [
+            "monthly_measure_entity"
+          ],
+          "semantic_model_name": "monthly_measures_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/semantic_models/monthly_measures_source.yaml",
+            "file_slice": {
+              "filename": "monthly_measures_source.yaml",
+              "content": "name: creation_time\ntype: time\ntype_params:\n  time_granularity: month\n",
+              "start_line_number": 20,
+              "end_line_number": 24
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "monthly_measures_source"
+      ]
+    },
+    {
+      "name": "derived_metric_with_common_filtered_metric_0",
+      "type": "derived",
+      "description": "One of the derived metrics that have the same metric + filter",
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": "monthly_metric_0",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": [
+          {
+            "name": "monthly_metric_0",
+            "filter": {
+              "where_filters": [
+                {
+                  "where_sql_template": "{{ TimeDimension('metric_time') }} = '2020-01-01'"
+                }
+              ]
+            },
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        ],
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "monthly_measure_0",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: derived_metric_with_common_filtered_metric_0\ndescription: One of the derived metrics that have the same metric + filter\ntype: derived\ntype_params:\n  expr: monthly_metric_0\n  metrics:\n  - name: monthly_metric_0\n    filter: \"{{ TimeDimension('metric_time') }} = '2020-01-01'\"\n",
+          "start_line_number": 77,
+          "end_line_number": 84
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__month",
+          "qualified_name": "metric_time__month",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "creation_time",
+          "dunder_name": "monthly_measure_entity__creation_time",
+          "qualified_name": "monthly_measure_entity__creation_time",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [
+            "monthly_measure_entity"
+          ],
+          "semantic_model_name": "monthly_measures_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/semantic_models/monthly_measures_source.yaml",
+            "file_slice": {
+              "filename": "monthly_measures_source.yaml",
+              "content": "name: creation_time\ntype: time\ntype_params:\n  time_granularity: month\n",
+              "start_line_number": 20,
+              "end_line_number": 24
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "monthly_measures_source"
+      ]
+    },
+    {
+      "name": "derived_metric_with_common_filtered_metric_1",
+      "type": "derived",
+      "description": "One of the derived metrics that have the same metric + filter",
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": "monthly_metric_0",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": [
+          {
+            "name": "monthly_metric_0",
+            "filter": {
+              "where_filters": [
+                {
+                  "where_sql_template": "{{ TimeDimension('metric_time') }} = '2020-01-01'"
+                }
+              ]
+            },
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        ],
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "monthly_measure_0",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: derived_metric_with_common_filtered_metric_1\ndescription: One of the derived metrics that have the same metric + filter\ntype: derived\ntype_params:\n  expr: monthly_metric_0\n  metrics:\n  - name: monthly_metric_0\n    filter: \"{{ TimeDimension('metric_time') }} = '2020-01-01'\"\n",
+          "start_line_number": 87,
+          "end_line_number": 94
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__month",
+          "qualified_name": "metric_time__month",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "creation_time",
+          "dunder_name": "monthly_measure_entity__creation_time",
+          "qualified_name": "monthly_measure_entity__creation_time",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [
+            "monthly_measure_entity"
+          ],
+          "semantic_model_name": "monthly_measures_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/semantic_models/monthly_measures_source.yaml",
+            "file_slice": {
+              "filename": "monthly_measures_source.yaml",
+              "content": "name: creation_time\ntype: time\ntype_params:\n  time_granularity: month\n",
+              "start_line_number": 20,
+              "end_line_number": 24
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "monthly_measures_source"
+      ]
+    },
+    {
+      "name": "derived_metric_with_different_parent_time_grains",
+      "type": "derived",
+      "description": "A derived metric based on metrics with month and year grains.",
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": "monthly_metric_0 + yearly_metric_0",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": [
+          {
+            "name": "monthly_metric_0",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          },
+          {
+            "name": "yearly_metric_0",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        ],
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "monthly_measure_0",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          },
+          {
+            "name": "yearly_measure_0",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: derived_metric_with_different_parent_time_grains\ndescription: A derived metric based on metrics with month and year grains.\ntype: derived\ntype_params:\n  expr: monthly_metric_0 + yearly_metric_0\n  metrics:\n  - name: monthly_metric_0\n  - name: yearly_metric_0\n",
+          "start_line_number": 34,
+          "end_line_number": 42
+        }
+      },
+      "config": null,
+      "dimensions": [],
+      "semantic_models": [
+        "monthly_measures_source",
+        "yearly_measure_source"
+      ]
+    },
+    {
+      "name": "derived_metric_with_same_parent_time_grains",
+      "type": "derived",
+      "description": "A derived metric based on metrics with a month grain.",
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": "monthly_metric_0 + monthly_metric_1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": [
+          {
+            "name": "monthly_metric_0",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          },
+          {
+            "name": "monthly_metric_1",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        ],
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "monthly_measure_0",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          },
+          {
+            "name": "monthly_measure_1",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: derived_metric_with_same_parent_time_grains\ndescription: A derived metric based on metrics with a month grain.\ntype: derived\ntype_params:\n  expr: monthly_metric_0 + monthly_metric_1\n  metrics:\n  - name: monthly_metric_0\n  - name: monthly_metric_1\n",
+          "start_line_number": 24,
+          "end_line_number": 31
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__month",
+          "qualified_name": "metric_time__month",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "creation_time",
+          "dunder_name": "monthly_measure_entity__creation_time",
+          "qualified_name": "monthly_measure_entity__creation_time",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [
+            "monthly_measure_entity"
+          ],
+          "semantic_model_name": "monthly_measures_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/semantic_models/monthly_measures_source.yaml",
+            "file_slice": {
+              "filename": "monthly_measures_source.yaml",
+              "content": "name: creation_time\ntype: time\ntype_params:\n  time_granularity: month\n",
+              "start_line_number": 20,
+              "end_line_number": 24
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "monthly_measures_source"
+      ]
+    },
+    {
+      "name": "derived_metric_with_time_granularity",
+      "type": "derived",
+      "description": "Derived metric with time granularity",
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": "simple_metric_with_default_time_granularity * 2",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": [
+          {
+            "name": "simple_metric_with_default_time_granularity",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        ],
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "monthly_measure_1",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: derived_metric_with_time_granularity\ndescription: Derived metric with time granularity\ntype: derived\ntime_granularity: year\ntype_params:\n  expr: simple_metric_with_default_time_granularity * 2\n  metrics:\n  - name: simple_metric_with_default_time_granularity\n",
+          "start_line_number": 105,
+          "end_line_number": 112
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__month",
+          "qualified_name": "metric_time__month",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "creation_time",
+          "dunder_name": "monthly_measure_entity__creation_time",
+          "qualified_name": "monthly_measure_entity__creation_time",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [
+            "monthly_measure_entity"
+          ],
+          "semantic_model_name": "monthly_measures_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/semantic_models/monthly_measures_source.yaml",
+            "file_slice": {
+              "filename": "monthly_measures_source.yaml",
+              "content": "name: creation_time\ntype: time\ntype_params:\n  time_granularity: month\n",
+              "start_line_number": 20,
+              "end_line_number": 24
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "monthly_measures_source"
+      ]
+    },
+    {
+      "name": "derived_metric_with_time_granularity_and_inner_metric_time_filter",
+      "type": "derived",
+      "description": "Derived metric with time granularity",
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": "simple_metric_with_default_time_granularity_and_metric_time_filter * 2",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": [
+          {
+            "name": "simple_metric_with_default_time_granularity_and_metric_time_filter",
+            "filter": {
+              "where_filters": [
+                {
+                  "where_sql_template": "{{ TimeDimension('metric_time') }} = '2020-01-01'\n"
+                }
+              ]
+            },
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        ],
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "monthly_measure_1",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: derived_metric_with_time_granularity_and_inner_metric_time_filter\ndescription: Derived metric with time granularity\ntype: derived\ntime_granularity: year\ntype_params:\n  expr: simple_metric_with_default_time_granularity_and_metric_time_filter * 2\n  metrics:\n  - name: simple_metric_with_default_time_granularity_and_metric_time_filter\n    filter: |\n      {{ TimeDimension('metric_time') }} = '2020-01-01'\n",
+          "start_line_number": 147,
+          "end_line_number": 156
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__month",
+          "qualified_name": "metric_time__month",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "creation_time",
+          "dunder_name": "monthly_measure_entity__creation_time",
+          "qualified_name": "monthly_measure_entity__creation_time",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [
+            "monthly_measure_entity"
+          ],
+          "semantic_model_name": "monthly_measures_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/semantic_models/monthly_measures_source.yaml",
+            "file_slice": {
+              "filename": "monthly_measures_source.yaml",
+              "content": "name: creation_time\ntype: time\ntype_params:\n  time_granularity: month\n",
+              "start_line_number": 20,
+              "end_line_number": 24
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "monthly_measures_source"
+      ]
+    },
+    {
+      "name": "derived_metric_with_time_granularity_and_outer_metric_time_filter",
+      "type": "derived",
+      "description": "Derived metric with time granularity",
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": "simple_metric_with_default_time_granularity * 2",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": [
+          {
+            "name": "simple_metric_with_default_time_granularity",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        ],
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "monthly_measure_1",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": {
+        "where_filters": [
+          {
+            "where_sql_template": "{{ TimeDimension('metric_time') }} > '2020-01-01'\n"
+          }
+        ]
+      },
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: derived_metric_with_time_granularity_and_outer_metric_time_filter\ndescription: Derived metric with time granularity\ntype: derived\ntime_granularity: year\ntype_params:\n  expr: simple_metric_with_default_time_granularity * 2\n  metrics:\n  - name: simple_metric_with_default_time_granularity\nfilter: |\n  {{ TimeDimension('metric_time') }} > '2020-01-01'\n",
+          "start_line_number": 135,
+          "end_line_number": 144
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__month",
+          "qualified_name": "metric_time__month",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "creation_time",
+          "dunder_name": "monthly_measure_entity__creation_time",
+          "qualified_name": "monthly_measure_entity__creation_time",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [
+            "monthly_measure_entity"
+          ],
+          "semantic_model_name": "monthly_measures_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/semantic_models/monthly_measures_source.yaml",
+            "file_slice": {
+              "filename": "monthly_measures_source.yaml",
+              "content": "name: creation_time\ntype: time\ntype_params:\n  time_granularity: month\n",
+              "start_line_number": 20,
+              "end_line_number": 24
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "monthly_measures_source"
+      ]
+    },
+    {
+      "name": "derived_metric_without_time_granularity",
+      "type": "derived",
+      "description": "Derived metric without time granularity",
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": "simple_metric_with_default_time_granularity * monthly_metric_0",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": [
+          {
+            "name": "simple_metric_with_default_time_granularity",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          },
+          {
+            "name": "monthly_metric_0",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        ],
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "monthly_measure_0",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          },
+          {
+            "name": "monthly_measure_1",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: derived_metric_without_time_granularity\ndescription: Derived metric without time granularity\ntype: derived\ntype_params:\n  expr: simple_metric_with_default_time_granularity * monthly_metric_0\n  metrics:\n  - name: simple_metric_with_default_time_granularity\n  - name: monthly_metric_0\n",
+          "start_line_number": 115,
+          "end_line_number": 122
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__month",
+          "qualified_name": "metric_time__month",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "creation_time",
+          "dunder_name": "monthly_measure_entity__creation_time",
+          "qualified_name": "monthly_measure_entity__creation_time",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [
+            "monthly_measure_entity"
+          ],
+          "semantic_model_name": "monthly_measures_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/semantic_models/monthly_measures_source.yaml",
+            "file_slice": {
+              "filename": "monthly_measures_source.yaml",
+              "content": "name: creation_time\ntype: time\ntype_params:\n  time_granularity: month\n",
+              "start_line_number": 20,
+              "end_line_number": 24
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "monthly_measures_source"
+      ]
+    },
+    {
+      "name": "metric_derived_from_heterogeneous_derived_metric",
+      "type": "derived",
+      "description": "A derived metric based on another derived metric (derived_metric_with_different_parent_time_grains).\nUsed to test metric filters.\n",
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": "derived_metric_with_different_parent_time_grains",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": [
+          {
+            "name": "derived_metric_with_different_parent_time_grains",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        ],
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "monthly_measure_0",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          },
+          {
+            "name": "yearly_measure_0",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: metric_derived_from_heterogeneous_derived_metric\ndescription: |\n  A derived metric based on another derived metric (derived_metric_with_different_parent_time_grains).\n  Used to test metric filters.\ntype: derived\ntype_params:\n  expr: derived_metric_with_different_parent_time_grains\n  metrics:\n  - name: derived_metric_with_different_parent_time_grains\n",
+          "start_line_number": 45,
+          "end_line_number": 54
+        }
+      },
+      "config": null,
+      "dimensions": [],
+      "semantic_models": [
+        "monthly_measures_source",
+        "yearly_measure_source"
+      ]
+    },
+    {
+      "name": "metric_derived_from_homogeneous_derived_metric",
+      "type": "derived",
+      "description": "A derived metric based on another derived metric (derived_metric_with_same_parent_time_grains).\nUsed to test metric filters.\n",
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": "derived_metric_with_same_parent_time_grains",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": [
+          {
+            "name": "derived_metric_with_same_parent_time_grains",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        ],
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "monthly_measure_0",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          },
+          {
+            "name": "monthly_measure_1",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: metric_derived_from_homogeneous_derived_metric\ndescription: |\n  A derived metric based on another derived metric (derived_metric_with_same_parent_time_grains).\n  Used to test metric filters.\ntype: derived\ntype_params:\n  expr: derived_metric_with_same_parent_time_grains\n  metrics:\n  - name: derived_metric_with_same_parent_time_grains\n",
+          "start_line_number": 57,
+          "end_line_number": 65
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__month",
+          "qualified_name": "metric_time__month",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "creation_time",
+          "dunder_name": "monthly_measure_entity__creation_time",
+          "qualified_name": "monthly_measure_entity__creation_time",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [
+            "monthly_measure_entity"
+          ],
+          "semantic_model_name": "monthly_measures_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/semantic_models/monthly_measures_source.yaml",
+            "file_slice": {
+              "filename": "monthly_measures_source.yaml",
+              "content": "name: creation_time\ntype: time\ntype_params:\n  time_granularity: month\n",
+              "start_line_number": 20,
+              "end_line_number": 24
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "monthly_measures_source"
+      ]
+    },
+    {
+      "name": "monthly_metric_0",
+      "type": "simple",
+      "description": "A metric with a month grain.",
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "monthly_measure_0",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "monthly_measure_0",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "monthly_measure_0",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "monthly_measures_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: monthly_metric_0\ndescription: A metric with a month grain.\ntype: simple\ntype_params:\n  measure: monthly_measure_0\n",
+          "start_line_number": 3,
+          "end_line_number": 7
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__month",
+          "qualified_name": "metric_time__month",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "creation_time",
+          "dunder_name": "monthly_measure_entity__creation_time",
+          "qualified_name": "monthly_measure_entity__creation_time",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [
+            "monthly_measure_entity"
+          ],
+          "semantic_model_name": "monthly_measures_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/semantic_models/monthly_measures_source.yaml",
+            "file_slice": {
+              "filename": "monthly_measures_source.yaml",
+              "content": "name: creation_time\ntype: time\ntype_params:\n  time_granularity: month\n",
+              "start_line_number": 20,
+              "end_line_number": 24
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "monthly_measures_source"
+      ]
+    },
+    {
+      "name": "monthly_metric_1",
+      "type": "simple",
+      "description": "A metric with a month grain.",
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "monthly_measure_1",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "monthly_measure_1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "monthly_measure_1",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "monthly_measures_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: monthly_metric_1\ndescription: A metric with a month grain.\ntype: simple\ntype_params:\n  measure: monthly_measure_1\n",
+          "start_line_number": 10,
+          "end_line_number": 14
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__month",
+          "qualified_name": "metric_time__month",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "creation_time",
+          "dunder_name": "monthly_measure_entity__creation_time",
+          "qualified_name": "monthly_measure_entity__creation_time",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [
+            "monthly_measure_entity"
+          ],
+          "semantic_model_name": "monthly_measures_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/semantic_models/monthly_measures_source.yaml",
+            "file_slice": {
+              "filename": "monthly_measures_source.yaml",
+              "content": "name: creation_time\ntype: time\ntype_params:\n  time_granularity: month\n",
+              "start_line_number": 20,
+              "end_line_number": 24
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "monthly_measures_source"
+      ]
+    },
+    {
+      "name": "simple_metric_with_default_time_granularity",
+      "type": "simple",
+      "description": "Simple metric with time granularity",
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "monthly_measure_1",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "monthly_measure_1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "monthly_measure_1",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "monthly_measures_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: simple_metric_with_default_time_granularity\ndescription: Simple metric with time granularity\ntype: simple\ntype_params:\n  measure: monthly_measure_1\ntime_granularity: quarter\n",
+          "start_line_number": 97,
+          "end_line_number": 102
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__month",
+          "qualified_name": "metric_time__month",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "creation_time",
+          "dunder_name": "monthly_measure_entity__creation_time",
+          "qualified_name": "monthly_measure_entity__creation_time",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [
+            "monthly_measure_entity"
+          ],
+          "semantic_model_name": "monthly_measures_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/semantic_models/monthly_measures_source.yaml",
+            "file_slice": {
+              "filename": "monthly_measures_source.yaml",
+              "content": "name: creation_time\ntype: time\ntype_params:\n  time_granularity: month\n",
+              "start_line_number": 20,
+              "end_line_number": 24
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "monthly_measures_source"
+      ]
+    },
+    {
+      "name": "simple_metric_with_default_time_granularity_and_metric_time_filter",
+      "type": "simple",
+      "description": "Simple metric with time granularity and metric_time filter",
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "monthly_measure_1",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "monthly_measure_1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "monthly_measure_1",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "monthly_measures_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": {
+        "where_filters": [
+          {
+            "where_sql_template": "{{ TimeDimension('metric_time') }} > '2020-01-01'\n"
+          }
+        ]
+      },
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: simple_metric_with_default_time_granularity_and_metric_time_filter\ndescription: Simple metric with time granularity and metric_time filter\ntype: simple\ntype_params:\n  measure: monthly_measure_1\ntime_granularity: quarter\nfilter: |\n  {{ TimeDimension('metric_time') }} > '2020-01-01'\n",
+          "start_line_number": 125,
+          "end_line_number": 132
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__month",
+          "qualified_name": "metric_time__month",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "creation_time",
+          "dunder_name": "monthly_measure_entity__creation_time",
+          "qualified_name": "monthly_measure_entity__creation_time",
+          "type": "time",
+          "granularity": "month",
+          "entity_links": [
+            "monthly_measure_entity"
+          ],
+          "semantic_model_name": "monthly_measures_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/semantic_models/monthly_measures_source.yaml",
+            "file_slice": {
+              "filename": "monthly_measures_source.yaml",
+              "content": "name: creation_time\ntype: time\ntype_params:\n  time_granularity: month\n",
+              "start_line_number": 20,
+              "end_line_number": 24
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "monthly_measures_source"
+      ]
+    },
+    {
+      "name": "yearly_metric_0",
+      "type": "simple",
+      "description": "A metric with a year grain.",
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "yearly_measure_0",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "yearly_measure_0",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "yearly_measure_0",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "yearly_measure_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: yearly_metric_0\ndescription: A metric with a year grain.\ntype: simple\ntype_params:\n  measure: yearly_measure_0\n",
+          "start_line_number": 17,
+          "end_line_number": 21
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__year",
+          "qualified_name": "metric_time__year",
+          "type": "time",
+          "granularity": "year",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "creation_time",
+          "dunder_name": "yearly_measure_entity__creation_time",
+          "qualified_name": "yearly_measure_entity__creation_time",
+          "type": "time",
+          "granularity": "year",
+          "entity_links": [
+            "yearly_measure_entity"
+          ],
+          "semantic_model_name": "yearly_measure_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/semantic_models/yearly_measures_source.yaml",
+            "file_slice": {
+              "filename": "yearly_measures_source.yaml",
+              "content": "name: creation_time\ntype: time\ntype_params:\n  time_granularity: year\n",
+              "start_line_number": 18,
+              "end_line_number": 22
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "yearly_measure_source"
+      ]
+    }
+  ]
+}

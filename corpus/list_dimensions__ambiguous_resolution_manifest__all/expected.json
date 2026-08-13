@@ -1,0 +1,54 @@
+{
+  "dimensions": [
+    {
+      "name": "creation_time",
+      "dunder_name": "monthly_measure_entity__creation_time",
+      "qualified_name": "monthly_measure_entity__creation_time",
+      "type": "time",
+      "granularity": "month",
+      "entity_links": [
+        "monthly_measure_entity"
+      ],
+      "semantic_model_name": "monthly_measures_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/semantic_models/monthly_measures_source.yaml",
+        "file_slice": {
+          "filename": "monthly_measures_source.yaml",
+          "content": "name: creation_time\ntype: time\ntype_params:\n  time_granularity: month\n",
+          "start_line_number": 20,
+          "end_line_number": 24
+        }
+      }
+    },
+    {
+      "name": "creation_time",
+      "dunder_name": "yearly_measure_entity__creation_time",
+      "qualified_name": "yearly_measure_entity__creation_time",
+      "type": "time",
+      "granularity": "year",
+      "entity_links": [
+        "yearly_measure_entity"
+      ],
+      "semantic_model_name": "yearly_measure_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/ambiguous_resolution_manifest/semantic_models/yearly_measures_source.yaml",
+        "file_slice": {
+          "filename": "yearly_measures_source.yaml",
+          "content": "name: creation_time\ntype: time\ntype_params:\n  time_granularity: year\n",
+          "start_line_number": 18,
+          "end_line_number": 22
+        }
+      }
+    }
+  ]
+}

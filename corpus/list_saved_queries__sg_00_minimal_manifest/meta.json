@@ -1,0 +1,9 @@
+{
+  "case_id": "list_saved_queries__sg_00_minimal_manifest",
+  "subcommand": "list_saved_queries",
+  "manifest_id": "sg_00_minimal_manifest",
+  "args": {},
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

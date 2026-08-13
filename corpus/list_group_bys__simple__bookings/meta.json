@@ -1,0 +1,13 @@
+{
+  "case_id": "list_group_bys__simple__bookings",
+  "subcommand": "list_group_bys",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "bookings"
+    ]
+  },
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

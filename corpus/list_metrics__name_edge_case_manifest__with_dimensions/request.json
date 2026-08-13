@@ -1,0 +1,350 @@
+{
+  "semantic_models": [
+    {
+      "name": "bookings_source",
+      "defaults": {
+        "agg_time_dimension": "ds"
+      },
+      "description": "bookings_source",
+      "node_relation": {
+        "alias": "fct_bookings",
+        "schema_name": "mf_corpus_2026_05_11_static",
+        "database": null,
+        "relation_name": "mf_corpus_2026_05_11_static.fct_bookings"
+      },
+      "primary_entity": "booking",
+      "entities": [
+        {
+          "name": "homonymous_metric_and_entity",
+          "description": null,
+          "type": "unique",
+          "role": null,
+          "expr": "'dummy_entity_value'",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/semantic_models/bookings_source.yaml",
+            "file_slice": {
+              "filename": "bookings_source.yaml",
+              "content": "name: homonymous_metric_and_entity\nexpr: \"'dummy_entity_value'\"\ntype: unique\n",
+              "start_line_number": 18,
+              "end_line_number": 21
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [
+        {
+          "name": "booking_value",
+          "agg": "sum",
+          "description": null,
+          "create_metric": null,
+          "expr": null,
+          "agg_params": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/semantic_models/bookings_source.yaml",
+            "file_slice": {
+              "filename": "bookings_source.yaml",
+              "content": "name: booking_value\nagg: sum\n",
+              "start_line_number": 14,
+              "end_line_number": 16
+            }
+          },
+          "non_additive_dimension": null,
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "dimensions": [
+        {
+          "name": "homonymous_metric_and_dimension",
+          "description": null,
+          "type": "categorical",
+          "is_partition": false,
+          "type_params": null,
+          "expr": "'dummy_dimension_value'",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/semantic_models/bookings_source.yaml",
+            "file_slice": {
+              "filename": "bookings_source.yaml",
+              "content": "name: homonymous_metric_and_dimension\nexpr: \"'dummy_dimension_value'\"\ntype: categorical\n",
+              "start_line_number": 23,
+              "end_line_number": 25
+            }
+          },
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "ds",
+          "description": null,
+          "type": "time",
+          "is_partition": false,
+          "type_params": {
+            "time_granularity": "day",
+            "validity_params": null
+          },
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/semantic_models/bookings_source.yaml",
+            "file_slice": {
+              "filename": "bookings_source.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 26,
+              "end_line_number": 30
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "label": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/semantic_models/bookings_source.yaml",
+        "file_slice": {
+          "filename": "bookings_source.yaml",
+          "content": "name: bookings_source\ndescription: bookings_source\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: fct_bookings\ndefaults:\n  agg_time_dimension: ds\nmeasures:\n- name: booking_value\n  agg: sum\nentities:\n- name: homonymous_metric_and_entity\n  expr: \"'dummy_entity_value'\"\n  type: unique\ndimensions:\n- name: homonymous_metric_and_dimension\n  expr: \"'dummy_dimension_value'\"\n  type: categorical\n- name: ds\n  type: time\n  type_params:\n    time_granularity: day\nprimary_entity: booking\n",
+          "start_line_number": 3,
+          "end_line_number": 31
+        }
+      },
+      "config": null
+    }
+  ],
+  "metrics": [
+    {
+      "name": "homonymous_metric_and_dimension",
+      "description": "Used to test a soon-to-be-deprecated use case where the name of the metric is the same as a dimension.\n",
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "booking_value",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "booking_value",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "booking_value",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "bookings_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: homonymous_metric_and_dimension\ndescription: |\n  Used to test a soon-to-be-deprecated use case where the name of the metric is the same as a dimension.\ntype: simple\ntype_params:\n  measure: booking_value\n",
+          "start_line_number": 3,
+          "end_line_number": 8
+        }
+      },
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "homonymous_metric_and_entity",
+      "description": "Used to test a soon-to-be-deprecated use case where the name of the metric is the same as an entity.\n",
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "booking_value",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "booking_value",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "booking_value",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "bookings_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: homonymous_metric_and_entity\ndescription: |\n  Used to test a soon-to-be-deprecated use case where the name of the metric is the same as an entity.\ntype: simple\ntype_params:\n  measure: booking_value\n",
+          "start_line_number": 11,
+          "end_line_number": 16
+        }
+      },
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    }
+  ],
+  "project_configuration": {
+    "time_spine_table_configurations": [
+      {
+        "location": "mf_corpus_2026_05_11_static.mf_time_spine",
+        "column_name": "ds",
+        "grain": "day"
+      }
+    ],
+    "metadata": {
+      "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/project_configuration.yaml",
+      "file_slice": {
+        "filename": "project_configuration.yaml",
+        "content": "time_spine_table_configurations:\n- location: mf_corpus_2026_05_11_static.mf_time_spine\n  column_name: ds\n  grain: day\ntime_spines:\n- node_relation:\n    alias: mf_time_spine_nanosecond\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: nanosecond\n- node_relation:\n    alias: mf_time_spine_microsecond\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: microsecond\n- node_relation:\n    alias: mf_time_spine_millisecond\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: millisecond\n- node_relation:\n    alias: mf_time_spine_second\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: second\n- node_relation:\n    alias: mf_time_spine_minute\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: minute\n- node_relation:\n    alias: mf_time_spine_hour\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: hour\n- node_relation:\n    alias: mf_time_spine\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ds\n    time_granularity: day\n  custom_granularities:\n  - name: alien_day\n",
+        "start_line_number": 4,
+        "end_line_number": 52
+      }
+    },
+    "dsi_package_version": {
+      "major_version": "0",
+      "minor_version": "210",
+      "patch_version": "0"
+    },
+    "time_spines": [
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_nanosecond",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_nanosecond"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "nanosecond"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_microsecond",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_microsecond"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "microsecond"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_millisecond",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_millisecond"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "millisecond"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_second",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_second"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "second"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_minute",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_minute"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "minute"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_hour",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_hour"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "hour"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine"
+        },
+        "primary_column": {
+          "name": "ds",
+          "time_granularity": "day"
+        },
+        "custom_granularities": [
+          {
+            "name": "alien_day",
+            "column_name": null
+          }
+        ]
+      }
+    ]
+  },
+  "saved_queries": [],
+  "args": {
+    "include_dimensions": true
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "case_id": "validate_manifest__config_linter_manifest_invalid",
+  "subcommand": "validate_manifest",
+  "manifest_id": "config_linter_manifest",
+  "args": {},
+  "dialect_set": [],
+  "source_test": "metricflow_semantics/test_helpers/semantic_manifest_yamls/config_linter_manifest/* (intentional errors)",
+  "notes": "Expected to produce blocking errors. Validates that we correctly surface intentional validation failures."
+}

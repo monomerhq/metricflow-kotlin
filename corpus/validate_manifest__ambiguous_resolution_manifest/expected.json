@@ -1,0 +1,24 @@
+{
+  "issues": [
+    {
+      "level": "WARNING",
+      "message": "Cumulative metric 'accumulate_last_2_months_metric' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "metrics.yaml",
+          "line_number": 68
+        },
+        "metric": {
+          "metric_name": "accumulate_last_2_months_metric"
+        }
+      },
+      "context_str": "with metric `accumulate_last_2_months_metric` in file `metrics.yaml` on line #68",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `accumulate_last_2_months_metric` in file `metrics.yaml` on line #68 - Cumulative metric 'accumulate_last_2_months_metric' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion."
+    }
+  ],
+  "error_count": 0,
+  "future_error_count": 0,
+  "warning_count": 1,
+  "has_blocking_issues": false
+}

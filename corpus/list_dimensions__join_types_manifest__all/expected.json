@@ -1,0 +1,54 @@
+{
+  "dimensions": [
+    {
+      "name": "ds",
+      "dunder_name": "booking__ds",
+      "qualified_name": "booking__ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "booking"
+      ],
+      "semantic_model_name": "bookings_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/join_types_manifest/bookings_source.yaml",
+        "file_slice": {
+          "filename": "bookings_source.yaml",
+          "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 20,
+          "end_line_number": 24
+        }
+      }
+    },
+    {
+      "name": "country",
+      "dunder_name": "listing__country",
+      "qualified_name": "listing__country",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "listing"
+      ],
+      "semantic_model_name": "listings_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/join_types_manifest/listings_source.yaml",
+        "file_slice": {
+          "filename": "listings_source.yaml",
+          "content": "name: country\ntype: categorical\n",
+          "start_line_number": 11,
+          "end_line_number": 13
+        }
+      }
+    }
+  ]
+}

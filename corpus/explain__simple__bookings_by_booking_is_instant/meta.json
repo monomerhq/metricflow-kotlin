@@ -1,0 +1,24 @@
+{
+  "case_id": "explain__simple__bookings_by_booking_is_instant",
+  "subcommand": "explain",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "bookings"
+    ],
+    "group_by_names": [
+      "booking__is_instant"
+    ]
+  },
+  "dialect_set": [
+    "Trino",
+    "BigQuery",
+    "Snowflake",
+    "Databricks",
+    "Redshift",
+    "DuckDB",
+    "Postgres"
+  ],
+  "source_test": "",
+  "notes": ""
+}

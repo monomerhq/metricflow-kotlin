@@ -1,0 +1,9 @@
+{
+  "case_id": "list_dimensions__ambiguous_resolution_manifest__all",
+  "subcommand": "list_dimensions",
+  "manifest_id": "ambiguous_resolution_manifest",
+  "args": {},
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

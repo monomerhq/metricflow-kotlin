@@ -1,0 +1,54 @@
+{
+  "dimensions": [
+    {
+      "name": "booking_time",
+      "dunder_name": "booking__booking_time",
+      "qualified_name": "booking__booking_time",
+      "type": "time",
+      "granularity": "quarter",
+      "entity_links": [
+        "booking"
+      ],
+      "semantic_model_name": "bookings_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/sg_02_single_join/manifest.yaml",
+        "file_slice": {
+          "filename": "manifest.yaml",
+          "content": "name: booking_time\ntype: time\ntype_params:\n  time_granularity: quarter\n",
+          "start_line_number": 25,
+          "end_line_number": 29
+        }
+      }
+    },
+    {
+      "name": "country_latest",
+      "dunder_name": "listing__country_latest",
+      "qualified_name": "listing__country_latest",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "listing"
+      ],
+      "semantic_model_name": "listings_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/sg_02_single_join/manifest.yaml",
+        "file_slice": {
+          "filename": "manifest.yaml",
+          "content": "name: country_latest\ntype: categorical\n",
+          "start_line_number": 43,
+          "end_line_number": 45
+        }
+      }
+    }
+  ]
+}

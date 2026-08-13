@@ -1,0 +1,164 @@
+{
+  "saved_queries": [
+    {
+      "name": "dimensions_only",
+      "description": "Query without metrics",
+      "label": null,
+      "query_params": {
+        "metrics": [],
+        "group_by": [
+          "Dimension('listing__capacity_latest')",
+          "TimeDimension('metric_time', 'month')"
+        ],
+        "order_by": [],
+        "limit": null,
+        "where": null
+      },
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/saved_queries.yaml",
+        "file_slice": {
+          "filename": "saved_queries.yaml",
+          "content": "name: dimensions_only\ndescription: Query without metrics\nquery_params:\n  group_by:\n  - Dimension('listing__capacity_latest')\n  - TimeDimension('metric_time', 'month')\n  metrics: []\n",
+          "start_line_number": 62,
+          "end_line_number": 68
+        }
+      },
+      "exports": [],
+      "tags": []
+    },
+    {
+      "name": "p0_booking",
+      "description": "Booking-related metrics that are of the highest priority.",
+      "label": null,
+      "query_params": {
+        "metrics": [
+          "bookings",
+          "instant_bookings"
+        ],
+        "group_by": [
+          "TimeDimension('metric_time', 'day')",
+          "Dimension('listing__capacity_latest')"
+        ],
+        "order_by": [],
+        "limit": null,
+        "where": {
+          "where_filters": [
+            {
+              "where_sql_template": "{{ Dimension('listing__capacity_latest') }} > 3"
+            }
+          ]
+        }
+      },
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/saved_queries.yaml",
+        "file_slice": {
+          "filename": "saved_queries.yaml",
+          "content": "name: p0_booking\ndescription: Booking-related metrics that are of the highest priority.\nquery_params:\n  metrics:\n  - bookings\n  - instant_bookings\n  group_by:\n  - TimeDimension('metric_time', 'day')\n  - Dimension('listing__capacity_latest')\n  where:\n  - \"{{ Dimension('listing__capacity_latest') }} > 3\"\n",
+          "start_line_number": 3,
+          "end_line_number": 13
+        }
+      },
+      "exports": [],
+      "tags": []
+    },
+    {
+      "name": "p0_booking_with_order_by_and_limit",
+      "description": "p0 bookings with order by and limit",
+      "label": null,
+      "query_params": {
+        "metrics": [
+          "bookings",
+          "views"
+        ],
+        "group_by": [
+          "TimeDimension('metric_time', 'day')",
+          "Dimension('listing__capacity_latest')"
+        ],
+        "order_by": [
+          "TimeDimension('metric_time', 'day').descending(True)",
+          "Dimension('listing__capacity_latest')",
+          "Metric('bookings').descending(True)",
+          "Metric('views')"
+        ],
+        "limit": 10,
+        "where": null
+      },
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/saved_queries.yaml",
+        "file_slice": {
+          "filename": "saved_queries.yaml",
+          "content": "name: p0_booking_with_order_by_and_limit\ndescription: p0 bookings with order by and limit\nquery_params:\n  metrics:\n  - bookings\n  - views\n  group_by:\n  - TimeDimension('metric_time', 'day')\n  - Dimension('listing__capacity_latest')\n  order_by:\n  - TimeDimension('metric_time', 'day').descending(True)\n  - Dimension('listing__capacity_latest')\n  - Metric('bookings').descending(True)\n  - Metric('views')\n  limit: 10\n",
+          "start_line_number": 16,
+          "end_line_number": 30
+        }
+      },
+      "exports": [],
+      "tags": []
+    },
+    {
+      "name": "saved_query_with_cumulative_metric",
+      "description": "Saved query that includes a cumulative metric. Added as cumulative metrics have a branch in the CLI for\nadjusting the time constraint.\n",
+      "label": null,
+      "query_params": {
+        "metrics": [
+          "trailing_2_months_revenue"
+        ],
+        "group_by": [
+          "TimeDimension('metric_time', 'day')"
+        ],
+        "order_by": [],
+        "limit": null,
+        "where": null
+      },
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/saved_queries.yaml",
+        "file_slice": {
+          "filename": "saved_queries.yaml",
+          "content": "name: saved_query_with_cumulative_metric\ndescription: |\n  Saved query that includes a cumulative metric. Added as cumulative metrics have a branch in the CLI for\n  adjusting the time constraint.\nquery_params:\n  metrics:\n  - trailing_2_months_revenue\n  group_by:\n  - TimeDimension('metric_time', 'day')\n",
+          "start_line_number": 33,
+          "end_line_number": 41
+        }
+      },
+      "exports": [],
+      "tags": []
+    },
+    {
+      "name": "saved_query_with_metric_joins_and_filter",
+      "description": "Saved query that includes multiple metrics from different input sources requiring a metric join and\na query-level filter on a mix of categorical and time dimension filters.\nNote this will not run on Trino due to the invalid filter construction - Trino will not cast string literals\nto timestamp types the way other engines do.\n",
+      "label": null,
+      "query_params": {
+        "metrics": [
+          "bookings",
+          "views",
+          "bookings_per_view"
+        ],
+        "group_by": [
+          "Dimension('listing__capacity_latest')"
+        ],
+        "order_by": [],
+        "limit": null,
+        "where": {
+          "where_filters": [
+            {
+              "where_sql_template": "{{ Dimension('listing__is_lux_latest') }}"
+            },
+            {
+              "where_sql_template": "{{ TimeDimension('metric_time', 'day') }} >= '2020-01-02'"
+            }
+          ]
+        }
+      },
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/saved_queries.yaml",
+        "file_slice": {
+          "filename": "saved_queries.yaml",
+          "content": "name: saved_query_with_metric_joins_and_filter\ndescription: |\n  Saved query that includes multiple metrics from different input sources requiring a metric join and\n  a query-level filter on a mix of categorical and time dimension filters.\n  Note this will not run on Trino due to the invalid filter construction - Trino will not cast string literals\n  to timestamp types the way other engines do.\nquery_params:\n  metrics:\n  - bookings\n  - views\n  - bookings_per_view\n  group_by:\n  - Dimension('listing__capacity_latest')\n  where:\n  - \"{{ Dimension('listing__is_lux_latest') }}\"\n  - \"{{ TimeDimension('metric_time', 'day') }} >= '2020-01-02'\"\n",
+          "start_line_number": 44,
+          "end_line_number": 59
+        }
+      },
+      "exports": [],
+      "tags": []
+    }
+  ]
+}

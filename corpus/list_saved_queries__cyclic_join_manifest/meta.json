@@ -1,0 +1,9 @@
+{
+  "case_id": "list_saved_queries__cyclic_join_manifest",
+  "subcommand": "list_saved_queries",
+  "manifest_id": "cyclic_join_manifest",
+  "args": {},
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

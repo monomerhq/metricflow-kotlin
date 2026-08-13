@@ -1,0 +1,224 @@
+{
+  "dimensions": [
+    {
+      "name": "account_month",
+      "dunder_name": "account_id__account_month",
+      "qualified_name": "account_id__account_month",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "account_id"
+      ],
+      "semantic_model_name": "account_month_txns",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/multi_hop_join_manifest/account_month_txns.yaml",
+        "file_slice": {
+          "filename": "account_month_txns.yaml",
+          "content": "name: account_month\ntype: categorical\n",
+          "start_line_number": 23,
+          "end_line_number": 25
+        }
+      }
+    },
+    {
+      "name": "acquired_ds",
+      "dunder_name": "account_id__customer_id__acquired_ds",
+      "qualified_name": "account_id__customer_id__acquired_ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "account_id",
+        "customer_id"
+      ],
+      "semantic_model_name": "customer_other_data",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/multi_hop_join_manifest/customer_other_data.yaml",
+        "file_slice": {
+          "filename": "customer_other_data.yaml",
+          "content": "name: acquired_ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 21,
+          "end_line_number": 25
+        }
+      }
+    },
+    {
+      "name": "country",
+      "dunder_name": "account_id__customer_id__country",
+      "qualified_name": "account_id__customer_id__country",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "account_id",
+        "customer_id"
+      ],
+      "semantic_model_name": "customer_other_data",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/multi_hop_join_manifest/customer_other_data.yaml",
+        "file_slice": {
+          "filename": "customer_other_data.yaml",
+          "content": "name: country\ntype: categorical\n",
+          "start_line_number": 19,
+          "end_line_number": 20
+        }
+      }
+    },
+    {
+      "name": "customer_atomic_weight",
+      "dunder_name": "account_id__customer_id__customer_atomic_weight",
+      "qualified_name": "account_id__customer_id__customer_atomic_weight",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "account_id",
+        "customer_id"
+      ],
+      "semantic_model_name": "customer_table",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/multi_hop_join_manifest/customer_table.yaml",
+        "file_slice": {
+          "filename": "customer_table.yaml",
+          "content": "name: customer_atomic_weight\ntype: categorical\n",
+          "start_line_number": 13,
+          "end_line_number": 15
+        }
+      }
+    },
+    {
+      "name": "customer_name",
+      "dunder_name": "account_id__customer_id__customer_name",
+      "qualified_name": "account_id__customer_id__customer_name",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "account_id",
+        "customer_id"
+      ],
+      "semantic_model_name": "customer_table",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/multi_hop_join_manifest/customer_table.yaml",
+        "file_slice": {
+          "filename": "customer_table.yaml",
+          "content": "name: customer_name\ntype: categorical\n",
+          "start_line_number": 11,
+          "end_line_number": 12
+        }
+      }
+    },
+    {
+      "name": "ds",
+      "dunder_name": "account_id__ds",
+      "qualified_name": "account_id__ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "account_id"
+      ],
+      "semantic_model_name": "account_month_txns",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/multi_hop_join_manifest/account_month_txns.yaml",
+        "file_slice": {
+          "filename": "account_month_txns.yaml",
+          "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 19,
+          "end_line_number": 22
+        }
+      }
+    },
+    {
+      "name": "extra_dim",
+      "dunder_name": "account_id__extra_dim",
+      "qualified_name": "account_id__extra_dim",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "account_id"
+      ],
+      "semantic_model_name": "bridge_table",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/multi_hop_join_manifest/bridge_table.yaml",
+        "file_slice": {
+          "filename": "bridge_table.yaml",
+          "content": "name: extra_dim\ntype: categorical\n",
+          "start_line_number": 11,
+          "end_line_number": 13
+        }
+      }
+    },
+    {
+      "name": "metric_time",
+      "dunder_name": "metric_time__day",
+      "qualified_name": "metric_time__day",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [],
+      "semantic_model_name": null,
+      "is_partition": false,
+      "is_metric_time": true,
+      "description": "Event time for metrics.",
+      "label": null,
+      "expr": null,
+      "metadata": null
+    }
+  ],
+  "entities": [
+    {
+      "name": "account_id",
+      "type": "primary",
+      "role": null,
+      "semantic_model_name": "account_month_txns",
+      "description": null,
+      "expr": null
+    },
+    {
+      "name": "customer_id",
+      "type": "foreign",
+      "role": null,
+      "semantic_model_name": "bridge_table",
+      "description": null,
+      "expr": null
+    },
+    {
+      "name": "customer_third_hop_id",
+      "type": "unique",
+      "role": null,
+      "semantic_model_name": "customer_other_data",
+      "description": null,
+      "expr": null
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "metricflow-oracle"
+version = "0.1.0"
+description = "Python-side oracle CLI for the metricflow-kotlin differential test harness."
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "metricflow-kotlin contributors" },
+]
+
+dependencies = [
+    "metricflow==0.210.0",
+    "pyyaml",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+
+[project.scripts]
+metricflow-oracle = "oracle.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["oracle*"]
+exclude = ["upstream*", "tests*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

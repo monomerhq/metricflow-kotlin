@@ -1,0 +1,79 @@
+{
+  "dimensions": [
+    {
+      "name": "capacity_latest",
+      "dunder_name": "listing__capacity_latest",
+      "qualified_name": "listing__capacity_latest",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "listing"
+      ],
+      "semantic_model_name": "listings_latest_cyclic",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": "capacity",
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/cyclic_join_manifest/listings_latest_cyclic.yaml",
+        "file_slice": {
+          "filename": "listings_latest_cyclic.yaml",
+          "content": "name: capacity_latest\ntype: categorical\nexpr: capacity\n",
+          "start_line_number": 11,
+          "end_line_number": 14
+        }
+      }
+    },
+    {
+      "name": "country_latest",
+      "dunder_name": "listing__country_latest",
+      "qualified_name": "listing__country_latest",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "listing"
+      ],
+      "semantic_model_name": "listings_latest",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": "country",
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/cyclic_join_manifest/listings_latest.yaml",
+        "file_slice": {
+          "filename": "listings_latest.yaml",
+          "content": "name: country_latest\ntype: categorical\nexpr: country\n",
+          "start_line_number": 25,
+          "end_line_number": 28
+        }
+      }
+    },
+    {
+      "name": "ds",
+      "dunder_name": "listing__ds",
+      "qualified_name": "listing__ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "listing"
+      ],
+      "semantic_model_name": "listings_latest",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": "created_at",
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/cyclic_join_manifest/listings_latest.yaml",
+        "file_slice": {
+          "filename": "listings_latest.yaml",
+          "content": "name: ds\ntype: time\nexpr: created_at\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 20,
+          "end_line_number": 24
+        }
+      }
+    }
+  ]
+}

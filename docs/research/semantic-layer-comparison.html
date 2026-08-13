@@ -1,0 +1,1933 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>오픈소스 시맨틱 레이어 비교 — MetricFlow를 계속 갈 것인가</title>
+<meta name="monomer:status" content="draft" />
+<meta name="monomer:summary" content="MetricFlow Kotlin 포팅을 마친 시점에서 customize 방향을 재평가. Cube/Malloy/Lightdash/Rill/BSL를 후보로 두고 strategic fit을 비교." />
+<meta name="monomer:related" content="../explained/metricflow-engine.html, ../PUBLIC_API.md, ../../CLAUDE.md" />
+<style>
+  :root {
+    --ivory:      #FAF9F5;
+    --paper:      #FFFFFF;
+    --oat:        #E3DACC;
+    --oat-soft:   rgba(227, 218, 204, 0.35);
+    --gray-100:   #F5F3EC;
+    --gray-150:   #F0EEE6;
+    --gray-300:   #D1CFC5;
+    --gray-500:   #87867F;
+    --gray-700:   #3D3D3A;
+    --slate:      #141413;
+    --clay:       #D97757;
+    --clay-soft:  #F5E0D2;
+    --olive:      #788C5D;
+    --sky:        #6A8CAF;
+    --error:      #B04A3F;
+    --serif: "Iowan Old Style", "Charter", "Palatino Linotype", Palatino, Georgia, ui-serif, serif;
+    --sans:  -apple-system, "Inter", "Segoe UI", system-ui, sans-serif;
+    --mono:  ui-monospace, "JetBrains Mono", "SF Mono", "Menlo", monospace;
+    --measure:        680px;
+    --sidebar-w:      220px;
+    --gap:            64px;
+    --radius:         12px;
+    --radius-sm:      8px;
+    --border:         1.5px solid var(--gray-300);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--ivory);
+    color: var(--gray-700);
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  .page {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 64px 32px 160px;
+    display: grid;
+    grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+    gap: var(--gap);
+    align-items: start;
+  }
+  .sidebar {
+    position: sticky;
+    top: 32px;
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+    padding-right: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .sidebar .eyebrow { margin-bottom: 12px; }
+  .sidebar h4 {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--gray-500);
+    margin: 28px 0 10px;
+  }
+  .sidebar nav ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-left: 2px solid var(--gray-150);
+  }
+  .sidebar nav ol li { margin: 0; padding: 0; }
+  .sidebar nav ol li a {
+    display: block;
+    padding: 7px 14px;
+    color: var(--gray-700);
+    border-bottom: none;
+    margin-left: -2px;
+    border-left: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    font-size: 13.5px;
+  }
+  .sidebar nav ol li a:hover {
+    color: var(--slate);
+    border-left-color: var(--slate);
+  }
+  .sidebar nav ol li .num {
+    display: inline-block;
+    width: 26px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--gray-500);
+    letter-spacing: 0.04em;
+  }
+  .sidebar .meta {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--gray-500);
+    line-height: 1.8;
+    margin-top: 28px;
+  }
+  .sidebar .meta dt { color: var(--gray-500); display: inline; }
+  .sidebar .meta dd { color: var(--gray-700); display: inline; margin: 0; }
+  .sidebar .meta dl { margin: 0; }
+  .sidebar .meta dl > div { margin-bottom: 4px; }
+  .content { min-width: 0; }
+  .content > * { max-width: 100%; }
+  .content > p,
+  .content > ul,
+  .content > ol,
+  .content > .lede,
+  .content > .lead,
+  .content section > p,
+  .content section > ul,
+  .content section > ol,
+  .content section > .lead { max-width: var(--measure); }
+  h1, h2, h3, h4 {
+    font-family: var(--serif);
+    color: var(--slate);
+    font-weight: 500;
+    letter-spacing: -0.012em;
+  }
+  h1 { font-size: 46px; line-height: 1.08; margin: 0 0 18px; }
+  h1 em { font-style: italic; color: var(--clay); }
+  h2 {
+    font-size: 28px; line-height: 1.2;
+    margin: 56px 0 12px;
+    max-width: var(--measure);
+  }
+  h2:first-of-type { margin-top: 0; }
+  h3 {
+    font-family: var(--sans);
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gray-500);
+    font-weight: 500;
+    margin: 36px 0 12px;
+    max-width: var(--measure);
+  }
+  h3.serif {
+    font-family: var(--serif);
+    font-size: 20px;
+    text-transform: none;
+    letter-spacing: -0.005em;
+    color: var(--slate);
+  }
+  p { margin: 0 0 14px; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--gray-500);
+    font-weight: 500;
+    margin: 0 0 14px;
+  }
+  .lede {
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--gray-700);
+    font-weight: 400;
+    margin: 0 0 36px;
+    max-width: var(--measure);
+  }
+  .lead {
+    font-size: 17.5px;
+    line-height: 1.55;
+    color: var(--slate);
+    margin: 8px 0 20px;
+    max-width: var(--measure);
+  }
+  .lead strong { color: var(--slate); }
+  strong { font-weight: 600; color: var(--slate); }
+  em { font-style: italic; }
+  a {
+    color: var(--clay);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+  a:hover { border-bottom-color: var(--clay); }
+  hr { border: 0; border-top: var(--border); margin: 56px 0; max-width: var(--measure); }
+  .tldr {
+    background: var(--paper);
+    border: var(--border);
+    border-left: 3px solid var(--clay);
+    border-radius: var(--radius);
+    padding: 18px 22px 20px;
+    margin: 0 0 48px;
+    max-width: var(--measure);
+  }
+  .tldr-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--clay);
+    font-weight: 500;
+    margin: 0 0 8px;
+  }
+  .tldr-body {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--gray-700);
+    margin: 0;
+  }
+  .tldr-body strong { color: var(--slate); }
+  section.stage { margin: 80px 0 0; scroll-margin-top: 32px; }
+  section.stage:first-of-type { margin-top: 0; }
+  .stage-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--clay);
+    font-weight: 500;
+    margin: 0 0 6px;
+  }
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.9em;
+  }
+  p code, li code, td code, summary code, h3 code, h2 code, dd code, dt code {
+    font-size: 0.85em;
+    color: var(--slate);
+    background: var(--gray-150);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  pre {
+    font-family: var(--mono);
+    background: var(--paper);
+    border: var(--border);
+    border-radius: var(--radius);
+    color: var(--slate);
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 16px 0 22px;
+  }
+  pre code { background: transparent; border: 0; padding: 0; color: inherit; font-size: 1em; }
+  .hl { color: var(--clay); }
+  .cm { color: var(--gray-500); }
+  .note, .tip {
+    background: var(--oat-soft);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    margin: 18px 0;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--gray-700);
+    max-width: var(--measure);
+  }
+  .note p, .tip p { font-size: inherit; margin: 0 0 8px; color: inherit; }
+  .note p:last-child, .tip p:last-child { margin-bottom: 0; }
+  .tip {
+    background: var(--paper);
+    border: var(--border);
+    border-left: 3px solid var(--clay);
+    border-radius: var(--radius);
+  }
+  .refs {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--gray-500);
+    margin: 0 0 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    max-width: var(--measure);
+  }
+  .refs span { white-space: nowrap; }
+  table.facts {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0 28px;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  table.facts th, table.facts td {
+    text-align: left;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--gray-300);
+    vertical-align: top;
+    color: var(--gray-700);
+    padding-right: 24px;
+  }
+  table.facts thead th {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gray-500);
+    font-weight: 500;
+    border-bottom: 2px solid var(--gray-300);
+    padding-bottom: 10px;
+  }
+  table.facts tbody th {
+    width: 180px;
+    font-weight: 500;
+    color: var(--slate);
+  }
+  table.facts.wide tbody th { width: 140px; }
+  table.facts.compact th, table.facts.compact td { padding: 10px 12px 10px 0; font-size: 14px; }
+  table.facts tr:last-child th, table.facts tr:last-child td { border-bottom: 0; }
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 20px 0 28px;
+  }
+  .card {
+    background: var(--paper);
+    border: var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: var(--slate);
+    box-shadow: 0 10px 30px rgba(20, 20, 19, 0.08);
+  }
+  .card h4 {
+    font-family: var(--serif);
+    font-size: 18px;
+    color: var(--slate);
+    margin: 0 0 10px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+  }
+  .card .card-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray-500);
+    background: var(--gray-150);
+    border-radius: 999px;
+    padding: 2px 8px;
+    margin-bottom: 12px;
+  }
+  .card p { font-size: 14.5px; line-height: 1.55; margin: 0 0 8px; color: var(--gray-700); }
+  .card p:last-child { margin-bottom: 0; }
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: var(--oat);
+    color: var(--slate);
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    padding: 2px 8px;
+    vertical-align: 2px;
+  }
+  .pill.olive { background: rgba(120, 140, 93, 0.18); border-color: rgba(120, 140, 93, 0.4); }
+  .pill.clay  { background: var(--clay-soft); border-color: var(--clay); color: var(--slate); }
+  .pill.muted { background: var(--gray-150); border-color: var(--gray-300); color: var(--gray-500); }
+  ul, ol {
+    margin: 8px 0 18px;
+    padding-left: 22px;
+  }
+  ul li, ol li {
+    margin: 6px 0;
+    padding-left: 4px;
+  }
+  ul li::marker { color: var(--gray-500); }
+  ol li::marker { color: var(--gray-500); font-family: var(--mono); font-size: 0.92em; }
+  ul.flow {
+    padding-left: 0;
+    list-style: none;
+    margin: 6px 0 18px;
+    max-width: var(--measure);
+  }
+  ul.flow li {
+    padding: 7px 0 7px 24px;
+    position: relative;
+    color: var(--gray-700);
+    font-size: 16px;
+    margin: 0;
+  }
+  ul.flow li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--clay);
+  }
+  .diagram-wrap {
+    margin: 28px 0 40px;
+    padding: 18px 20px 12px;
+    background: var(--paper);
+    border: var(--border);
+    border-radius: var(--radius);
+  }
+  .diagram-wrap svg { width: 100%; height: auto; display: block; }
+  .diagram-wrap figcaption {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray-500);
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--gray-150);
+  }
+  .collapsible-list { margin: 18px 0; max-width: var(--measure); }
+  details.opt {
+    background: var(--paper);
+    border: var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  details.opt[open] { border-color: var(--clay); }
+  details.opt summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 14px 18px;
+    font-weight: 500;
+    color: var(--slate);
+    font-size: 15.5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+  }
+  details.opt summary::-webkit-details-marker { display: none; }
+  details.opt summary::after {
+    content: "▸";
+    color: var(--clay);
+    font-size: 14px;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  details.opt[open] summary::after { transform: rotate(90deg); }
+  details.opt .opt-body {
+    padding: 0 18px 16px;
+    border-top: 1px solid var(--gray-150);
+    padding-top: 12px;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--gray-700);
+  }
+  details.opt .opt-body p { margin: 0 0 8px; font-size: inherit; }
+  details.opt .opt-body p:last-child { margin-bottom: 0; }
+  footer.doc-footer {
+    margin-top: 80px;
+    padding-top: 28px;
+    border-top: 1px solid var(--gray-300);
+    color: var(--gray-500);
+    font-size: 13px;
+    max-width: var(--measure);
+  }
+  ol.refs-list { font-size: 14px; line-height: 1.7; max-width: var(--measure); padding-left: 22px; }
+  ol.refs-list li { margin: 8px 0; padding-left: 6px; }
+  ol.refs-list li a { word-break: break-word; }
+  @media (max-width: 920px) {
+    .page {
+      grid-template-columns: 1fr;
+      gap: 36px;
+      padding: 40px 22px 80px;
+    }
+    .sidebar {
+      position: static;
+      max-height: none;
+      padding-right: 0;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--gray-150);
+    }
+    h1 { font-size: 32px; }
+    h2 { font-size: 24px; }
+    .lede { font-size: 19px; }
+    .lead { font-size: 16.5px; }
+    body { font-size: 15.5px; }
+    pre { font-size: 12.5px; padding: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <aside class="sidebar">
+    <p class="eyebrow">METRICFLOW-KOTLIN · 전략 연구 · v1</p>
+
+    <h4>Contents</h4>
+    <nav>
+      <ol>
+        <li><a href="#s1"><span class="num">01</span>이 결정이 왜 중요한가</a></li>
+        <li><a href="#s2"><span class="num">02</span>시맨틱 레이어란 무엇인가</a></li>
+        <li><a href="#s3"><span class="num">03</span>후보 풍경 한 장면</a></li>
+        <li><a href="#s4"><span class="num">04</span>MetricFlow 심층</a></li>
+        <li><a href="#s5"><span class="num">05</span>Cube 심층</a></li>
+        <li><a href="#s6"><span class="num">06</span>Malloy 심층</a></li>
+        <li><a href="#s7"><span class="num">07</span>Lightdash 심층</a></li>
+        <li><a href="#s8"><span class="num">08</span>Rill 심층</a></li>
+        <li><a href="#s9"><span class="num">09</span>Boring Semantic Layer</a></li>
+        <li><a href="#s10"><span class="num">10</span>비교 매트릭스</a></li>
+        <li><a href="#s11"><span class="num">11</span>시나리오별 평가</a></li>
+        <li><a href="#s12"><span class="num">12</span>MetricFlow 정직 평가</a></li>
+        <li><a href="#s13"><span class="num">13</span>머무를까 갈아탈까</a></li>
+        <li><a href="#s14"><span class="num">14</span>결론 및 권장</a></li>
+        <li><a href="#s15"><span class="num">15</span>참고 자료</a></li>
+      </ol>
+    </nav>
+
+    <div class="meta">
+      <dl>
+        <div><dt>status:</dt> <dd>draft</dd></div>
+        <div><dt>updated:</dt> <dd>2026-05-17</dd></div>
+        <div><dt>related:</dt> <dd>explained/metricflow-engine.html</dd></div>
+      </dl>
+    </div>
+  </aside>
+
+  <main class="content">
+
+    <header>
+      <p class="eyebrow">RESEARCH · STRATEGIC · DECISION DOC</p>
+      <h1>오픈소스 시맨틱 레이어 비교 —<br/><em>MetricFlow를 계속 갈 것인가</em></h1>
+      <p class="lede">
+        Kotlin 포팅을 112/112 PASS로 마친 시점에서, customize 단계 진입 전 출발점을 한 번 다시 평가한다.
+        후보는 <strong>MetricFlow, Cube, Malloy, Lightdash, Rill, Boring Semantic Layer</strong>. 비교 기준은
+        표현력·use case 커버·성숙도, 그리고 우리 상황에 특화된 customize fit.
+      </p>
+
+      <div class="tldr">
+        <p class="tldr-label">한 줄 요약</p>
+        <p class="tldr-body">
+          <strong>MetricFlow를 그대로 간다.</strong> 2025년 10월 Apache 2.0 재라이선스 + 같은 달
+          <strong>Open Semantic Interchange(OSI)</strong> 표준의 <em>참조 구현</em>으로 채택된 사건이
+          MetricFlow의 거버넌스 무게중심을 dbt Cloud 단독에서 산업 컨소시엄(Snowflake·Salesforce·Cube·Hex
+          등 30+사)으로 옮겼다. Cube는 기능적으로 가장 풍부하지만 <em>엔진</em>이 아니라 <em>실행
+          인프라</em>(pre-aggregation 클러스터)에 가까워 우리 책임 경계(SQL 생성까지)와 어긋난다.
+          Malloy는 새 언어이고, Lightdash/Rill은 BI 도구라 비교 대상이 다르다. 우리가 만든 자산
+          (8M+ 토큰, 60k LOC 풀 포팅, corpus 100%)은 <em>OSI 표준의 JVM 참조 구현</em>으로 자연스럽게
+          승격된다. <strong>피벗하지 말 것.</strong>
+        </p>
+      </div>
+    </header>
+
+    <!-- ======================== 01 ======================== -->
+    <section class="stage" id="s1">
+      <p class="stage-num">01 · WHY THIS DECISION</p>
+      <h2>이 결정이 왜 중요한가</h2>
+      <p class="lead">
+        <strong>지금 출발점을 잘못 골랐다면 비용은 customize 단계 내내 누적된다.</strong>
+        Kotlin 포팅을 끝낸 시점은 customize 자유도가 가장 큰 순간이자, 동시에 다른 base로 갈아탈
+        매몰비용이 아직 0이 아닌 마지막 시점이다.
+      </p>
+
+      <h3 class="serif">현재 투자 상황</h3>
+      <p>
+        2026-05-17 기준 누적 자산은 <code>PROGRESS.md</code> 기준:
+      </p>
+
+      <table class="facts compact">
+        <tr><th>풀 포팅 범위</th><td>도달 가능 60,346 LOC / 477 files (metricflow 0.210.0)</td></tr>
+        <tr><th>Kotlin 산출 규모</th><td>약 10 publishable modules, ~436 .kt 파일</td></tr>
+        <tr><th>차등 테스트</th><td>corpus 112/112 PASS (Python oracle ≡ Kotlin SQL, normalizer 적용 후 strict 100%)</td></tr>
+        <tr><th>dialect 커버</th><td>8개 (Trino · BigQuery · Snowflake · Databricks · Redshift · DuckDB · Postgres · Default)</td></tr>
+        <tr><th>검증 규칙</th><td>28개 SemanticManifestValidator 규칙 풀 포팅</td></tr>
+        <tr><th>누적 에이전트 토큰</th><td>약 8.6M (오케스트레이터 + builder + evaluator 합)</td></tr>
+        <tr><th>지나간 mission cycle</th><td>30+ (Phase 0 → Phase 5 모듈 컨솔리데이션 완료)</td></tr>
+      </table>
+
+      <h3 class="serif">결정의 비대칭성</h3>
+      <p>
+        두 가지 비용을 같은 척도로 본다.
+      </p>
+
+      <ul class="flow">
+        <li><strong>머무르는 비용</strong> — customize 항목별로 MetricFlow 도메인 모델 위에 확장 작성. 매 항목마다 corpus 회귀가 새 안전망이 됨.</li>
+        <li><strong>갈아타는 비용</strong> — 8.6M 토큰의 작업이 매몰비용이 됨 + 새 base의 풀 포팅을 다시(혹은 다른 형태로) 해야 함 + 새로운 corpus 마련.</li>
+      </ul>
+
+      <p class="note">
+        <strong>매몰비용 함정 경계.</strong> "이미 많이 했으니 계속 가자"는 그 자체로는 논거가 아니다.
+        만약 다른 base가 우리 use case에 명백히 더 잘 맞는다면 8.6M 토큰을 잃더라도 갈아타는 게 옳다.
+        이 문서는 그 판단을 정직하게 내리기 위한 것이다.
+      </p>
+    </section>
+
+    <!-- ======================== 02 ======================== -->
+    <section class="stage" id="s2">
+      <p class="stage-num">02 · CONTEXT</p>
+      <h2>시맨틱 레이어란 무엇인가 (간략 재정리)</h2>
+      <p class="lead">
+        자세히는 <a href="../explained/metricflow-engine.html">docs/explained/metricflow-engine.html</a>에 정리되어 있다.
+        비교를 위한 정의만 한 번 짚는다.
+      </p>
+
+      <p>
+        시맨틱 레이어는 <strong>"메트릭의 정의를 코드로 묶고, 쿼리 시 어떤 dimension으로 dispatch할지를
+        엔진이 결정하게 하는 계층"</strong>이다. 사용자는 메트릭 이름과 group-by 이름만 던지고, 엔진이
+        join 경로·시간 grain·집계 순서를 풀어 SQL을 만든다. dbt MetricFlow의 도메인 어휘로는
+        <em>semantic manifest</em> → <em>spec resolution</em> → <em>dataflow plan</em> → <em>sql plan</em> → <em>dialect render</em>.
+      </p>
+
+      <p>
+        구별이 흐려질 수 있는 경계 셋:
+      </p>
+
+      <ul class="flow">
+        <li><strong>시맨틱 레이어 ≠ BI 도구.</strong> 시맨틱 레이어는 SQL을 만들기까지(혹은 API로 서빙). BI 도구는 그 위에 시각화를 얹는다. Lightdash·Rill은 BI 도구이면서 안에 시맨틱 레이어를 품는 형태.</li>
+        <li><strong>시맨틱 레이어 ≠ 쿼리 가속기.</strong> Cube의 pre-aggregation 레이어처럼 캐싱·재구체화는 부가 책임. MetricFlow는 의도적으로 그 책임을 안 진다.</li>
+        <li><strong>시맨틱 레이어 ≠ 쿼리 언어.</strong> Malloy는 새 query language. SQL을 대체하려는 야심. MetricFlow는 기존 SQL을 생성한다.</li>
+      </ul>
+
+      <p>
+        이 세 축의 위치가 비교의 핵심 차원이다.
+      </p>
+    </section>
+
+    <!-- ======================== 03 ======================== -->
+    <section class="stage" id="s3">
+      <p class="stage-num">03 · LANDSCAPE</p>
+      <h2>후보 시맨틱 레이어 풍경 (장면 한 컷)</h2>
+      <p class="lead">
+        2026년 5월 기준, "오픈소스이면서 진지하게 사용되는 시맨틱 레이어"는 여섯 개. 각자의 정체성이
+        다르다는 점이 이미 비교의 의미.
+      </p>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 860 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="시맨틱 레이어 패러다임 분류">
+          <defs>
+            <style>
+              .lane       { fill: #FAF9F5; stroke: #D1CFC5; stroke-width: 1; }
+              .lane-label { fill: #87867F; font: 500 10px ui-monospace, "SF Mono", monospace; letter-spacing: 0.12em; }
+              .node       { fill: #FFFFFF; stroke: #D1CFC5; stroke-width: 1.5; }
+              .node-accent{ fill: rgba(227, 218, 204, 0.5); stroke: #D97757; stroke-width: 1.5; }
+              .node-olive { fill: rgba(120, 140, 93, 0.15); stroke: #788C5D; stroke-width: 1.5; }
+              .node-label { fill: #141413; font: 500 13px -apple-system, system-ui, sans-serif; }
+              .node-sub   { fill: #87867F; font: 400 11px -apple-system, system-ui, sans-serif; }
+              .axis-label { fill: #3D3D3A; font: 500 12px -apple-system, system-ui, sans-serif; letter-spacing: 0.02em; }
+              .axis-end   { fill: #87867F; font: 400 11px -apple-system, system-ui, sans-serif; font-style: italic; }
+            </style>
+          </defs>
+
+          <!-- Axes -->
+          <line x1="80" y1="400" x2="820" y2="400" stroke="#D1CFC5" stroke-width="1.5"/>
+          <line x1="80" y1="60" x2="80" y2="400" stroke="#D1CFC5" stroke-width="1.5"/>
+
+          <text class="axis-label" x="450" y="438" text-anchor="middle">정체성: 엔진 → BI 도구</text>
+          <text class="axis-end" x="100" y="438">엔진</text>
+          <text class="axis-end" x="800" y="438" text-anchor="end">BI</text>
+
+          <text class="axis-label" x="38" y="230" text-anchor="middle" transform="rotate(-90 38 230)">패러다임: SQL 생성 → 새 언어/쿼리 가속</text>
+          <text class="axis-end" x="60" y="80" text-anchor="end">새 패러다임</text>
+          <text class="axis-end" x="60" y="395" text-anchor="end">SQL 생성</text>
+
+          <!-- Nodes positioned on (identity, paradigm) -->
+          <!-- MetricFlow: pure engine, pure SQL-gen -->
+          <rect class="node node-accent" x="115" y="320" width="155" height="60" rx="8"/>
+          <text class="node-label" x="192" y="346" text-anchor="middle">MetricFlow</text>
+          <text class="node-sub" x="192" y="364" text-anchor="middle">metric-first SQL 생성기</text>
+
+          <!-- BSL: pure engine, Ibis-based / Malloy-inspired -->
+          <rect class="node" x="115" y="195" width="155" height="60" rx="8"/>
+          <text class="node-label" x="192" y="221" text-anchor="middle">Boring SL</text>
+          <text class="node-sub" x="192" y="239" text-anchor="middle">Ibis 기반 경량 (newer)</text>
+
+          <!-- Malloy: middle, new language -->
+          <rect class="node" x="320" y="80" width="155" height="60" rx="8"/>
+          <text class="node-label" x="397" y="106" text-anchor="middle">Malloy</text>
+          <text class="node-sub" x="397" y="124" text-anchor="middle">새 쿼리 언어 (.malloy)</text>
+
+          <!-- Cube: engine that owns pre-agg infra -->
+          <rect class="node" x="320" y="210" width="155" height="60" rx="8"/>
+          <text class="node-label" x="397" y="236" text-anchor="middle">Cube</text>
+          <text class="node-sub" x="397" y="254" text-anchor="middle">엔진 + pre-aggregation 캐시</text>
+
+          <!-- Lightdash: BI tool, dbt-native semantic -->
+          <rect class="node" x="620" y="280" width="155" height="60" rx="8"/>
+          <text class="node-label" x="697" y="306" text-anchor="middle">Lightdash</text>
+          <text class="node-sub" x="697" y="324" text-anchor="middle">dbt-native BI</text>
+
+          <!-- Rill: BI tool + DuckDB/ClickHouse + semantic -->
+          <rect class="node" x="620" y="160" width="155" height="60" rx="8"/>
+          <text class="node-label" x="697" y="186" text-anchor="middle">Rill</text>
+          <text class="node-sub" x="697" y="204" text-anchor="middle">OLAP BI + 의미층</text>
+
+          <!-- Our port marker -->
+          <circle cx="115" cy="350" r="4" fill="#D97757"/>
+          <text class="axis-end" x="100" y="354" text-anchor="end" fill="#D97757">우리 위치</text>
+        </svg>
+        <figcaption>FIGURE 1 — 후보 6개의 좌표. 가로축: 엔진 ↔ BI. 세로축: SQL 생성 ↔ 새 패러다임</figcaption>
+      </div>
+
+      <h3 class="serif">상위 6개 (depth 비교 대상)</h3>
+
+      <table class="facts">
+        <thead>
+          <tr><th>name</th><th>category</th><th>license</th><th>lang</th><th>stars (≈)</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>MetricFlow</th><td>metric-first 엔진</td><td>Apache 2.0 <span class="pill clay">2025-10 OSS</span></td><td>Python</td><td>1.6k</td></tr>
+          <tr><th>Cube</th><td>엔진 + 캐시 인프라</td><td>Apache 2.0 + MIT 클라이언트</td><td>Rust 52% / TS 32%</td><td>20k</td></tr>
+          <tr><th>Malloy</th><td>새 쿼리 언어</td><td>MIT</td><td>TS 98%</td><td>2.5k</td></tr>
+          <tr><th>Lightdash</th><td>dbt-native BI</td><td>MIT</td><td>TS 94%</td><td>5.8k</td></tr>
+          <tr><th>Rill</th><td>OLAP BI + 의미층</td><td>Apache 2.0</td><td>Go 40% / TS 37% / Svelte 21%</td><td>2.6k</td></tr>
+          <tr><th>Boring SL</th><td>Ibis 기반 경량 SL</td><td>MIT</td><td>Python 99%</td><td>443</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="serif">짧게 본 후보 (deep-dive 제외)</h3>
+
+      <table class="facts compact">
+        <tr><th>WrenAI</th><td>시맨틱 모델 + LLM (NL→SQL) MCP 서버. 시맨틱 레이어보다 NL 인터페이스가 본업.</td></tr>
+        <tr><th>Apache Superset metric layer</th><td>Superset 안에 묶인 metric 정의. 독립 사용 불가 — Superset 종속.</td></tr>
+        <tr><th>Snowflake Semantic Views</th><td>2025년 도입. Snowflake 내장. 워크로드를 Snowflake로 묶음 — 오픈소스 후보 아님.</td></tr>
+        <tr><th>AtScale · IBM Cognos · LookML</th><td>모두 상용. 후보 아님. LookML은 Looker가 Google에 인수되며 사실상 닫힘.</td></tr>
+        <tr><th>dbt Semantic Layer (제품)</th><td>= MetricFlow + dbt Cloud의 상용 API. 엔진 자체는 MetricFlow이므로 비교 단위가 MetricFlow에 흡수됨.</td></tr>
+        <tr><th>MetricQL</th><td>Snowflake에 묶임. 워크로드 격리 안 됨.</td></tr>
+      </table>
+    </section>
+
+    <!-- ======================== 04 MetricFlow ======================== -->
+    <section class="stage" id="s4">
+      <p class="stage-num">04 · DEEP DIVE</p>
+      <h2>MetricFlow 심층 분석</h2>
+      <p class="lead">
+        <strong>"메트릭을 일급 시민으로 다루는, dbt-style 코드형 SQL 생성 엔진."</strong>
+        2023년 dbt Labs가 Transform Data를 인수해 흡수. 2025년 10월 Apache 2.0 재라이선스 +
+        OSI 표준의 참조 구현 채택이 가장 큰 사건.
+      </p>
+
+      <h3>철학과 trade-off</h3>
+      <p>
+        MetricFlow의 핵심 선택은 <strong>"엔진은 SQL 생성까지, 실행은 외부"</strong>다.
+        warehouse 안의 어떤 엔진(BigQuery·Snowflake·Trino…)이라도 그대로 쓰고, 엔진은 메트릭 정의의
+        <em>해석</em>과 <em>SQL로의 정확한 컴파일</em>에만 책임을 진다. Cube가 자체 캐시 클러스터를 끌고
+        오는 것과 정반대.
+      </p>
+
+      <p>
+        값(values) 정렬:
+      </p>
+      <ul class="flow">
+        <li><strong>정확성 &gt; 성능.</strong> fan-out / chasm join을 entity type으로 정적으로 막는다. 성능은 warehouse 책임.</li>
+        <li><strong>코드형 정의 &gt; UI 정의.</strong> 모든 게 YAML + git PR. UI는 dbt Cloud로 분리.</li>
+        <li><strong>호환성 &gt; 발명.</strong> SQL 그대로 출력. 새 언어/새 프로토콜 도입 안 함.</li>
+        <li><strong>도메인 어휘 보존.</strong> <code>semantic_model</code>, <code>metric</code>, <code>entity</code>, <code>measure</code>, <code>metric_time</code> — Pydantic 모델 그대로.</li>
+      </ul>
+
+      <h3>모델링 언어</h3>
+      <p>
+        파일 포맷은 <strong>YAML</strong>. 개념 모델은 다음과 같이 분리되어 있다.
+      </p>
+
+      <table class="facts compact">
+        <tr><th>semantic_model</th><td>1개 dbt 모델(테이블)에 대응. measures + dimensions + entities를 포함</td></tr>
+        <tr><th>entity</th><td><code>primary</code> / <code>unique</code> / <code>foreign</code> / <code>natural</code> 타입. 자동 join 그래프의 노드</td></tr>
+        <tr><th>measure</th><td>aggregation 표현식 (sum/count/avg/median/percentile/sum_boolean/count_distinct)</td></tr>
+        <tr><th>dimension</th><td><code>categorical</code> 또는 <code>time</code>. time은 grain 지정</td></tr>
+        <tr><th>metric</th><td><strong>simple / ratio / cumulative / derived / conversion</strong> 5종</td></tr>
+        <tr><th>metric_time</th><td>모든 메트릭이 공유하는 가상 time dimension. 메트릭별 time dim을 통합</td></tr>
+        <tr><th>saved_query</th><td>재사용 가능한 쿼리 + export (table/view) 매핑</td></tr>
+      </table>
+
+      <p>
+        time 처리는 이 분야에서 가장 정교하다. <code>metric_time__day</code> / <code>__week</code> /
+        <code>__month</code> ... 식으로 grain dispatch가 일급 문법. cumulative 메트릭은 time spine
+        테이블에 자동 join하여 누적 윈도우를 푼다.
+      </p>
+
+      <p>
+        join 모델은 <strong>"entity name 매칭으로 자동 해소"</strong>. 사용자가 join 경로를 직접
+        쓰지 않고, primary/foreign entity 타입으로 fan-out을 정적으로 회피. <em>최대 2-hop</em>까지
+        지원하는 점은 알려진 제한 (multi-hop을 더 깊게 가려면 별도 semantic model이 필요).
+      </p>
+
+      <h3>엔진 아키텍처</h3>
+      <p>
+        파이프라인:
+      </p>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 860 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MetricFlow 컴파일 파이프라인">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#87867F"/>
+            </marker>
+            <marker id="arr-clay" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#D97757"/>
+            </marker>
+            <style>
+              .node-mf       { fill: #FFFFFF; stroke: #D1CFC5; stroke-width: 1.5; }
+              .node-mf-accent{ fill: rgba(227, 218, 204, 0.5); stroke: #D97757; stroke-width: 1.5; }
+              .node-label-mf { fill: #141413; font: 500 12.5px -apple-system, system-ui, sans-serif; }
+              .node-sub-mf   { fill: #87867F; font: 400 10.5px ui-monospace, monospace; }
+              .edge-mf       { stroke: #87867F; stroke-width: 1.2; fill: none; }
+              .edge-clay-mf  { stroke: #D97757; stroke-width: 1.5; fill: none; }
+            </style>
+          </defs>
+
+          <!-- 6 stages -->
+          <rect class="node-mf" x="20" y="80" width="120" height="60" rx="8"/>
+          <text class="node-label-mf" x="80" y="106" text-anchor="middle">YAML</text>
+          <text class="node-sub-mf" x="80" y="124" text-anchor="middle">semantic_manifest</text>
+
+          <path class="edge-mf" d="M 142 110 L 178 110" marker-end="url(#arr)"/>
+
+          <rect class="node-mf" x="180" y="80" width="120" height="60" rx="8"/>
+          <text class="node-label-mf" x="240" y="106" text-anchor="middle">QuerySpec</text>
+          <text class="node-sub-mf" x="240" y="124" text-anchor="middle">resolveQuery</text>
+
+          <path class="edge-mf" d="M 302 110 L 338 110" marker-end="url(#arr)"/>
+
+          <rect class="node-mf" x="340" y="80" width="120" height="60" rx="8"/>
+          <text class="node-label-mf" x="400" y="106" text-anchor="middle">DataflowPlan</text>
+          <text class="node-sub-mf" x="400" y="124" text-anchor="middle">DAG of 23 node kinds</text>
+
+          <path class="edge-mf" d="M 462 110 L 498 110" marker-end="url(#arr)"/>
+
+          <rect class="node-mf" x="500" y="80" width="120" height="60" rx="8"/>
+          <text class="node-label-mf" x="560" y="106" text-anchor="middle">SqlPlan</text>
+          <text class="node-sub-mf" x="560" y="124" text-anchor="middle">visitor 변환</text>
+
+          <path class="edge-clay-mf" d="M 622 110 L 658 110" marker-end="url(#arr-clay)"/>
+
+          <rect class="node-mf node-mf-accent" x="660" y="80" width="160" height="60" rx="8"/>
+          <text class="node-label-mf" x="740" y="106" text-anchor="middle">Dialect SQL</text>
+          <text class="node-sub-mf" x="740" y="124" text-anchor="middle">8개 dialect 렌더러</text>
+
+          <text class="node-sub-mf" x="430" y="40" text-anchor="middle" fill="#3D3D3A">SQL 실행은 엔진 책임 아님 — 호출자가 warehouse에 던짐</text>
+          <text class="node-sub-mf" x="430" y="190" text-anchor="middle">기능 표면: explain · listMetrics · listDimensions · listGroupBys · validateManifest 등 8개 RPC</text>
+        </svg>
+        <figcaption>FIGURE 2 — MetricFlow의 컴파일 파이프라인. 5단계, SQL 실행 분리</figcaption>
+      </div>
+
+      <p>
+        Kotlin 포팅이 그대로 따라간 구조이며, 우리 모듈 분할(<code>domain.manifest</code> →
+        <code>domain.spec.bind</code> → <code>domain.dataflow</code> → <code>domain.sql.plan</code> →
+        <code>infrastructure.sql.render.{dialect}</code>)이 이 파이프라인을 1:1 반영한다.
+      </p>
+
+      <h3>출력 인터페이스</h3>
+      <ul>
+        <li><strong>SQL 문자열</strong> (dialect별) — 우리 포팅의 핵심 산출.</li>
+        <li><strong>실행계획 메타</strong> — <code>MetricFlowExplainResult</code>: querySpec, dataflowPlan, sqlPlan, outputSqlTable.</li>
+        <li><strong>카탈로그 RPC</strong> — listMetrics / listDimensions / listGroupBys / listSavedQueries / entitiesForMetrics.</li>
+        <li>SQL <em>실행</em>은 의도적 제외. <code>SqlClient</code>의 실행 메서드는 정의조차 없음.</li>
+      </ul>
+
+      <h3>알려진 약점</h3>
+      <ul>
+        <li><strong>전역 이름공간.</strong> entity / dimension / measure / metric의 이름이 프로젝트 전체에서 unique. <code>total_sales</code> 두 도메인 = parse error.</li>
+        <li><strong>2-hop join limit.</strong> <code>MAX_JOIN_HOPS=2</code> 하드코딩.</li>
+        <li><strong>쿼리 시점 계산만.</strong> 캐싱/pre-aggregation 없음 — warehouse 비용 그대로.</li>
+        <li><strong>dimension은 primary entity가 있는 모델에서만.</strong> primary key 없는 event log는 dimension으로 join 불가.</li>
+        <li><strong>0.x 버전.</strong> 1.0 미릴리즈. 마이너 버전 사이 모델 변경이 가능 (단 2026년 OSI 표준화 흐름이 이 변동성을 줄일 가능성).</li>
+        <li><strong>학습 곡선.</strong> entity 타입 / metric_time / time spine 등의 개념을 같이 익혀야 함.</li>
+      </ul>
+
+      <h3>성숙도 (2026-05 기준)</h3>
+      <table class="facts compact">
+        <tr><th>GitHub stars</th><td>1.6k</td></tr>
+        <tr><th>최신 릴리즈</th><td>0.211.0 (2026-05-12)</td></tr>
+        <tr><th>총 릴리즈</th><td>24</td></tr>
+        <tr><th>라이선스 궤적</th><td>AGPL → BSL → <strong>Apache 2.0 (2025-10, v0.209.0~)</strong></td></tr>
+        <tr><th>company</th><td>dbt Labs (인수 후 흡수, 2023~)</td></tr>
+        <tr><th>industry 표준 위치</th><td><strong>Open Semantic Interchange (OSI) 참조 구현</strong>. Snowflake · Salesforce · dbt Labs · Cube · Hex · BlackRock · Mistral · Amazon · Google · DataHub 등 30+사 컨소시엄</td></tr>
+        <tr><th>production 도입</th><td>dbt Semantic Layer 형태로 dbt Cloud 고객사 전체에 노출 — 가장 넓게 깔린 시맨틱 레이어</td></tr>
+      </table>
+    </section>
+
+    <!-- ======================== 05 Cube ======================== -->
+    <section class="stage" id="s5">
+      <p class="stage-num">05 · DEEP DIVE</p>
+      <h2>Cube 심층 분석</h2>
+      <p class="lead">
+        <strong>"엔진 + pre-aggregation 캐시 클러스터를 묶은 universal semantic layer."</strong>
+        오픈소스 시맨틱 레이어 중 가장 큰 별 수(20k)와 가장 넓은 API 표면. 단 이는 "엔진"보다
+        "인프라"에 가깝다.
+      </p>
+
+      <h3>철학과 trade-off</h3>
+      <p>
+        Cube의 핵심 선택은 <strong>"메트릭을 API로 서빙하면서, 사이에 캐시를 박는다"</strong>이다.
+        Cube Store(Rust, RocksDB + Apache Parquet + Arrow) 클러스터가 pre-aggregation을 보관하고,
+        Cube Server(Node.js)가 REST / GraphQL / SQL / Python API로 메트릭을 노출한다.
+        결과: 임베디드 대시보드의 sub-second 응답을 warehouse 비용을 늘리지 않고 달성.
+      </p>
+
+      <p>
+        값 정렬:
+      </p>
+      <ul class="flow">
+        <li><strong>성능 ≈ 정확성.</strong> pre-aggregation으로 sub-second 50–500ms, 100–1000 QPS.</li>
+        <li><strong>API breadth.</strong> REST / GraphQL / SQL / Python — 임베디드 분석의 핵심.</li>
+        <li><strong>다양한 frontend.</strong> 데이터 앱·고객 대시보드·LLM agent 모두 같은 API.</li>
+        <li><strong>인프라 부담을 받아들인다.</strong> Cube Store + Redis + worker — 운영 대상.</li>
+      </ul>
+
+      <h3>모델링 언어</h3>
+      <p>
+        파일 포맷은 <strong>YAML 또는 JavaScript</strong>(둘 다 1급). 개념 모델은 다음과 같다.
+      </p>
+
+      <table class="facts compact">
+        <tr><th>cube</th><td>1개 테이블/뷰에 대응. dimensions + measures + segments + joins를 포함</td></tr>
+        <tr><th>view</th><td>cube 위에 facade를 만들어 메트릭 + dimension subset을 외부에 노출</td></tr>
+        <tr><th>dimension</th><td>string / number / boolean / time. time은 grain 지원</td></tr>
+        <tr><th>measure</th><td>count / sum / avg / min / max / count_distinct / running_total 등</td></tr>
+        <tr><th>join</th><td><code>one_to_one</code> / <code>one_to_many</code> / <code>many_to_one</code>. LEFT JOIN 고정. 사용자가 명시적으로 SQL 표현 작성</td></tr>
+        <tr><th>segment</th><td>재사용 가능한 미리 필터 (predefined WHERE)</td></tr>
+        <tr><th>pre_aggregation</th><td>materialized rollup 정의. Cube의 핵심 기능</td></tr>
+      </table>
+
+      <p>
+        MetricFlow와의 가장 큰 차이: <strong>cube가 dimension/measure를 직접 품는다</strong>는 점.
+        MetricFlow는 semantic_model(데이터)과 metric(정의)을 분리하고 entity로 연결. Cube는 cube 안에
+        join을 명시적으로 쓴다.
+      </p>
+
+      <h3>엔진 아키텍처</h3>
+      <p>
+        파이프라인은 두 단계로 갈라진다.
+      </p>
+
+      <ul class="flow">
+        <li><strong>API → SQL/Cube Store</strong>: 쿼리가 들어오면 미리 정의된 pre-aggregation 중 매칭되는 것이 있으면 Cube Store에서 직접 응답. 없으면 warehouse로 fall-through하여 LIVE SQL 생성·실행.</li>
+        <li><strong>Pre-aggregation builder</strong>: 백그라운드에서 warehouse → Cube Store로 rollup을 주기적으로 적재. Parquet 컬럼 포맷, RocksDB 메타.</li>
+      </ul>
+
+      <p>
+        Cube는 SQL을 <em>생성</em>하지만, 그 SQL이 어디로 가는지에 대해 엔진이 결정권을 가짐 —
+        Cube Store 또는 warehouse. 즉 <strong>실행 책임을 엔진이 가져간다</strong>는 게 MetricFlow와
+        결정적으로 다른 지점.
+      </p>
+
+      <h3>출력 인터페이스</h3>
+      <ul>
+        <li><strong>SQL API</strong> (Postgres-호환 wire protocol) — BI 도구가 Cube를 Postgres처럼 본다.</li>
+        <li><strong>REST API</strong> — 가장 일반적, embedded 분석의 표준.</li>
+        <li><strong>GraphQL API</strong> — 정해진 measure/dimension 조합 쿼리.</li>
+        <li><strong>Python API</strong> — ML/DS 사용 케이스.</li>
+        <li><strong>MCP server</strong> — LLM agent용 (Cube가 OSI 컨소시엄 참여).</li>
+      </ul>
+
+      <h3>알려진 약점</h3>
+      <ul>
+        <li><strong>운영 부담.</strong> Cube Store + Redis + worker — 5명짜리 팀에 부담일 수 있음.</li>
+        <li><strong>학습 곡선.</strong> pre-aggregation 설계가 까다로움. fan-out 처리 + grain alignment를 사용자가 이해해야.</li>
+        <li><strong>Pre-aggregation 유지 비용.</strong> 모델 변경 = pipeline rebuild. 대시보드 수가 늘수록 maintenance 폭증.</li>
+        <li><strong>Time/metric_time 추상화 약함.</strong> grain dispatch는 cube의 time dimension granularity로 풀지만, MetricFlow의 <code>metric_time</code> 같은 메트릭 간 공통 추상화는 없음.</li>
+        <li><strong>Cumulative / conversion metric 표현력.</strong> 가능하지만 사용자 SQL 작성 비중이 큼 — MetricFlow처럼 selector로 처리되지 않음.</li>
+        <li><strong>Cube Cloud로의 풀.</strong> 핵심 기능(엔터프라이즈 access control 등) 일부가 Cloud 전용.</li>
+      </ul>
+
+      <h3>성숙도 (2026-05 기준)</h3>
+      <table class="facts compact">
+        <tr><th>GitHub stars</th><td>20k (시맨틱 레이어 중 압도적 1위)</td></tr>
+        <tr><th>최신 릴리즈</th><td>v1.6.46 (2026-05-11)</td></tr>
+        <tr><th>총 릴리즈</th><td>1,265+ (활발한 cadence)</td></tr>
+        <tr><th>code split</th><td>Rust 52% (Cube Store) / TypeScript 32% / MDX 11%</td></tr>
+        <tr><th>라이선스</th><td>Apache 2.0 (서버) + MIT (클라이언트)</td></tr>
+        <tr><th>company</th><td>Cube Dev (Series B, 2022 — VC backed)</td></tr>
+        <tr><th>OSI 참여</th><td>OSI 컨소시엄 멤버 (founding partner)</td></tr>
+        <tr><th>production 도입</th><td>Brex, Webflow 등 100+ SaaS 임베디드 분석. Cloud Academy / Scoot Science / Linux Foundation 케이스 스터디</td></tr>
+      </table>
+
+      <p class="tip">
+        <strong>핵심.</strong> Cube는 우리 포팅과 책임 경계가 다르다. 우리가 가져가는 책임은 SQL 생성까지.
+        Cube는 그것에 더해 캐시 인프라 + API gateway까지. <em>우리 사용 케이스가 사실 Cube를 향해 있다면</em>
+        피벗을 고려할 가치가 있지만, 명시된 미션(Monomer Control의 Semantic module에 SQL 생성 코어를 공급)은 그렇지 않다.
+      </p>
+    </section>
+
+    <!-- ======================== 06 Malloy ======================== -->
+    <section class="stage" id="s6">
+      <p class="stage-num">06 · DEEP DIVE</p>
+      <h2>Malloy 심층 분석</h2>
+      <p class="lead">
+        <strong>"SQL을 대체하려는 새 쿼리 언어."</strong> Looker 창업자 Lloyd Tabb이 Google에서
+        시작한 프로젝트. 시맨틱 모델링과 쿼리를 같은 언어 안에 묶고, nested data를 1급으로 다룬다.
+        2025년 Linux Foundation 산하로 이관.
+      </p>
+
+      <h3>철학과 trade-off</h3>
+      <p>
+        Malloy의 핵심 선택은 <strong>"SQL이 가린 것을 다시 드러낸다"</strong>이다. 구체적으로:
+      </p>
+
+      <ul class="flow">
+        <li><strong>Nested data 보존.</strong> JSON → flatten은 의미를 잃는다. <code>nest:</code> 키워드로 하위 쿼리를 결과 안에 nesting.</li>
+        <li><strong>Symmetric aggregates.</strong> fan-out 시 sum/avg 오류를 언어 차원에서 자동 회피.</li>
+        <li><strong>Semantic model = query language.</strong> LookML처럼 분리하지 않고 같은 .malloy 파일에서.</li>
+        <li><strong>Free + safe.</strong> SQL의 자유 + LookML의 안전성을 둘 다 가져가려는 야심.</li>
+      </ul>
+
+      <p>
+        Lloyd Tabb의 주장은 명확하다: "Looker의 시맨틱 모델은 UI를 위한 것이었고, 결과적으로
+        business user의 것이 되었다. data developer는 무시당했다. Malloy는 data developer를 위한
+        proper language다."
+      </p>
+
+      <h3>모델링 언어</h3>
+      <p>
+        파일 포맷은 <code>.malloy</code> 전용 DSL. VS Code extension이 1차 IDE.
+      </p>
+
+      <table class="facts compact">
+        <tr><th>source</th><td>테이블/쿼리에 대한 의미적 wrapper. dimension / measure / join / view를 포함</td></tr>
+        <tr><th>view</th><td>재사용 쿼리 정의. nest: 가능</td></tr>
+        <tr><th>measure</th><td>aggregation 표현식. SQL function 호환</td></tr>
+        <tr><th>dimension</th><td>field 또는 SQL 표현식</td></tr>
+        <tr><th>join_one / join_many</th><td>관계 명시. symmetric aggregate가 fan-out 자동 처리</td></tr>
+        <tr><th>nest</th><td>결과 안에 sub-result. 가장 독특한 특징</td></tr>
+      </table>
+
+      <p>
+        예: <code>group_by: state aggregate: total_sales nest: top_products is { ... }</code> 같이
+        nested query를 결과로 받는다. SQL에서 flatten하던 작업을 모델이 처리.
+      </p>
+
+      <h3>엔진 아키텍처</h3>
+      <p>
+        Malloy compiler(TypeScript, 98%)가 .malloy를 dialect-specific SQL로 변환. 실행은
+        Connection.runSQL()이 적절한 backend에 보냄. 지원 dialect: BigQuery, Snowflake, PostgreSQL,
+        MySQL, Trino/Presto, DuckDB, Databricks, MSSQL.
+      </p>
+
+      <h3>출력 인터페이스</h3>
+      <ul>
+        <li>SQL (dialect별) + 실행 결과 (Connection이 실행까지).</li>
+        <li>Notebook (.malloynb) — Malloy 셀 + 결과 (Jupyter-스타일).</li>
+        <li>VS Code extension이 1차 IDE.</li>
+      </ul>
+
+      <h3>알려진 약점</h3>
+      <ul>
+        <li><strong>새 언어 습득 부담.</strong> SQL을 모르는 사람은 못 씀. SQL을 잘 아는 사람도 다시 배워야.</li>
+        <li><strong>도구 생태계 좁음.</strong> 거의 모든 BI 도구가 SQL을 받지만 Malloy를 직접 받는 곳은 없음.</li>
+        <li><strong>커뮤니티 작음.</strong> 2.5k stars / 5,083 commits / TypeScript 98%로 핵심 contributor 좁음.</li>
+        <li><strong>표준화 위치 약함.</strong> OSI에 직접 참여하지 않음. dbt Labs/Snowflake/Salesforce가 만드는 표준의 바깥에 있음.</li>
+        <li><strong>운영 도구 부족.</strong> 권한 / saved query / RLS / multi-tenant — 모두 future work에 가까움.</li>
+        <li><strong>"BI 백엔드"보다 "data developer language"</strong> — embedded analytics나 production metric API용으로 설계되지 않음.</li>
+      </ul>
+
+      <h3>성숙도 (2026-05 기준)</h3>
+      <table class="facts compact">
+        <tr><th>GitHub stars</th><td>2.5k</td></tr>
+        <tr><th>총 commits</th><td>5,083 (활발)</td></tr>
+        <tr><th>라이선스</th><td>MIT</td></tr>
+        <tr><th>backer</th><td>처음 Google, 현재 Meta(Lloyd Tabb) + Linux Foundation 이관</td></tr>
+        <tr><th>positioning</th><td>"data developer language", 시맨틱 레이어이면서 동시에 쿼리 언어</td></tr>
+        <tr><th>production 도입</th><td>구체적인 대규모 production 사례 미공개. 학술/실험적 사용이 많음</td></tr>
+        <tr><th>OSI 참여</th><td>비참여</td></tr>
+      </table>
+    </section>
+
+    <!-- ======================== 07 Lightdash ======================== -->
+    <section class="stage" id="s7">
+      <p class="stage-num">07 · DEEP DIVE</p>
+      <h2>Lightdash 심층 분석</h2>
+      <p class="lead">
+        <strong>"dbt 위에 얹는 오픈소스 BI."</strong> dbt 모델의 <code>meta:</code> 블록에 dimension /
+        metric을 정의하면 자동으로 BI 화면이 떠오른다. 시맨틱 레이어는 부산물이고, 1차 정체성은 BI 도구.
+      </p>
+
+      <h3>철학과 trade-off</h3>
+      <p>
+        Lightdash의 선택: <strong>"Looker의 대안, 단 dbt-native + 오픈소스."</strong> dbt 프로젝트에
+        이미 있는 모델 + tests + 문서를 BI 첫 번째 시민으로 끌어올린다. 정의는 YAML, 시각화는 UI.
+      </p>
+
+      <ul class="flow">
+        <li><strong>dbt-native가 모든 것.</strong> 시맨틱 정의는 dbt 모델 YAML 안의 <code>meta:</code> 블록.</li>
+        <li><strong>Git PR workflow.</strong> KPI 변경 = PR 리뷰. 코드형 거버넌스.</li>
+        <li><strong>BI UX 우선.</strong> Explore / Dashboard / 자연어 쿼리 인터페이스.</li>
+        <li><strong>모든 게 self-hosted 가능.</strong> Cloud 옵션도 있지만 Apache 2.0이라 lock-in 없음.</li>
+      </ul>
+
+      <h3>모델링 언어</h3>
+      <p>
+        파일 포맷은 <strong>dbt YAML</strong>의 확장. dbt 모델의 column 안에 <code>meta.dimension</code>,
+        <code>meta.metrics</code>를 직접 적는다.
+      </p>
+
+      <table class="facts compact">
+        <tr><th>dbt model + meta</th><td>1개 모델 = 1개 explore. column의 meta 블록에 dimension / metric 명시</td></tr>
+        <tr><th>metric</th><td>sum / count / count_distinct / avg / min / max / median / percentile / boolean — MetricFlow보다 표면이 좁음</td></tr>
+        <tr><th>join</th><td>dbt schema.yml에 join 명시. fan-out 회피는 사용자 책임</td></tr>
+        <tr><th>saved query</th><td>UI에서 만든 chart / dashboard로 저장</td></tr>
+      </table>
+
+      <p>
+        MetricFlow의 metric type 5종 (cumulative / ratio / derived / conversion) 같은 풍부함은 없음.
+        대신 BI 도구의 UX가 그 공백을 채움.
+      </p>
+
+      <h3>엔진 아키텍처</h3>
+      <p>
+        Lightdash 서버(TypeScript)가 dbt 프로젝트를 파싱 → 메트릭 카탈로그 + 화면 그래프 생성 →
+        사용자가 UI에서 dimension/metric을 선택하면 query builder가 SQL을 만들고 warehouse로 던짐.
+      </p>
+
+      <h3>알려진 약점</h3>
+      <ul>
+        <li><strong>시맨틱 레이어로 단독 추출 어려움.</strong> Lightdash는 BI 도구 — API로 메트릭을 뽑는 표면이 작음.</li>
+        <li><strong>표현력 좁음.</strong> cumulative / derived / conversion이 MetricFlow처럼 일급이 아님.</li>
+        <li><strong>multi-tenant / RLS 약함.</strong> 엔터프라이즈 기능은 Cloud 유료 plan으로 분리.</li>
+        <li><strong>dbt에 100% lock-in.</strong> dbt 없으면 안 돌아감.</li>
+      </ul>
+
+      <h3>성숙도 (2026-05 기준)</h3>
+      <table class="facts compact">
+        <tr><th>GitHub stars</th><td>5.8k</td></tr>
+        <tr><th>contributors</th><td>200+</td></tr>
+        <tr><th>최신 릴리즈</th><td>0.2960.0 (2026-05-15)</td></tr>
+        <tr><th>총 릴리즈</th><td>5000+ (매우 활발한 cadence)</td></tr>
+        <tr><th>라이선스</th><td>MIT</td></tr>
+        <tr><th>company</th><td>Lightdash Inc (Y Combinator W21, VC-backed)</td></tr>
+        <tr><th>production 도입</th><td>JustWatch 등 SaaS 다수. 스타트업~중견 다수</td></tr>
+        <tr><th>OSI 참여</th><td>비참여</td></tr>
+      </table>
+    </section>
+
+    <!-- ======================== 08 Rill ======================== -->
+    <section class="stage" id="s8">
+      <p class="stage-num">08 · DEEP DIVE</p>
+      <h2>Rill Data 심층 분석</h2>
+      <p class="lead">
+        <strong>"OLAP + 시맨틱 + BI를 같은 바이너리에 묶은 BI-as-code."</strong>
+        DuckDB / ClickHouse를 내장 또는 연결해 sub-second 응답을 목표로 한다.
+        YAML + SQL이 정의 언어. AI agent 친화를 강하게 marketing.
+      </p>
+
+      <h3>철학과 trade-off</h3>
+      <p>
+        Rill의 선택: <strong>"semantic layer가 새 언어를 만들지 말고 SQL이어야 한다"</strong>.
+        Cube/Malloy/MetricFlow가 각자의 추상화를 만든 것을 비판하며, <code>Metrics SQL</code>이라는
+        SQL-as-semantic-layer를 제안한다.
+      </p>
+
+      <ul class="flow">
+        <li><strong>SQL universal.</strong> 모든 DB / BI / LLM이 SQL을 이해한다.</li>
+        <li><strong>OLAP-first.</strong> DuckDB (작은 데이터) / ClickHouse (큰 데이터) 위에 dashboard.</li>
+        <li><strong>BI-as-code.</strong> dashboard 정의도 YAML — git CI/CD에 친화.</li>
+        <li><strong>Agent-first.</strong> AI agent가 metric을 호출하는 표준 인터페이스.</li>
+      </ul>
+
+      <h3>모델링 언어</h3>
+      <table class="facts compact">
+        <tr><th>metrics_view</th><td>YAML에 measures / dimensions / time_dimension 정의. SQL 표현식을 YAML 안에 임베드</td></tr>
+        <tr><th>source / model</th><td>dbt-스타일 transformation. source = 데이터 import, model = SQL 기반 변환</td></tr>
+        <tr><th>dashboard</th><td>YAML에 chart 배치, filter, 자동 생성된 explore</td></tr>
+      </table>
+
+      <h3>엔진 아키텍처</h3>
+      <p>
+        Rill (Go binary)가 DuckDB (또는 ClickHouse / Druid / Snowflake / BigQuery) 위에 시맨틱 +
+        dashboard 서비스를 띄움. metrics SQL을 받아 자동으로 join/aggregation을 풀어 OLAP 쿼리 생성.
+        <em>실행까지 책임짐</em>.
+      </p>
+
+      <h3>알려진 약점</h3>
+      <ul>
+        <li><strong>시맨틱 레이어 ≠ 1급 정체성.</strong> Rill의 메인은 BI 도구. 시맨틱은 그 안의 한 컴포넌트.</li>
+        <li><strong>OLAP 종속.</strong> DuckDB 또는 ClickHouse 위에 서는 게 전제. warehouse 직접 쿼리는 secondary.</li>
+        <li><strong>표현력.</strong> MetricFlow의 cumulative / conversion / time spine 같은 풍부함은 미흡.</li>
+        <li><strong>커뮤니티 작음.</strong> 2.6k stars, Go + Svelte라는 비주류 조합.</li>
+        <li><strong>OSI 참여 약함.</strong> 본문에 OSI 멤버 명단에 등장하지 않음.</li>
+      </ul>
+
+      <h3>성숙도 (2026-05 기준)</h3>
+      <table class="facts compact">
+        <tr><th>GitHub stars</th><td>2.6k</td></tr>
+        <tr><th>최신 릴리즈</th><td>v0.86.4 (2026-05-15)</td></tr>
+        <tr><th>총 릴리즈</th><td>308+</td></tr>
+        <tr><th>라이선스</th><td>Apache 2.0</td></tr>
+        <tr><th>company</th><td>Rill Data (VC-backed, ex-Druid 팀)</td></tr>
+        <tr><th>production 도입</th><td>operational analytics / event analytics 케이스. 광고/게임/SaaS 일부</td></tr>
+      </table>
+    </section>
+
+    <!-- ======================== 09 BSL ======================== -->
+    <section class="stage" id="s9">
+      <p class="stage-num">09 · DEEP DIVE (short)</p>
+      <h2>Boring Semantic Layer (BSL)</h2>
+      <p class="lead">
+        <strong>"가장 작고 새로운 후보."</strong> 2024년 즈음 시작. Malloy에 영감을 받아 Python으로
+        다시 쓴 경량 시맨틱 레이어. Ibis 위에.
+      </p>
+
+      <table class="facts compact">
+        <tr><th>철학</th><td>"Inspired by Malloy, took the Python route." 가볍게 — Ibis가 dialect 추상화를 가져옴</td></tr>
+        <tr><th>backend</th><td>DuckDB / Snowflake / BigQuery / PostgreSQL (Ibis가 받는 모든 곳)</td></tr>
+        <tr><th>모델링</th><td>Python class 또는 YAML</td></tr>
+        <tr><th>strengths</th><td>설치 5초. LLM agent와 wire하기 쉬움</td></tr>
+        <tr><th>weaknesses</th><td>표현력 매우 좁음. cumulative / time spine / saved query 등 모두 없음. 커뮤니티 미세</td></tr>
+        <tr><th>GitHub stars</th><td>443</td></tr>
+        <tr><th>최신 릴리즈</th><td>v0.3.13 (2026-05-05)</td></tr>
+        <tr><th>라이선스</th><td>MIT</td></tr>
+        <tr><th>company</th><td>Boring Tech (small team)</td></tr>
+      </table>
+
+      <p>
+        BSL은 진지한 후보라기보다 <em>참고용 reference point</em>다. "Malloy-스타일을 더 간단하게"가
+        가능한 방향이라는 신호. 단 우리 use case의 표현력 요구를 충족하지 못함.
+      </p>
+    </section>
+
+    <!-- ======================== 10 Comparison Matrix ======================== -->
+    <section class="stage" id="s10">
+      <p class="stage-num">10 · MATRIX</p>
+      <h2>비교 매트릭스</h2>
+      <p class="lead">
+        네 가지 축으로 표를 나눠 본다. <strong>표현력 · use case 커버력 · 성숙도 · 우리 customize fit</strong>.
+      </p>
+
+      <h3>표 1 — 표현력 (metric / time / join / filter)</h3>
+
+      <table class="facts">
+        <thead>
+          <tr><th>capability</th><th>MetricFlow</th><th>Cube</th><th>Malloy</th><th>Lightdash</th><th>Rill</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>simple metric</th>
+            <td><span class="pill olive">yes</span></td>
+            <td><span class="pill olive">yes</span></td>
+            <td><span class="pill olive">yes</span></td>
+            <td><span class="pill olive">yes</span></td>
+            <td><span class="pill olive">yes</span></td>
+          </tr>
+          <tr><th>ratio metric</th>
+            <td><span class="pill olive">일급</span></td>
+            <td>derived로 가능</td>
+            <td>표현식으로</td>
+            <td>표현식으로</td>
+            <td>표현식으로</td>
+          </tr>
+          <tr><th>cumulative</th>
+            <td><span class="pill olive">일급</span></td>
+            <td>running_total measure</td>
+            <td>nest로 가능</td>
+            <td class="muted">제한적</td>
+            <td class="muted">제한적</td>
+          </tr>
+          <tr><th>derived (metric over metrics)</th>
+            <td><span class="pill olive">일급</span></td>
+            <td><span class="pill olive">measure 간 참조</span></td>
+            <td>view 합성</td>
+            <td class="muted">제한적</td>
+            <td class="muted">제한적</td>
+          </tr>
+          <tr><th>conversion (funnel)</th>
+            <td><span class="pill olive">일급</span></td>
+            <td>사용자 SQL</td>
+            <td>사용자 SQL</td>
+            <td>사용자 SQL</td>
+            <td>사용자 SQL</td>
+          </tr>
+          <tr><th>time grain dispatch</th>
+            <td><span class="pill olive">metric_time 일급</span></td>
+            <td>time dimension granularity</td>
+            <td>declare 표현식</td>
+            <td>UI에서</td>
+            <td>YAML grain</td>
+          </tr>
+          <tr><th>time spine join</th>
+            <td><span class="pill olive">자동</span></td>
+            <td>사용자 정의</td>
+            <td>사용자 정의</td>
+            <td class="muted">없음</td>
+            <td>제한적</td>
+          </tr>
+          <tr><th>auto JOIN resolution</th>
+            <td><span class="pill olive">entity 매칭</span></td>
+            <td>명시적 join SQL</td>
+            <td>join_one/many + symmetric agg</td>
+            <td>명시적</td>
+            <td>명시적</td>
+          </tr>
+          <tr><th>multi-hop join</th>
+            <td>최대 2-hop</td>
+            <td>chain 가능</td>
+            <td>chain 가능</td>
+            <td>chain 가능</td>
+            <td>chain 가능</td>
+          </tr>
+          <tr><th>fan-out 자동 회피</th>
+            <td><span class="pill olive">entity type</span></td>
+            <td>사용자 책임</td>
+            <td><span class="pill olive">symmetric agg</span></td>
+            <td>사용자 책임</td>
+            <td>사용자 책임</td>
+          </tr>
+          <tr><th>saved query / segment</th>
+            <td><span class="pill olive">saved_query</span></td>
+            <td>segment + view</td>
+            <td>view</td>
+            <td>UI saved chart</td>
+            <td>YAML view</td>
+          </tr>
+          <tr><th>where filter Jinja</th>
+            <td><span class="pill olive">yes</span></td>
+            <td>SQL parameter</td>
+            <td>Malloy 표현식</td>
+            <td>UI / SQL</td>
+            <td>SQL</td>
+          </tr>
+          <tr><th>validation rule set</th>
+            <td><span class="pill clay">28 rules</span></td>
+            <td>schema validation</td>
+            <td>compiler check</td>
+            <td>dbt test 위임</td>
+            <td>YAML schema</td>
+          </tr>
+          <tr><th>nested data (JSON / array)</th>
+            <td class="muted">flatten</td>
+            <td class="muted">flatten</td>
+            <td><span class="pill olive">1급</span></td>
+            <td class="muted">flatten</td>
+            <td class="muted">flatten</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="note">
+        <strong>해석.</strong> 메트릭 표현력은 MetricFlow가 가장 깊다 (5종 metric type + entity 기반
+        자동 join + time spine). Malloy는 nested data 한 영역에서 독보. Cube는 표현력보다 캐시·API에
+        강함. Lightdash/Rill은 BI UX에 비해 시맨틱 표현력은 평이.
+      </p>
+
+      <h3>표 2 — use case 커버력</h3>
+
+      <table class="facts">
+        <thead>
+          <tr><th>use case</th><th>MetricFlow</th><th>Cube</th><th>Malloy</th><th>Lightdash</th><th>Rill</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>BI 대시보드 backend (Tableau/Superset)</th>
+            <td>JDBC adapter (dbt Cloud 경유)</td>
+            <td><span class="pill olive">SQL API native</span></td>
+            <td>BI 직결 약함</td>
+            <td><span class="pill olive">자체 BI</span></td>
+            <td><span class="pill olive">자체 BI</span></td>
+          </tr>
+          <tr><th>embedded 분석 (custom app)</th>
+            <td>API 직접 작성 필요</td>
+            <td><span class="pill clay">최강</span> (REST/GraphQL/SQL)</td>
+            <td>약함</td>
+            <td>제한적</td>
+            <td>제한적</td>
+          </tr>
+          <tr><th>headless metric API (ML/DS)</th>
+            <td><span class="pill olive">JDBC + Python SDK</span></td>
+            <td><span class="pill olive">Python SDK + GraphQL</span></td>
+            <td>SDK 약함</td>
+            <td>API 약함</td>
+            <td>API 중간</td>
+          </tr>
+          <tr><th>self-service exploration</th>
+            <td>약함 (dbt Cloud UI)</td>
+            <td>약함 (BI 도구 외부)</td>
+            <td>VS Code 중심</td>
+            <td><span class="pill olive">Explore UI</span></td>
+            <td><span class="pill olive">Dashboard UI</span></td>
+          </tr>
+          <tr><th>real-time / streaming</th>
+            <td>없음</td>
+            <td><span class="pill olive">lambda pre-agg</span></td>
+            <td>없음</td>
+            <td>없음</td>
+            <td><span class="pill olive">OLAP first</span></td>
+          </tr>
+          <tr><th>multi-tenant</th>
+            <td>약함 (manifest 수준)</td>
+            <td><span class="pill olive">context based</span></td>
+            <td>약함</td>
+            <td>workspace</td>
+            <td>project</td>
+          </tr>
+          <tr><th>row-level security</th>
+            <td>warehouse 위임</td>
+            <td><span class="pill olive">security context</span></td>
+            <td>약함</td>
+            <td>Cloud plan</td>
+            <td>제한적</td>
+          </tr>
+          <tr><th>LLM/AI agent</th>
+            <td>OSI 표준 + dbt MCP</td>
+            <td>Cube MCP</td>
+            <td>약함</td>
+            <td>chart-level AI</td>
+            <td><span class="pill olive">agent-first 강조</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>표 3 — 성숙도</h3>
+
+      <table class="facts">
+        <thead>
+          <tr><th>metric</th><th>MetricFlow</th><th>Cube</th><th>Malloy</th><th>Lightdash</th><th>Rill</th><th>BSL</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>stars (≈)</th><td>1.6k</td><td>20k</td><td>2.5k</td><td>5.8k</td><td>2.6k</td><td>443</td></tr>
+          <tr><th>최신 릴리즈</th><td>2026-05-12</td><td>2026-05-11</td><td>활발</td><td>2026-05-15</td><td>2026-05-15</td><td>2026-05-05</td></tr>
+          <tr><th>버전</th><td>0.211.0</td><td>v1.6.46</td><td>—</td><td>0.2960.0</td><td>v0.86.4</td><td>v0.3.13</td></tr>
+          <tr><th>funding</th><td>dbt Labs (Series E+)</td><td>Cube Dev (Series B)</td><td>Linux Foundation</td><td>Lightdash (YC W21+)</td><td>Rill Data (Series A)</td><td>small</td></tr>
+          <tr><th>1.0 도달?</th><td>아직 (0.x)</td><td><span class="pill olive">예 (1.x)</span></td><td>아직</td><td>아직 (0.29x.x)</td><td>아직 (0.8x.x)</td><td>아직</td></tr>
+          <tr><th>OSI 참여</th>
+            <td><span class="pill clay">참조 구현</span></td>
+            <td><span class="pill olive">founding</span></td>
+            <td class="muted">no</td>
+            <td class="muted">no</td>
+            <td class="muted">no</td>
+            <td class="muted">no</td>
+          </tr>
+          <tr><th>대표 prod 고객</th>
+            <td>dbt Cloud 고객사 전체</td>
+            <td>Brex, Webflow, 100+ SaaS</td>
+            <td>실험적</td>
+            <td>JustWatch 등 다수</td>
+            <td>operational analytics</td>
+            <td>none known</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>표 4 — 우리 customize fit</h3>
+
+      <table class="facts">
+        <thead>
+          <tr><th>차원</th><th>MetricFlow</th><th>Cube</th><th>Malloy</th><th>Lightdash</th><th>Rill</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>라이선스</th>
+            <td><span class="pill olive">Apache 2.0</span></td>
+            <td>Apache 2.0 + MIT</td>
+            <td>MIT</td>
+            <td>MIT</td>
+            <td>Apache 2.0</td>
+          </tr>
+          <tr><th>모듈성 (swap-able)</th>
+            <td><span class="pill olive">계층 분리 명확</span> (manifest/spec/dataflow/sql)</td>
+            <td>Cube Store가 Cube Server에 강하게 결합</td>
+            <td>compiler 단일체</td>
+            <td>UI + 서버 결합</td>
+            <td>OLAP과 결합</td>
+          </tr>
+          <tr><th>JVM 친화</th>
+            <td>Python → Kotlin 1:1 매핑 가능</td>
+            <td>Rust + Node — JVM 포팅 헤비</td>
+            <td>TS — JVM 포팅 가능하지만 새 언어 의미</td>
+            <td>TS — 사실상 unfork</td>
+            <td>Go + Svelte — 포팅 의미 약함</td>
+          </tr>
+          <tr><th>포팅 cost (재시작 시)</th>
+            <td><span class="pill clay">완료 (8.6M tok)</span></td>
+            <td>3–5x (Rust core 포함)</td>
+            <td>2–3x (compiler)</td>
+            <td>BI 도구라 의미 다름</td>
+            <td>BI 도구라 의미 다름</td>
+          </tr>
+          <tr><th>API stability (forking)</th>
+            <td><span class="pill olive">OSI 표준화로 안정 강화</span></td>
+            <td>1.x 안정</td>
+            <td>변동성 큼</td>
+            <td>0.x — 변동성 큼</td>
+            <td>0.x — 변동성 큼</td>
+          </tr>
+          <tr><th>이미 포팅된 자산</th>
+            <td><strong>112/112 PASS, 60k LOC</strong></td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+          </tr>
+          <tr><th>차등 테스트 corpus</th>
+            <td><span class="pill olive">2,854 SQL snapshots upstream</span></td>
+            <td>tests 있지만 corpus 표준화 필요</td>
+            <td>compiler test only</td>
+            <td>UI 테스트 — corpus 아님</td>
+            <td>integration test only</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>SVG — 패러다임 분류</h3>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 860 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="시맨틱 레이어 패러다임 4분면">
+          <defs>
+            <style>
+              .axis-q { stroke: #D1CFC5; stroke-width: 1.5; }
+              .quad-bg { fill: #FAF9F5; stroke: #D1CFC5; stroke-width: 1; }
+              .quad-label { fill: #87867F; font: 500 11px ui-monospace, monospace; letter-spacing: 0.1em; text-transform: uppercase; }
+              .node-q       { fill: #FFFFFF; stroke: #D1CFC5; stroke-width: 1.5; }
+              .node-q-accent{ fill: rgba(227, 218, 204, 0.5); stroke: #D97757; stroke-width: 1.5; }
+              .node-label-q { fill: #141413; font: 500 13px -apple-system, system-ui, sans-serif; }
+              .axis-end-q   { fill: #3D3D3A; font: 500 11.5px -apple-system, system-ui, sans-serif; font-style: italic; }
+            </style>
+          </defs>
+
+          <!-- Quadrants -->
+          <rect class="quad-bg" x="60" y="40" width="370" height="140"/>
+          <rect class="quad-bg" x="430" y="40" width="370" height="140"/>
+          <rect class="quad-bg" x="60" y="180" width="370" height="140"/>
+          <rect class="quad-bg" x="430" y="180" width="370" height="140"/>
+
+          <text class="quad-label" x="80" y="60">SQL-replacement</text>
+          <text class="quad-label" x="450" y="60">Cube-first</text>
+          <text class="quad-label" x="80" y="200">Metric-first (코드형)</text>
+          <text class="quad-label" x="450" y="200">dbt-native BI</text>
+
+          <!-- Axis labels -->
+          <text class="axis-end-q" x="245" y="340" text-anchor="middle">기존 SQL 보존 ───────────────────────── 새 추상화 도입</text>
+          <text class="axis-end-q" x="38" y="180" text-anchor="middle" transform="rotate(-90 38 180)">코드형 정의 ───── UI 정의</text>
+
+          <!-- Cross -->
+          <line class="axis-q" x1="430" y1="40" x2="430" y2="320"/>
+          <line class="axis-q" x1="60" y1="180" x2="800" y2="180"/>
+
+          <!-- Nodes -->
+          <!-- MetricFlow: lower-left (metric-first, code) -->
+          <rect class="node-q node-q-accent" x="120" y="230" width="140" height="50" rx="8"/>
+          <text class="node-label-q" x="190" y="260" text-anchor="middle">MetricFlow</text>
+
+          <!-- Cube: upper-right (new abstraction = pre-agg, code) -->
+          <rect class="node-q" x="490" y="100" width="140" height="50" rx="8"/>
+          <text class="node-label-q" x="560" y="130" text-anchor="middle">Cube</text>
+
+          <!-- Malloy: upper-left (new language replacing SQL, code) -->
+          <rect class="node-q" x="270" y="100" width="140" height="50" rx="8"/>
+          <text class="node-label-q" x="340" y="130" text-anchor="middle">Malloy</text>
+
+          <!-- Lightdash: lower-right (BI, code-ish) -->
+          <rect class="node-q" x="490" y="240" width="140" height="50" rx="8"/>
+          <text class="node-label-q" x="560" y="270" text-anchor="middle">Lightdash</text>
+
+          <!-- Rill: lower-right too but more OLAP -->
+          <rect class="node-q" x="650" y="240" width="120" height="50" rx="8"/>
+          <text class="node-label-q" x="710" y="270" text-anchor="middle">Rill</text>
+
+          <!-- BSL: same as Malloy (small) -->
+          <rect class="node-q" x="270" y="40" width="100" height="40" rx="8"/>
+          <text class="node-label-q" x="320" y="65" text-anchor="middle">BSL</text>
+        </svg>
+        <figcaption>FIGURE 3 — 4분면 분류. 가로축: 기존 SQL 보존 ↔ 새 추상화 도입. 세로축: 코드형 정의 ↔ UI 정의</figcaption>
+      </div>
+    </section>
+
+    <!-- ======================== 11 Scenarios ======================== -->
+    <section class="stage" id="s11">
+      <p class="stage-num">11 · SCENARIOS</p>
+      <h2>시나리오별 평가</h2>
+      <p class="lead">
+        같은 시맨틱 레이어라도 use case에 따라 best fit이 다르다. 우리가 어떤 시나리오에 가까운지부터
+        정직하게 짚는다.
+      </p>
+
+      <h3 class="serif">시나리오 A — 메트릭 정의 + 검증 + 다중 차원 dispatch 중심</h3>
+      <p>
+        "한 manifest에 metric 50–500개, dimension 100+, 다양한 grain에서 dispatch. 정확성이 최우선."
+      </p>
+      <p>
+        <strong>Best fit: MetricFlow.</strong> 5종 metric type + entity-based auto-join +
+        metric_time + 28개 validation rule이 다른 어떤 후보보다 깊다. Cube는 가능하지만 metric 표현력이
+        평이. Malloy는 새 언어가 부담. Lightdash/Rill은 BI에 묶임.
+      </p>
+
+      <h3 class="serif">시나리오 B — BI 대시보드 backend (Tableau/Superset/Looker)</h3>
+      <p>
+        "여러 BI 도구가 같은 메트릭 정의를 공유해야 한다. JDBC/ODBC 호환이 결정적."
+      </p>
+      <p>
+        <strong>Best fit: Cube (SQL API).</strong> Postgres wire 호환으로 모든 BI 도구가 그냥 연결.
+        MetricFlow는 dbt Cloud의 JDBC adapter를 거쳐야 — 우리가 직접 만들면 추가 비용. Lightdash는
+        자체 BI이지 BI backend가 아님.
+      </p>
+
+      <h3 class="serif">시나리오 C — 사이트 임베디드 분석 (customer-facing dashboard)</h3>
+      <p>
+        "100–1000 tenant, sub-second 응답 요구, 각 tenant마다 row-level filter."
+      </p>
+      <p>
+        <strong>Best fit: Cube.</strong> 이 시나리오는 사실상 Cube가 만들어졌다. pre-aggregation +
+        security context + REST/GraphQL이 결합. MetricFlow는 캐시가 없어 부적합.
+      </p>
+
+      <h3 class="serif">시나리오 D — ML/DS 헤드리스 metric API</h3>
+      <p>
+        "Python notebook에서 메트릭을 불러 feature로 사용. 정의가 BI와 일치해야 데이터 사이언티스트가
+        믿는다."
+      </p>
+      <p>
+        <strong>Best fit: MetricFlow 또는 Cube.</strong> MetricFlow는 정확성 + 표현력에서 유리, Cube는
+        Python SDK + GraphQL에서 유리. Malloy는 SDK 약함.
+      </p>
+
+      <h3 class="serif">시나리오 E — 멀티테넌트 SaaS analytics 백엔드</h3>
+      <p>
+        "여러 고객사가 한 인프라를 공유. 각 고객의 데이터 격리 + 별개 metric set."
+      </p>
+      <p>
+        <strong>Best fit: Cube.</strong> security context + multi-manifest + 캐시 분리가 표준.
+        MetricFlow는 manifest 수준 격리만 가능 — 운영 코드를 추가 작성해야 함.
+      </p>
+
+      <h3 class="serif">우리 시나리오는 어디인가</h3>
+      <p>
+        <code>CLAUDE.md</code>, <code>FEASIBILITY.md</code>, <code>PROGRESS.md</code>의 단서를 정직하게 모으면:
+      </p>
+
+      <table class="facts compact">
+        <tr><th>운영 대상</th><td>Monomer Control의 Semantic module에 공급하는 시맨틱 코어</td></tr>
+        <tr><th>책임 경계</th><td><strong>SQL 생성까지</strong>. 실행은 외부 (gRPC contract에 명시)</td></tr>
+        <tr><th>호출 방식</th><td>gRPC (8개 RPC: explain · listMetrics · ... · validateManifest)</td></tr>
+        <tr><th>dialect</th><td>8개 모두 (Trino · BigQuery · Snowflake · Databricks · Redshift · DuckDB · Postgres · Default)</td></tr>
+        <tr><th>tenant 모델</th><td>여러 manifest, 하지만 격리는 호출자가 결정 (engine은 stateless)</td></tr>
+        <tr><th>BI 도구 연결</th><td>scope 외 — 호출자가 결정</td></tr>
+        <tr><th>cache / pre-agg</th><td>scope 외</td></tr>
+      </table>
+
+      <p>
+        시나리오로 매핑하면 <strong>시나리오 A (메트릭 정의 + 검증 + dispatch) + 시나리오 D 일부 (헤드리스 API)</strong>가
+        압도적으로 가깝다. <strong>시나리오 B/C/E는 우리 책임 경계 밖.</strong>
+      </p>
+
+      <p class="tip">
+        <strong>의의.</strong> 우리 시나리오가 시나리오 A이면 MetricFlow가 가장 잘 맞는다.
+        만약 시나리오 C(임베디드 sub-second)였다면 Cube가 명백히 더 적합했을 것. 책임 경계 정의가
+        이미 base 선택을 거의 결정한 상태였다.
+      </p>
+    </section>
+
+    <!-- ======================== 12 MetricFlow honest eval ======================== -->
+    <section class="stage" id="s12">
+      <p class="stage-num">12 · HONEST ASSESSMENT</p>
+      <h2>MetricFlow의 강점과 약점 (정직 평가)</h2>
+      <p class="lead">
+        sunk cost가 의사결정을 왜곡하지 않도록, 강점만 모은 listicle을 피하고 약점도 같은 무게로 짚는다.
+      </p>
+
+      <h3 class="serif">강점 (이것 때문에 베이스로 좋다)</h3>
+      <ul>
+        <li><strong>메트릭 표현력 1위.</strong> 5종 metric type(simple · ratio · cumulative · derived · conversion). Cube에 비해 cumulative / conversion이 일급. Malloy는 nest로 가능하지만 cumulative는 비대칭.</li>
+        <li><strong>entity-based auto-join.</strong> fan-out / chasm join을 entity type으로 정적으로 회피. Cube가 사용자 책임으로 두는 부분.</li>
+        <li><strong>metric_time + time spine.</strong> 메트릭 간 공통 시간 추상화. cumulative 윈도우 자동 처리. 다른 후보 중 가장 정교.</li>
+        <li><strong>검증 28 rule 풀 셋.</strong> 의미 모델 정합성 검사가 다른 후보보다 깊고 명세적.</li>
+        <li><strong>설계 계층 분리 명확.</strong> manifest → spec → dataflow → sql plan → render. Kotlin 포팅이 1:1 매핑 가능했던 이유.</li>
+        <li><strong>OSI 표준의 참조 구현.</strong> 2025-10 이후 MetricFlow의 YAML 스키마가 산업 표준(OSI)의 base. 산업 컨소시엄이 같은 추상화를 채택.</li>
+        <li><strong>오픈소스 라이선스 안정.</strong> AGPL → BSL을 거쳐 2025-10에 Apache 2.0 정착. 더 이상 라이선스 후퇴 위험 낮음.</li>
+        <li><strong>SQL 실행 분리.</strong> 우리 책임 경계(SQL 생성까지)와 완전히 일치. Cube/Rill처럼 실행 인프라까지 끌고 오지 않음.</li>
+        <li><strong>2,854 SQL snapshots.</strong> upstream에 차등 테스트용 corpus가 이미 있음. 우리 corpus 100% PASS는 우연이 아니라 이 자산의 직접 결과.</li>
+      </ul>
+
+      <h3 class="serif">약점 (이것 때문에 customize 부담이 있다)</h3>
+      <ul>
+        <li><strong>0.x 버전.</strong> 1.0 미릴리즈. 0.211까지 갔지만 major 모델 변경 가능성 잔존. 단 OSI 표준화 흐름이 이걸 줄임.</li>
+        <li><strong>2-hop join limit.</strong> <code>MAX_JOIN_HOPS=2</code> 하드코딩. 3-hop 이상 join이 필요한 도메인에 부적합. customize 필요 시 가능 (우리 Kotlin 포팅에서 이 값을 조정 가능).</li>
+        <li><strong>전역 이름공간.</strong> entity / dimension / measure / metric 이름이 manifest 전체에서 unique. 멀티-도메인 manifest 운영 시 prefix 강제 (운영 컨벤션으로 회피).</li>
+        <li><strong>pre-aggregation 없음.</strong> 쿼리 시점 SQL 생성만 — sub-second 요구는 외부에서 풀어야. (단 우리 책임 경계 밖이라 약점이 아님.)</li>
+        <li><strong>API 표면 좁음.</strong> Cube의 REST/GraphQL/MCP 같은 풍성한 API가 없음 — SQL + 메타만. (단 우리는 gRPC로 감싸므로 큰 문제 아님.)</li>
+        <li><strong>BI 도구 직결 약함.</strong> dbt Cloud의 JDBC adapter를 거치는 게 표준 — 우리가 BI backend로 쓰려면 추가 인프라 작성. (단 우리 책임 경계 밖이라 약점이 아님.)</li>
+        <li><strong>dimension은 primary entity가 있는 model에서만.</strong> primary key 없는 event log는 dimension으로 직접 join 불가. 다른 entity로 우회 필요.</li>
+        <li><strong>학습 곡선.</strong> entity / measure / metric / metric_time / time spine 같은 어휘를 다 익혀야 함.</li>
+      </ul>
+
+      <h3 class="serif">우리 포팅 자산 (이게 결정에 어떻게 들어가나)</h3>
+      <p>
+        포팅 자산 자체는 결정 논거가 아니다 (매몰비용). 하지만 다음은 진짜 의미를 가진다.
+      </p>
+      <ul>
+        <li><strong>학습 가독성 정책의 산물.</strong> Kotlin 코드가 metricflow 도메인 어휘 보존 + KDoc + 모듈 README로 작성되어 있어 customize 시 "어디를 만져야 하는지" 명확. 다른 base로 갈아타면 이 가독성 자산은 사라진다.</li>
+        <li><strong>corpus 100% PASS</strong>는 customize의 안전망. 한 번 깨질 때마다 즉시 회귀가 보고된다. 다른 base에는 이 corpus를 다시 만들어야 함.</li>
+        <li><strong>OSI 흐름과의 정렬.</strong> 우리 포팅이 OSI 참조 구현의 JVM 버전으로 정확히 위치함 — Python에서 JVM으로 가는 표준 진입점이 됨.</li>
+      </ul>
+    </section>
+
+    <!-- ======================== 13 Stay or Pivot ======================== -->
+    <section class="stage" id="s13">
+      <p class="stage-num">13 · STAY OR PIVOT</p>
+      <h2>우리 상황 분석 — 머무를까 갈아탈까</h2>
+      <p class="lead">
+        두 시나리오의 비용을 같은 단위로 추정한다. 답이 동률에 가까우면 매몰비용이 결정한다고 판단할
+        근거가 약해진다.
+      </p>
+
+      <h3 class="serif">시나리오 X — 머무른다 (MetricFlow customize 계속)</h3>
+      <p>
+        <strong>예상 비용:</strong>
+      </p>
+      <ul>
+        <li>customize 항목별로 +mission cycle. 평균 cycle당 ~300–400k 토큰 (Phase 3 평균).</li>
+        <li>corpus 회귀가 안전망 — 매 변경마다 강한 신호. 추가 인프라 작성 0.</li>
+        <li>OSI 표준이 진화하면 upstream sync mission으로 따라잡음. 0.211 → 0.220 정도의 마이너 sync는 1–2 mission cycle.</li>
+      </ul>
+      <p>
+        <strong>예상 위험:</strong>
+      </p>
+      <ul>
+        <li>1.0 미릴리즈 — major model 변경이 발생하면 추격 cycle 부담. 단 OSI 흐름이 model을 묶음 → 변동성 낮아짐.</li>
+        <li>customize가 깊어지면 upstream과 divergence. fork friction.</li>
+      </ul>
+
+      <h3 class="serif">시나리오 Y — 갈아탄다 (예: Cube로 피벗)</h3>
+      <p>
+        <strong>예상 비용:</strong>
+      </p>
+      <ul>
+        <li>8.6M 토큰 매몰. 60k LOC 포팅 + 28 validation rule + 8 dialect renderer + corpus 인프라 폐기.</li>
+        <li>Cube의 핵심 코어가 Rust (Cube Store) + Node (Cube Server) — JVM 포팅 자체가 metricflow보다 복잡. Rust 코어를 그대로 두고 JVM client만 만들면 우리 책임 경계 (SQL 생성까지)가 깨짐 — Cube 클러스터를 띄워야 함.</li>
+        <li>Cube의 모델 (cube + view + explicit join)이 MetricFlow의 모델 (semantic_model + entity + metric)과 다름. 기존 yaml 마이그레이션 필요.</li>
+        <li>corpus 재구축. Cube에는 우리 같은 2,854 snapshot이 없음.</li>
+      </ul>
+      <p>
+        <strong>얻는 것:</strong>
+      </p>
+      <ul>
+        <li>pre-aggregation으로 sub-second 응답 가능 — 단 우리 책임 경계 밖.</li>
+        <li>REST/GraphQL API — 단 우리는 gRPC 가지고 있음.</li>
+        <li>임베디드 분석 표준 — 단 우리 사용 케이스가 임베디드가 아님.</li>
+      </ul>
+
+      <h3 class="serif">시나리오 Z — 다른 base로 갈아탄다 (Malloy / Lightdash / Rill / BSL)</h3>
+      <table class="facts compact">
+        <tr><th>Malloy로</th>
+          <td>새 언어 도입 + nested data 강점. 단 멀티-dialect SQL 생성기로의 의도가 약하고, 운영 도구 (RLS, multi-tenant, saved query 깊은 표현력)가 약함. <strong>비추천</strong></td></tr>
+        <tr><th>Lightdash로</th>
+          <td>Lightdash는 BI 도구이지 시맨틱 엔진 라이브러리가 아님. 우리 책임 경계와 어긋남. <strong>부적합</strong></td></tr>
+        <tr><th>Rill로</th>
+          <td>OLAP에 묶임. warehouse 직접 쿼리 환경에서 어색. <strong>부적합</strong></td></tr>
+        <tr><th>BSL로</th>
+          <td>표현력 미흡 + 성숙도 낮음. 라이브러리로서는 신생. <strong>부적합</strong></td></tr>
+      </table>
+
+      <h3 class="serif">비용 비교 도식</h3>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 860 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="머무름 vs 갈아탐 비용 비교">
+          <defs>
+            <style>
+              .bar-stay  { fill: rgba(120, 140, 93, 0.3); stroke: #788C5D; stroke-width: 1.5; }
+              .bar-pivot { fill: rgba(176, 74, 63, 0.25); stroke: #B04A3F; stroke-width: 1.5; }
+              .bar-label { fill: #141413; font: 500 12px -apple-system, system-ui, sans-serif; }
+              .bar-num   { fill: #3D3D3A; font: 500 11px ui-monospace, monospace; }
+              .axis-l    { stroke: #D1CFC5; stroke-width: 1.5; }
+              .axis-t    { fill: #87867F; font: 500 11px -apple-system, system-ui, sans-serif; }
+              .head      { fill: #141413; font: 500 14px -apple-system, system-ui, sans-serif; }
+            </style>
+          </defs>
+
+          <text class="head" x="60" y="30">customize 6개월 누적 토큰 (대략)</text>
+
+          <line class="axis-l" x1="60" y1="240" x2="800" y2="240"/>
+          <line class="axis-l" x1="60" y1="60" x2="60" y2="240"/>
+
+          <!-- Scale lines -->
+          <line x1="60" y1="200" x2="800" y2="200" stroke="#F0EEE6" stroke-width="1"/>
+          <line x1="60" y1="150" x2="800" y2="150" stroke="#F0EEE6" stroke-width="1"/>
+          <line x1="60" y1="100" x2="800" y2="100" stroke="#F0EEE6" stroke-width="1"/>
+
+          <text class="axis-t" x="55" y="244" text-anchor="end">0M</text>
+          <text class="axis-t" x="55" y="204" text-anchor="end">5M</text>
+          <text class="axis-t" x="55" y="154" text-anchor="end">10M</text>
+          <text class="axis-t" x="55" y="104" text-anchor="end">15M</text>
+
+          <!-- Stay bar: ~3M (customize cycles only) -->
+          <rect class="bar-stay" x="120" y="210" width="120" height="30"/>
+          <text class="bar-label" x="180" y="200" text-anchor="middle">머무름</text>
+          <text class="bar-num" x="180" y="260" text-anchor="middle">~3M 토큰</text>
+          <text class="bar-num" x="180" y="275" text-anchor="middle" fill="#87867F">10 mission cycle</text>
+
+          <!-- Pivot to Cube bar: ~12M (re-port + customize) -->
+          <rect class="bar-pivot" x="350" y="100" width="120" height="140"/>
+          <text class="bar-label" x="410" y="90" text-anchor="middle">Cube로 피벗</text>
+          <text class="bar-num" x="410" y="260" text-anchor="middle">~12M+ 토큰</text>
+          <text class="bar-num" x="410" y="275" text-anchor="middle" fill="#B04A3F">+ 8.6M 매몰 + Rust 코어</text>
+
+          <!-- Pivot to Malloy bar: ~8M -->
+          <rect class="bar-pivot" x="580" y="160" width="120" height="80"/>
+          <text class="bar-label" x="640" y="150" text-anchor="middle">Malloy로 피벗</text>
+          <text class="bar-num" x="640" y="260" text-anchor="middle">~8M+ 토큰</text>
+          <text class="bar-num" x="640" y="275" text-anchor="middle" fill="#B04A3F">+ 8.6M 매몰 + 새 언어</text>
+        </svg>
+        <figcaption>FIGURE 4 — 향후 6개월 customize 비용 추정. 갈아탐의 비용은 매몰 + 재포팅 + 표현력 격차 보전 합</figcaption>
+      </div>
+
+      <p class="note">
+        <strong>주의.</strong> 위 비용 추정은 단순 토큰 견적이고, 갈아탐의 진짜 비용은 시간 + 모멘텀
+        손실 + 학습 가독성 자산 폐기. 토큰 견적은 그 그림자에 불과.
+      </p>
+    </section>
+
+    <!-- ======================== 14 Recommendation ======================== -->
+    <section class="stage" id="s14">
+      <p class="stage-num">14 · RECOMMENDATION</p>
+      <h2>결론 및 권장</h2>
+      <p class="lead">
+        <strong>MetricFlow를 그대로 간다.</strong> sunk cost를 빼고 봐도 베이스로서 가장 잘 맞는다.
+        다만 customize 방향에는 우선순위가 있다.
+      </p>
+
+      <h3 class="serif">권장 — 머무름, 단 OSI 표준화 흐름에 맞춰 정렬</h3>
+
+      <ol>
+        <li><strong>OSI 표준 정렬을 1순위로.</strong> 2025-10 이후 MetricFlow의 YAML 스키마가 OSI 참조 구현. customize 시 OSI 호환을 깨지 않는 방향으로 (uplift는 OK, 의미 변경은 NO). 우리 포팅이 자연스럽게 OSI 표준의 JVM 참조 구현으로 위상이 격상됨.</li>
+        <li><strong>upstream sync를 정기 mission으로.</strong> 0.211 → 0.220 → … 마이너 sync를 분기마다 1개 mission cycle. PROGRESS.md에 sync 항목을 별도 row로.</li>
+        <li><strong>customize는 운영 코드(application/engine)에 우선.</strong> domain 계층(manifest/spec/dataflow/sql)에 customize 가하지 말 것. upstream sync 비용 폭증. 새 RPC, 캐시, 권한, telemetry는 application 계층에서.</li>
+        <li><strong>차등 테스트 corpus를 자산으로 유지.</strong> 운영 trace를 추가로 캡처해 corpus를 키워두면 customize 안전망이 더 두꺼워짐. <code>harness/sql_norm/rules/</code>에 normalizer 규칙을 명시 보존.</li>
+        <li><strong>2-hop join 같은 알려진 제한은 customize 후보로 보관.</strong> upstream이 lift 가능성 있음 (OSI에서 논의). 우리가 먼저 가지 말 것 — divergence cost.</li>
+      </ol>
+
+      <h3 class="serif">권장 이유 5가지</h3>
+
+      <table class="facts compact">
+        <tr><th>1. 책임 경계 일치</th>
+          <td>SQL 생성까지가 우리 책임. MetricFlow가 같은 경계로 설계됨. Cube/Rill처럼 실행 인프라까지 끌고 오지 않음 → 우리 사용 케이스에 맞음</td></tr>
+        <tr><th>2. 표현력 1위</th>
+          <td>5종 metric type + entity-based join + metric_time + 28 validation rule. 이 깊이를 customize로 다른 base에 추가하면 비용 폭증</td></tr>
+        <tr><th>3. OSI 참조 구현</th>
+          <td>2025-10 OSS + OSI 표준화로 거버넌스가 dbt Labs 단독에서 산업 컨소시엄으로 이동. 표준 진화의 흐름에 무료로 올라타게 됨</td></tr>
+        <tr><th>4. 포팅 자산</th>
+          <td>매몰비용이 아닌 학습 가독성 + corpus 100% + 도메인 어휘 보존이라는 진짜 자산. 갈아타면 사라짐</td></tr>
+        <tr><th>5. 갈아탐의 비대칭 비용</th>
+          <td>Cube는 책임 경계 다름, Malloy는 새 언어, Lightdash/Rill은 BI. 어디로 가도 우리 use case와 결이 어긋남</td></tr>
+      </table>
+
+      <h3 class="serif">customize 우선순위 (1년 plan 제안)</h3>
+
+      <ul class="flow">
+        <li><strong>Q1.</strong> Phase 5 마무리 (internal sweep + gRPC split). 외부 publishable JAR + BOM. Maven publish 준비.</li>
+        <li><strong>Q1.</strong> upstream sync 0.220까지. OSI 스키마 변경 흡수.</li>
+        <li><strong>Q2.</strong> Phase 4: integration examples (dbt → Kotlin 엔진 → warehouse 차트). 데모 앱.</li>
+        <li><strong>Q2.</strong> 운영 telemetry / metric usage analytics (application 계층, domain 무변경).</li>
+        <li><strong>Q3.</strong> customize candidate 1: <code>MAX_JOIN_HOPS</code> lift (OSI에 제안 먼저, 받아들여지면 upstream PR. 안 받으면 우리만 적용 + normalizer로 흡수).</li>
+        <li><strong>Q3.</strong> customize candidate 2: 운영 corpus 확장 (운영 trace 캡처 → corpus 합류).</li>
+        <li><strong>Q4.</strong> Monomer Control Semantic module의 versioned artifact 채택.</li>
+      </ul>
+
+      <p class="tip">
+        <strong>한 줄.</strong> Kotlin 포팅이 단순한 "MetricFlow의 JVM 사본"이 아니라 <em>OSI 표준의 JVM 참조 구현</em>으로
+        승격되었다는 게 이 분석의 가장 큰 발견. 매몰비용이 자산으로 바뀐 순간이다.
+      </p>
+    </section>
+
+    <!-- ======================== 15 References ======================== -->
+    <section class="stage" id="s15">
+      <p class="stage-num">15 · SOURCES</p>
+      <h2>참고 자료</h2>
+      <p class="lead">
+        주요 인용은 본문에 있다. 여기는 fetch한 원천 모음. 2026-05-17 기준 stars / 릴리즈 numbers는
+        아래 GitHub 페이지에서 직접 수집.
+      </p>
+
+      <h3>공식 repo / docs</h3>
+      <ol class="refs-list">
+        <li><a href="https://github.com/dbt-labs/metricflow">github.com/dbt-labs/metricflow</a> — 1.6k stars, 0.211.0 (2026-05-12). 라이선스 변경 이력 (AGPL → BSL → Apache 2.0).</li>
+        <li><a href="https://github.com/cube-js/cube">github.com/cube-js/cube</a> — 20k stars, v1.6.46 (2026-05-11). Rust 52% + TS 32%.</li>
+        <li><a href="https://github.com/malloydata/malloy">github.com/malloydata/malloy</a> — 2.5k stars, 5,083 commits. MIT, TS 98%.</li>
+        <li><a href="https://github.com/lightdash/lightdash">github.com/lightdash/lightdash</a> — 5.8k stars, 0.2960.0 (2026-05-15). 200+ contributors.</li>
+        <li><a href="https://github.com/rilldata/rill">github.com/rilldata/rill</a> — 2.6k stars, v0.86.4 (2026-05-15). Go 40% + TS 37%.</li>
+        <li><a href="https://github.com/boringdata/boring-semantic-layer">github.com/boringdata/boring-semantic-layer</a> — 443 stars, v0.3.13 (2026-05-05).</li>
+        <li><a href="https://docs.getdbt.com/docs/build/about-metricflow">docs.getdbt.com — About MetricFlow</a></li>
+        <li><a href="https://docs.getdbt.com/docs/build/metrics-overview">docs.getdbt.com — Metrics overview (5종 metric type)</a></li>
+        <li><a href="https://docs.getdbt.com/docs/build/dimensions">docs.getdbt.com — Dimensions / metric_time</a></li>
+        <li><a href="https://cube.dev/docs/product/data-modeling/concepts">cube.dev — Data Modeling concepts</a></li>
+        <li><a href="http://www.malloydata.dev/">malloydata.dev — Malloy 공식 소개</a></li>
+      </ol>
+
+      <h3>OSI / 산업 컨소시엄</h3>
+      <ol class="refs-list">
+        <li><a href="https://www.snowflake.com/en/news/press-releases/snowflake-salesforce-dbt-labs-and-more-revolutionize-data-readiness-for-ai-with-open-semantic-interchange-initiative/">Snowflake press — OSI launch (2025-09)</a></li>
+        <li><a href="https://www.getdbt.com/blog/open-source-metricflow-governed-metrics">dbt Labs blog — Open sourcing MetricFlow Apache 2.0 (2025-10)</a></li>
+        <li><a href="https://www.getdbt.com/blog/dbt-labs-affirms-commitment-to-open-semantic-interchange-by-open-sourcing-metricflow">dbt Labs blog — Affirms commitment to OSI</a></li>
+        <li><a href="https://www.getdbt.com/blog/the-osi-spec-updates">dbt Labs blog — What the OSI spec means</a></li>
+        <li><a href="https://www.snowflake.com/en/blog/osi-initiative-expands-partners/">Snowflake blog — OSI expands partners (2025-11)</a></li>
+      </ol>
+
+      <h3>비교 / 분석 글</h3>
+      <ol class="refs-list">
+        <li><a href="https://davidsj.substack.com/p/semantic-layers-a-buyers-guide">David Jayatillake — Semantic Layers: A Buyer's Guide</a></li>
+        <li><a href="https://www.contextawareanalytics.com/semantic-layer/open-source-semantic-layers">Context Aware Analytics — Open Source Semantic Layers</a></li>
+        <li><a href="https://www.typedef.ai/resources/semantic-layer-architectures-explained-warehouse-native-vs-dbt-vs-cube">typedef.ai — Semantic Layer Architectures</a></li>
+        <li><a href="https://promethium.ai/guides/top-10-semantic-layer-tools-2026-definitive-comparison/">Promethium — Top 10 Semantic Layer Tools 2026</a></li>
+        <li><a href="https://querio.ai/articles/ultimate-comparison-cube-vs-transform-vs-metricflow">Querio — Cube vs Transform vs MetricFlow</a></li>
+        <li><a href="https://www.contextawareanalytics.com/semantic-layer/dbt-metrics-vs-cube-comparison">Context Aware — dbt Metrics vs Cube</a></li>
+        <li><a href="https://unwinddata.com/dbt-semantic-layer-vs-cube">Unwind Data — dbt Semantic Layer vs Cube</a></li>
+        <li><a href="https://www.rilldata.com/blog/the-semantic-layer-problem-nobody-wants-to-talk-about">Rill blog — Semantic Layer Problem</a></li>
+        <li><a href="https://www.rilldata.com/blog/introducing-metrics-sql-a-sql-based-semantic-layer-for-humans-and-agents">Rill blog — Introducing Metrics SQL</a></li>
+        <li><a href="https://www.bigdatawire.com/2022/05/03/looker-founder-helps-create-new-data-exploration-language-malloy/">BigDATAwire — Looker founder + Malloy (Lloyd Tabb)</a></li>
+      </ol>
+
+      <h3>아키텍처 / 기술 자료</h3>
+      <ol class="refs-list">
+        <li><a href="https://cube.dev/blog/introducing-cubestore">Cube blog — Introducing Cube Store</a></li>
+        <li><a href="https://deepwiki.com/cube-js/cube/3.1-cubestore-architecture">DeepWiki — Cube Store Architecture</a></li>
+        <li><a href="https://deepwiki.com/dbt-labs/metricflow">DeepWiki — MetricFlow internals</a></li>
+        <li><a href="https://deepwiki.com/malloydata/malloy">DeepWiki — Malloy internals</a></li>
+        <li><a href="https://docs.malloydata.dev/documentation/user_guides/quickstart_modeling">Malloy docs — Semantic modeling quickstart</a></li>
+      </ol>
+    </section>
+
+    <footer class="doc-footer">
+      <p>본 문서는 strategic decision doc. 의사결정의 근거가 바뀌면 갱신.</p>
+      <div class="refs" style="margin-top: 6px;">
+        <span>docs/explained/metricflow-engine.html</span>
+        <span>docs/PUBLIC_API.md</span>
+        <span>CLAUDE.md</span>
+        <span>FEASIBILITY.md</span>
+        <span>PROGRESS.md</span>
+      </div>
+    </footer>
+
+  </main>
+</div>
+
+</body>
+</html>

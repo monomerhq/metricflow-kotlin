@@ -1,0 +1,9 @@
+{
+  "case_id": "validate_manifest__partitioned_multi_hop_join_manifest",
+  "subcommand": "validate_manifest",
+  "manifest_id": "partitioned_multi_hop_join_manifest",
+  "args": {},
+  "dialect_set": [],
+  "source_test": "SemanticManifestValidator on canonical YAML manifest",
+  "notes": ""
+}

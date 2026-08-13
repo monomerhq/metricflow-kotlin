@@ -1,0 +1,70 @@
+-- Combine Aggregated Outputs
+-- Write to DataTable
+SELECT
+  COALESCE(subq_5.metric_time__day, subq_11.metric_time__day, subq_17.metric_time__day) AS metric_time__day
+  , MAX(subq_5.bookings) AS bookings
+  , MAX(subq_11.listings) AS listings
+  , MAX(subq_17.views) AS views
+FROM (
+  -- Aggregate Inputs for Simple Metrics
+  -- Compute Metrics via Expressions
+  SELECT
+    metric_time__day
+    , SUM(__bookings) AS bookings
+  FROM (
+    -- Read Elements From Semantic Model 'bookings_source'
+    -- Metric Time Dimension 'ds'
+    -- Select: ['__bookings', 'metric_time__day']
+    -- Select: ['__bookings', 'metric_time__day']
+    SELECT
+      DATETIME_TRUNC(ds, day) AS metric_time__day
+      , 1 AS __bookings
+    FROM mf_corpus_2026_05_11_static.fct_bookings bookings_source_src_10000
+  ) subq_3
+  GROUP BY
+    metric_time__day
+) subq_5
+FULL OUTER JOIN (
+  -- Aggregate Inputs for Simple Metrics
+  -- Compute Metrics via Expressions
+  SELECT
+    metric_time__day
+    , SUM(__listings) AS listings
+  FROM (
+    -- Read Elements From Semantic Model 'listings_latest'
+    -- Metric Time Dimension 'ds'
+    -- Select: ['__listings', 'metric_time__day']
+    -- Select: ['__listings', 'metric_time__day']
+    SELECT
+      DATETIME_TRUNC(created_at, day) AS metric_time__day
+      , 1 AS __listings
+    FROM mf_corpus_2026_05_11_static.dim_listings_latest listings_latest_src_10000
+  ) subq_9
+  GROUP BY
+    metric_time__day
+) subq_11
+ON
+  subq_5.metric_time__day = subq_11.metric_time__day
+FULL OUTER JOIN (
+  -- Aggregate Inputs for Simple Metrics
+  -- Compute Metrics via Expressions
+  SELECT
+    metric_time__day
+    , SUM(__views) AS views
+  FROM (
+    -- Read Elements From Semantic Model 'views_source'
+    -- Metric Time Dimension 'ds'
+    -- Select: ['__views', 'metric_time__day']
+    -- Select: ['__views', 'metric_time__day']
+    SELECT
+      DATETIME_TRUNC(ds, day) AS metric_time__day
+      , 1 AS __views
+    FROM mf_corpus_2026_05_11_static.fct_views views_source_src_10000
+  ) subq_15
+  GROUP BY
+    metric_time__day
+) subq_17
+ON
+  COALESCE(subq_5.metric_time__day, subq_11.metric_time__day) = subq_17.metric_time__day
+GROUP BY
+  metric_time__day

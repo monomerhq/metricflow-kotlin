@@ -1,0 +1,1037 @@
+{
+  "semantic_models": [
+    {
+      "name": "customer_table",
+      "defaults": {
+        "agg_time_dimension": "ds_partitioned"
+      },
+      "description": "customer_table",
+      "node_relation": {
+        "alias": "customer_table",
+        "schema_name": "mf_corpus_2026_05_11_static",
+        "database": null,
+        "relation_name": "mf_corpus_2026_05_11_static.customer_table"
+      },
+      "primary_entity": null,
+      "entities": [
+        {
+          "name": "customer_id",
+          "description": null,
+          "type": "primary",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_table.yaml",
+            "file_slice": {
+              "filename": "customer_table.yaml",
+              "content": "name: customer_id\ntype: primary\n",
+              "start_line_number": 32,
+              "end_line_number": 33
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [
+        {
+          "name": "customers",
+          "agg": "sum",
+          "description": null,
+          "create_metric": true,
+          "expr": "1",
+          "agg_params": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_table.yaml",
+            "file_slice": {
+              "filename": "customer_table.yaml",
+              "content": "name: customers\nexpr: 1\nagg: sum\ncreate_metric: true\n",
+              "start_line_number": 15,
+              "end_line_number": 19
+            }
+          },
+          "non_additive_dimension": null,
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "dimensions": [
+        {
+          "name": "customer_name",
+          "description": null,
+          "type": "categorical",
+          "is_partition": false,
+          "type_params": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_table.yaml",
+            "file_slice": {
+              "filename": "customer_table.yaml",
+              "content": "name: customer_name\ntype: categorical\n",
+              "start_line_number": 21,
+              "end_line_number": 22
+            }
+          },
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "customer_atomic_weight",
+          "description": null,
+          "type": "categorical",
+          "is_partition": false,
+          "type_params": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_table.yaml",
+            "file_slice": {
+              "filename": "customer_table.yaml",
+              "content": "name: customer_atomic_weight\ntype: categorical\n",
+              "start_line_number": 23,
+              "end_line_number": 24
+            }
+          },
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "ds_partitioned",
+          "description": null,
+          "type": "time",
+          "is_partition": true,
+          "type_params": {
+            "time_granularity": "day",
+            "validity_params": null
+          },
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_table.yaml",
+            "file_slice": {
+              "filename": "customer_table.yaml",
+              "content": "name: ds_partitioned\ntype: time\ntype_params:\n  time_granularity: day\nis_partition: true\n",
+              "start_line_number": 25,
+              "end_line_number": 30
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "label": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_table.yaml",
+        "file_slice": {
+          "filename": "customer_table.yaml",
+          "content": "name: customer_table\ndescription: customer_table\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: customer_table\ndefaults:\n  agg_time_dimension: ds_partitioned\nmeasures:\n- name: customers\n  expr: 1\n  agg: sum\n  create_metric: true\ndimensions:\n- name: customer_name\n  type: categorical\n- name: customer_atomic_weight\n  type: categorical\n- name: ds_partitioned\n  type: time\n  type_params:\n    time_granularity: day\n  is_partition: true\nentities:\n- name: customer_id\n  type: primary\n",
+          "start_line_number": 3,
+          "end_line_number": 33
+        }
+      },
+      "config": null
+    },
+    {
+      "name": "customer_other_data",
+      "defaults": {
+        "agg_time_dimension": "acquired_ds"
+      },
+      "description": "customer_other_data",
+      "node_relation": {
+        "alias": "customer_other_data",
+        "schema_name": "mf_corpus_2026_05_11_static",
+        "database": null,
+        "relation_name": "mf_corpus_2026_05_11_static.customer_other_data"
+      },
+      "primary_entity": null,
+      "entities": [
+        {
+          "name": "customer_id",
+          "description": null,
+          "type": "primary",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_other_data.yaml",
+            "file_slice": {
+              "filename": "customer_other_data.yaml",
+              "content": "name: customer_id\ntype: primary\n",
+              "start_line_number": 27,
+              "end_line_number": 28
+            }
+          },
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "customer_third_hop_id",
+          "description": null,
+          "type": "unique",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_other_data.yaml",
+            "file_slice": {
+              "filename": "customer_other_data.yaml",
+              "content": "name: customer_third_hop_id\ntype: unique\n",
+              "start_line_number": 29,
+              "end_line_number": 30
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [
+        {
+          "name": "customers_with_other_data",
+          "agg": "sum",
+          "description": null,
+          "create_metric": null,
+          "expr": "1",
+          "agg_params": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_other_data.yaml",
+            "file_slice": {
+              "filename": "customer_other_data.yaml",
+              "content": "name: customers_with_other_data\nexpr: 1\nagg: sum\n",
+              "start_line_number": 14,
+              "end_line_number": 17
+            }
+          },
+          "non_additive_dimension": null,
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "dimensions": [
+        {
+          "name": "country",
+          "description": null,
+          "type": "categorical",
+          "is_partition": false,
+          "type_params": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_other_data.yaml",
+            "file_slice": {
+              "filename": "customer_other_data.yaml",
+              "content": "name: country\ntype: categorical\n",
+              "start_line_number": 19,
+              "end_line_number": 20
+            }
+          },
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "acquired_ds",
+          "description": null,
+          "type": "time",
+          "is_partition": false,
+          "type_params": {
+            "time_granularity": "day",
+            "validity_params": null
+          },
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_other_data.yaml",
+            "file_slice": {
+              "filename": "customer_other_data.yaml",
+              "content": "name: acquired_ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 21,
+              "end_line_number": 25
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "label": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_other_data.yaml",
+        "file_slice": {
+          "filename": "customer_other_data.yaml",
+          "content": "name: customer_other_data\ndescription: customer_other_data\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: customer_other_data\ndefaults:\n  agg_time_dimension: acquired_ds\nmeasures:\n- name: customers_with_other_data\n  expr: 1\n  agg: sum\ndimensions:\n- name: country\n  type: categorical\n- name: acquired_ds\n  type: time\n  type_params:\n    time_granularity: day\nentities:\n- name: customer_id\n  type: primary\n- name: customer_third_hop_id\n  type: unique\n",
+          "start_line_number": 3,
+          "end_line_number": 30
+        }
+      },
+      "config": null
+    },
+    {
+      "name": "bridge_table",
+      "defaults": {
+        "agg_time_dimension": "ds_partitioned"
+      },
+      "description": "bridge_table",
+      "node_relation": {
+        "alias": "bridge_table",
+        "schema_name": "mf_corpus_2026_05_11_static",
+        "database": null,
+        "relation_name": "mf_corpus_2026_05_11_static.bridge_table"
+      },
+      "primary_entity": "bridge_account",
+      "entities": [
+        {
+          "name": "account_id",
+          "description": null,
+          "type": "unique",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/bridge_table.yaml",
+            "file_slice": {
+              "filename": "bridge_table.yaml",
+              "content": "name: account_id\ntype: unique\n",
+              "start_line_number": 31,
+              "end_line_number": 32
+            }
+          },
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "customer_id",
+          "description": null,
+          "type": "foreign",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/bridge_table.yaml",
+            "file_slice": {
+              "filename": "bridge_table.yaml",
+              "content": "name: customer_id\ntype: foreign\n",
+              "start_line_number": 33,
+              "end_line_number": 34
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [
+        {
+          "name": "account_customer_combos",
+          "agg": "count_distinct",
+          "description": null,
+          "create_metric": true,
+          "expr": "account_id || customer_id",
+          "agg_params": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/bridge_table.yaml",
+            "file_slice": {
+              "filename": "bridge_table.yaml",
+              "content": "name: account_customer_combos\nexpr: account_id || customer_id\nagg: count_distinct\ncreate_metric: true\n",
+              "start_line_number": 14,
+              "end_line_number": 18
+            }
+          },
+          "non_additive_dimension": null,
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "dimensions": [
+        {
+          "name": "extra_dim",
+          "description": null,
+          "type": "categorical",
+          "is_partition": false,
+          "type_params": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/bridge_table.yaml",
+            "file_slice": {
+              "filename": "bridge_table.yaml",
+              "content": "name: extra_dim\ntype: categorical\n",
+              "start_line_number": 20,
+              "end_line_number": 21
+            }
+          },
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "ds_partitioned",
+          "description": null,
+          "type": "time",
+          "is_partition": true,
+          "type_params": {
+            "time_granularity": "day",
+            "validity_params": null
+          },
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/bridge_table.yaml",
+            "file_slice": {
+              "filename": "bridge_table.yaml",
+              "content": "name: ds_partitioned\ntype: time\ntype_params:\n  time_granularity: day\nis_partition: true\n",
+              "start_line_number": 22,
+              "end_line_number": 27
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "label": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/bridge_table.yaml",
+        "file_slice": {
+          "filename": "bridge_table.yaml",
+          "content": "name: bridge_table\ndescription: bridge_table\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: bridge_table\ndefaults:\n  agg_time_dimension: ds_partitioned\nmeasures:\n- name: account_customer_combos\n  expr: account_id || customer_id\n  agg: count_distinct\n  create_metric: true\ndimensions:\n- name: extra_dim\n  type: categorical\n- name: ds_partitioned\n  type: time\n  type_params:\n    time_granularity: day\n  is_partition: true\nprimary_entity: bridge_account\nentities:\n- name: account_id\n  type: unique\n- name: customer_id\n  type: foreign\n",
+          "start_line_number": 3,
+          "end_line_number": 34
+        }
+      },
+      "config": null
+    },
+    {
+      "name": "third_hop_table",
+      "defaults": {
+        "agg_time_dimension": "third_hop_ds"
+      },
+      "description": "third_hop_table",
+      "node_relation": {
+        "alias": "third_hop_table",
+        "schema_name": "mf_corpus_2026_05_11_static",
+        "database": null,
+        "relation_name": "mf_corpus_2026_05_11_static.third_hop_table"
+      },
+      "primary_entity": null,
+      "entities": [
+        {
+          "name": "customer_third_hop_id",
+          "description": null,
+          "type": "primary",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/third_hop_table.yaml",
+            "file_slice": {
+              "filename": "third_hop_table.yaml",
+              "content": "name: customer_third_hop_id\ntype: primary\n",
+              "start_line_number": 28,
+              "end_line_number": 29
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [
+        {
+          "name": "third_hop_count",
+          "agg": "count_distinct",
+          "description": null,
+          "create_metric": true,
+          "expr": "customer_third_hop_id",
+          "agg_params": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/third_hop_table.yaml",
+            "file_slice": {
+              "filename": "third_hop_table.yaml",
+              "content": "name: third_hop_count\nexpr: customer_third_hop_id\nagg: count_distinct\ncreate_metric: true\n",
+              "start_line_number": 14,
+              "end_line_number": 18
+            }
+          },
+          "non_additive_dimension": null,
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "dimensions": [
+        {
+          "name": "value",
+          "description": null,
+          "type": "categorical",
+          "is_partition": false,
+          "type_params": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/third_hop_table.yaml",
+            "file_slice": {
+              "filename": "third_hop_table.yaml",
+              "content": "name: value\ntype: categorical\n",
+              "start_line_number": 20,
+              "end_line_number": 21
+            }
+          },
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "third_hop_ds",
+          "description": null,
+          "type": "time",
+          "is_partition": false,
+          "type_params": {
+            "time_granularity": "day",
+            "validity_params": null
+          },
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/third_hop_table.yaml",
+            "file_slice": {
+              "filename": "third_hop_table.yaml",
+              "content": "name: third_hop_ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 22,
+              "end_line_number": 26
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "label": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/third_hop_table.yaml",
+        "file_slice": {
+          "filename": "third_hop_table.yaml",
+          "content": "name: third_hop_table\ndescription: third_hop_table\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: third_hop_table\ndefaults:\n  agg_time_dimension: third_hop_ds\nmeasures:\n- name: third_hop_count\n  expr: customer_third_hop_id\n  agg: count_distinct\n  create_metric: true\ndimensions:\n- name: value\n  type: categorical\n- name: third_hop_ds\n  type: time\n  type_params:\n    time_granularity: day\nentities:\n- name: customer_third_hop_id\n  type: primary\n",
+          "start_line_number": 3,
+          "end_line_number": 29
+        }
+      },
+      "config": null
+    },
+    {
+      "name": "account_month_txns",
+      "defaults": {
+        "agg_time_dimension": "ds"
+      },
+      "description": "account_month_txns",
+      "node_relation": {
+        "alias": "account_month_txns",
+        "schema_name": "mf_corpus_2026_05_11_static",
+        "database": null,
+        "relation_name": "mf_corpus_2026_05_11_static.account_month_txns"
+      },
+      "primary_entity": null,
+      "entities": [
+        {
+          "name": "account_id",
+          "description": null,
+          "type": "primary",
+          "role": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/account_month_txns.yaml",
+            "file_slice": {
+              "filename": "account_month_txns.yaml",
+              "content": "name: account_id\ntype: primary\n",
+              "start_line_number": 32,
+              "end_line_number": 33
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [
+        {
+          "name": "txn_count",
+          "agg": "sum",
+          "description": null,
+          "create_metric": true,
+          "expr": null,
+          "agg_params": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/account_month_txns.yaml",
+            "file_slice": {
+              "filename": "account_month_txns.yaml",
+              "content": "name: txn_count\nagg: sum\ncreate_metric: true\n",
+              "start_line_number": 14,
+              "end_line_number": 17
+            }
+          },
+          "non_additive_dimension": null,
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "dimensions": [
+        {
+          "name": "ds_partitioned",
+          "description": null,
+          "type": "time",
+          "is_partition": true,
+          "type_params": {
+            "time_granularity": "day",
+            "validity_params": null
+          },
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/account_month_txns.yaml",
+            "file_slice": {
+              "filename": "account_month_txns.yaml",
+              "content": "name: ds_partitioned\ntype: time\ntype_params:\n  time_granularity: day\nis_partition: true\n",
+              "start_line_number": 19,
+              "end_line_number": 23
+            }
+          },
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "ds",
+          "description": null,
+          "type": "time",
+          "is_partition": false,
+          "type_params": {
+            "time_granularity": "day",
+            "validity_params": null
+          },
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/account_month_txns.yaml",
+            "file_slice": {
+              "filename": "account_month_txns.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 24,
+              "end_line_number": 27
+            }
+          },
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "account_month",
+          "description": null,
+          "type": "categorical",
+          "is_partition": false,
+          "type_params": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/account_month_txns.yaml",
+            "file_slice": {
+              "filename": "account_month_txns.yaml",
+              "content": "name: account_month\ntype: categorical\n",
+              "start_line_number": 28,
+              "end_line_number": 30
+            }
+          },
+          "label": null,
+          "config": null
+        }
+      ],
+      "label": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/account_month_txns.yaml",
+        "file_slice": {
+          "filename": "account_month_txns.yaml",
+          "content": "name: account_month_txns\ndescription: account_month_txns\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: account_month_txns\ndefaults:\n  agg_time_dimension: ds\nmeasures:\n- name: txn_count\n  agg: sum\n  create_metric: true\ndimensions:\n- name: ds_partitioned\n  type: time\n  type_params:\n    time_granularity: day\n  is_partition: true\n- name: ds\n  type: time\n  type_params:\n    time_granularity: day\n- name: account_month\n  type: categorical\nentities:\n- name: account_id\n  type: primary\n",
+          "start_line_number": 3,
+          "end_line_number": 33
+        }
+      },
+      "config": null
+    }
+  ],
+  "metrics": [
+    {
+      "name": "paraguayan_customers",
+      "description": null,
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "customers_with_other_data",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "customers_with_other_data",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "customer_other_data",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": {
+        "where_filters": [
+          {
+            "where_sql_template": "{{ Dimension('customer_id__country') }} = 'paraguay'\n"
+          }
+        ]
+      },
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: paraguayan_customers\ntype: SIMPLE\ntype_params:\n  measure: customers_with_other_data\nfilter: |\n  {{ Dimension('customer_id__country') }} = 'paraguay'\n",
+          "start_line_number": 3,
+          "end_line_number": 8
+        }
+      },
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "customers",
+      "description": null,
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "customers",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "customers",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "customer_table",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_table.yaml",
+        "file_slice": {
+          "filename": "customer_table.yaml",
+          "content": "name: customers\nexpr: 1\nagg: sum\ncreate_metric: true\n",
+          "start_line_number": 15,
+          "end_line_number": 19
+        }
+      },
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "account_customer_combos",
+      "description": null,
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "account_customer_combos",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "account_id || customer_id",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "account_customer_combos",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "bridge_table",
+          "agg": "count_distinct",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/bridge_table.yaml",
+        "file_slice": {
+          "filename": "bridge_table.yaml",
+          "content": "name: account_customer_combos\nexpr: account_id || customer_id\nagg: count_distinct\ncreate_metric: true\n",
+          "start_line_number": 14,
+          "end_line_number": 18
+        }
+      },
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "third_hop_count",
+      "description": null,
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "third_hop_count",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "customer_third_hop_id",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "third_hop_count",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "third_hop_table",
+          "agg": "count_distinct",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/third_hop_table.yaml",
+        "file_slice": {
+          "filename": "third_hop_table.yaml",
+          "content": "name: third_hop_count\nexpr: customer_third_hop_id\nagg: count_distinct\ncreate_metric: true\n",
+          "start_line_number": 14,
+          "end_line_number": 18
+        }
+      },
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "txn_count",
+      "description": null,
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "txn_count",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "txn_count",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "txn_count",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "account_month_txns",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/account_month_txns.yaml",
+        "file_slice": {
+          "filename": "account_month_txns.yaml",
+          "content": "name: txn_count\nagg: sum\ncreate_metric: true\n",
+          "start_line_number": 14,
+          "end_line_number": 17
+        }
+      },
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    }
+  ],
+  "project_configuration": {
+    "time_spine_table_configurations": [
+      {
+        "location": "mf_corpus_2026_05_11_static.mf_time_spine",
+        "column_name": "ds",
+        "grain": "day"
+      }
+    ],
+    "metadata": {
+      "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/project_configuration.yaml",
+      "file_slice": {
+        "filename": "project_configuration.yaml",
+        "content": "time_spine_table_configurations:\n- location: mf_corpus_2026_05_11_static.mf_time_spine\n  column_name: ds\n  grain: day\ntime_spines:\n- node_relation:\n    alias: mf_time_spine_nanosecond\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: nanosecond\n- node_relation:\n    alias: mf_time_spine_microsecond\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: microsecond\n- node_relation:\n    alias: mf_time_spine_millisecond\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: millisecond\n- node_relation:\n    alias: mf_time_spine_second\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: second\n- node_relation:\n    alias: mf_time_spine_minute\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: minute\n- node_relation:\n    alias: mf_time_spine_hour\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: hour\n- node_relation:\n    alias: mf_time_spine\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ds\n    time_granularity: day\n  custom_granularities:\n  - name: alien_day\n",
+        "start_line_number": 4,
+        "end_line_number": 52
+      }
+    },
+    "dsi_package_version": {
+      "major_version": "0",
+      "minor_version": "210",
+      "patch_version": "0"
+    },
+    "time_spines": [
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_nanosecond",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_nanosecond"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "nanosecond"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_microsecond",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_microsecond"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "microsecond"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_millisecond",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_millisecond"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "millisecond"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_second",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_second"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "second"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_minute",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_minute"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "minute"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine_hour",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine_hour"
+        },
+        "primary_column": {
+          "name": "ts",
+          "time_granularity": "hour"
+        },
+        "custom_granularities": []
+      },
+      {
+        "node_relation": {
+          "alias": "mf_time_spine",
+          "schema_name": "mf_corpus_2026_05_11_static",
+          "database": null,
+          "relation_name": "mf_corpus_2026_05_11_static.mf_time_spine"
+        },
+        "primary_column": {
+          "name": "ds",
+          "time_granularity": "day"
+        },
+        "custom_granularities": [
+          {
+            "name": "alien_day",
+            "column_name": null
+          }
+        ]
+      }
+    ]
+  },
+  "saved_queries": [],
+  "args": {}
+}

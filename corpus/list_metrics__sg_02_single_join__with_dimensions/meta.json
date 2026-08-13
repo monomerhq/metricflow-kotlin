@@ -1,0 +1,11 @@
+{
+  "case_id": "list_metrics__sg_02_single_join__with_dimensions",
+  "subcommand": "list_metrics",
+  "manifest_id": "sg_02_single_join",
+  "args": {
+    "include_dimensions": true
+  },
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

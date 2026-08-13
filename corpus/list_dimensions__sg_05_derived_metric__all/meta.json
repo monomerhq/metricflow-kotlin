@@ -1,0 +1,9 @@
+{
+  "case_id": "list_dimensions__sg_05_derived_metric__all",
+  "subcommand": "list_dimensions",
+  "manifest_id": "sg_05_derived_metric",
+  "args": {},
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

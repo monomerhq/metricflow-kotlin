@@ -1,0 +1,20 @@
+-- Compute Metrics via Expressions
+-- Write to DataTable
+SELECT
+  metric_time__day
+  , booking_value * 0.05 / bookers AS booking_fees_per_booker
+FROM (
+  -- Read Elements From Semantic Model 'bookings_source'
+  -- Metric Time Dimension 'ds'
+  -- Select: ['__booking_value', '__bookers', 'metric_time__day']
+  -- Select: ['__booking_value', '__bookers', 'metric_time__day']
+  -- Aggregate Inputs for Simple Metrics
+  -- Compute Metrics via Expressions
+  SELECT
+    DATETIME_TRUNC(ds, day) AS metric_time__day
+    , SUM(booking_value) AS booking_value
+    , COUNT(DISTINCT guest_id) AS bookers
+  FROM mf_corpus_2026_05_11_static.fct_bookings bookings_source_src_10000
+  GROUP BY
+    metric_time__day
+) subq_5

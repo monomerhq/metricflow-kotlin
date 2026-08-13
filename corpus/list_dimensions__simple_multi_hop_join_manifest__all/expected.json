@@ -1,0 +1,154 @@
+{
+  "dimensions": [
+    {
+      "name": "ds",
+      "dunder_name": "all_entity_composite__ds",
+      "qualified_name": "all_entity_composite__ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "all_entity_composite"
+      ],
+      "semantic_model_name": "all_entity_measure_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/all_entity_measure_source.yaml",
+        "file_slice": {
+          "filename": "all_entity_measure_source.yaml",
+          "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 19,
+          "end_line_number": 23
+        }
+      }
+    },
+    {
+      "name": "ds",
+      "dunder_name": "composite_entity__ds",
+      "qualified_name": "composite_entity__ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "composite_entity"
+      ],
+      "semantic_model_name": "entity_1_and_entity_2_measure_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_and_entity_2_measure_source.yaml",
+        "file_slice": {
+          "filename": "entity_1_and_entity_2_measure_source.yaml",
+          "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 19,
+          "end_line_number": 23
+        }
+      }
+    },
+    {
+      "name": "country",
+      "dunder_name": "entity_0__country",
+      "qualified_name": "entity_0__country",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "entity_0"
+      ],
+      "semantic_model_name": "entity_0_dimension_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_0_dimension_source.yaml",
+        "file_slice": {
+          "filename": "entity_0_dimension_source.yaml",
+          "content": "name: country\ntype: categorical\n",
+          "start_line_number": 11,
+          "end_line_number": 13
+        }
+      }
+    },
+    {
+      "name": "ds",
+      "dunder_name": "entity_0__ds",
+      "qualified_name": "entity_0__ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "entity_0"
+      ],
+      "semantic_model_name": "entity_0_measure_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_0_measure_source.yaml",
+        "file_slice": {
+          "filename": "entity_0_measure_source.yaml",
+          "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 18,
+          "end_line_number": 22
+        }
+      }
+    },
+    {
+      "name": "country",
+      "dunder_name": "entity_1__country",
+      "qualified_name": "entity_1__country",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "entity_1"
+      ],
+      "semantic_model_name": "entity_1_dimension_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_dimension_source.yaml",
+        "file_slice": {
+          "filename": "entity_1_dimension_source.yaml",
+          "content": "name: country\ntype: categorical\n",
+          "start_line_number": 11,
+          "end_line_number": 13
+        }
+      }
+    },
+    {
+      "name": "ds",
+      "dunder_name": "entity_1__ds",
+      "qualified_name": "entity_1__ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "entity_1"
+      ],
+      "semantic_model_name": "entity_1_measure_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_multi_hop_join_manifest/entity_1_measure_source.yaml",
+        "file_slice": {
+          "filename": "entity_1_measure_source.yaml",
+          "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 18,
+          "end_line_number": 22
+        }
+      }
+    }
+  ]
+}

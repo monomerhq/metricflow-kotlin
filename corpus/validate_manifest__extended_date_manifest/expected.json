@@ -1,0 +1,40 @@
+{
+  "issues": [
+    {
+      "level": "WARNING",
+      "message": "Cumulative metric 'trailing_3_months_bookings' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "bookings_monthly_cumulative.yaml",
+          "line_number": 2
+        },
+        "metric": {
+          "metric_name": "trailing_3_months_bookings"
+        }
+      },
+      "context_str": "with metric `trailing_3_months_bookings` in file `bookings_monthly_cumulative.yaml` on line #2",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `trailing_3_months_bookings` in file `bookings_monthly_cumulative.yaml` on line #2 - Cumulative metric 'trailing_3_months_bookings' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion."
+    },
+    {
+      "level": "WARNING",
+      "message": "Cumulative metric 'weekly_bookers' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion.",
+      "context": {
+        "file_context": {
+          "file_name": "bookings_cumulative.yaml",
+          "line_number": 2
+        },
+        "metric": {
+          "metric_name": "weekly_bookers"
+        }
+      },
+      "context_str": "with metric `weekly_bookers` in file `bookings_cumulative.yaml` on line #2",
+      "extra_detail": null,
+      "readable": "WARNING: with metric `weekly_bookers` in file `bookings_cumulative.yaml` on line #2 - Cumulative metric 'weekly_bookers' should not have both a measure and a metric as inputs. The measure will be ignored; please remove it to avoid confusion."
+    }
+  ],
+  "error_count": 0,
+  "future_error_count": 0,
+  "warning_count": 2,
+  "has_blocking_issues": false
+}

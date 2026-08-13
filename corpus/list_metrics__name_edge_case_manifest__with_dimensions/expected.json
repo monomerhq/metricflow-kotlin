@@ -1,0 +1,350 @@
+{
+  "metrics": [
+    {
+      "name": "homonymous_metric_and_dimension",
+      "type": "simple",
+      "description": "Used to test a soon-to-be-deprecated use case where the name of the metric is the same as a dimension.\n",
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "booking_value",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "booking_value",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "booking_value",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "bookings_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: homonymous_metric_and_dimension\ndescription: |\n  Used to test a soon-to-be-deprecated use case where the name of the metric is the same as a dimension.\ntype: simple\ntype_params:\n  measure: booking_value\n",
+          "start_line_number": 3,
+          "end_line_number": 8
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking__ds",
+          "qualified_name": "booking__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/semantic_models/bookings_source.yaml",
+            "file_slice": {
+              "filename": "bookings_source.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 26,
+              "end_line_number": 30
+            }
+          }
+        },
+        {
+          "name": "homonymous_metric_and_dimension",
+          "dunder_name": "booking__homonymous_metric_and_dimension",
+          "qualified_name": "booking__homonymous_metric_and_dimension",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "'dummy_dimension_value'",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/semantic_models/bookings_source.yaml",
+            "file_slice": {
+              "filename": "bookings_source.yaml",
+              "content": "name: homonymous_metric_and_dimension\nexpr: \"'dummy_dimension_value'\"\ntype: categorical\n",
+              "start_line_number": 23,
+              "end_line_number": 25
+            }
+          }
+        },
+        {
+          "name": "ds",
+          "dunder_name": "homonymous_metric_and_entity__ds",
+          "qualified_name": "homonymous_metric_and_entity__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "homonymous_metric_and_entity"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/semantic_models/bookings_source.yaml",
+            "file_slice": {
+              "filename": "bookings_source.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 26,
+              "end_line_number": 30
+            }
+          }
+        },
+        {
+          "name": "homonymous_metric_and_dimension",
+          "dunder_name": "homonymous_metric_and_entity__homonymous_metric_and_dimension",
+          "qualified_name": "homonymous_metric_and_entity__homonymous_metric_and_dimension",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "homonymous_metric_and_entity"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "'dummy_dimension_value'",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/semantic_models/bookings_source.yaml",
+            "file_slice": {
+              "filename": "bookings_source.yaml",
+              "content": "name: homonymous_metric_and_dimension\nexpr: \"'dummy_dimension_value'\"\ntype: categorical\n",
+              "start_line_number": 23,
+              "end_line_number": 25
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__day",
+          "qualified_name": "metric_time__day",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "bookings_source"
+      ]
+    },
+    {
+      "name": "homonymous_metric_and_entity",
+      "type": "simple",
+      "description": "Used to test a soon-to-be-deprecated use case where the name of the metric is the same as an entity.\n",
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "booking_value",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "booking_value",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "booking_value",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "bookings_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/metrics.yaml",
+        "file_slice": {
+          "filename": "metrics.yaml",
+          "content": "name: homonymous_metric_and_entity\ndescription: |\n  Used to test a soon-to-be-deprecated use case where the name of the metric is the same as an entity.\ntype: simple\ntype_params:\n  measure: booking_value\n",
+          "start_line_number": 11,
+          "end_line_number": 16
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking__ds",
+          "qualified_name": "booking__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/semantic_models/bookings_source.yaml",
+            "file_slice": {
+              "filename": "bookings_source.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 26,
+              "end_line_number": 30
+            }
+          }
+        },
+        {
+          "name": "homonymous_metric_and_dimension",
+          "dunder_name": "booking__homonymous_metric_and_dimension",
+          "qualified_name": "booking__homonymous_metric_and_dimension",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "'dummy_dimension_value'",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/semantic_models/bookings_source.yaml",
+            "file_slice": {
+              "filename": "bookings_source.yaml",
+              "content": "name: homonymous_metric_and_dimension\nexpr: \"'dummy_dimension_value'\"\ntype: categorical\n",
+              "start_line_number": 23,
+              "end_line_number": 25
+            }
+          }
+        },
+        {
+          "name": "ds",
+          "dunder_name": "homonymous_metric_and_entity__ds",
+          "qualified_name": "homonymous_metric_and_entity__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "homonymous_metric_and_entity"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/semantic_models/bookings_source.yaml",
+            "file_slice": {
+              "filename": "bookings_source.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 26,
+              "end_line_number": 30
+            }
+          }
+        },
+        {
+          "name": "homonymous_metric_and_dimension",
+          "dunder_name": "homonymous_metric_and_entity__homonymous_metric_and_dimension",
+          "qualified_name": "homonymous_metric_and_entity__homonymous_metric_and_dimension",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "homonymous_metric_and_entity"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "'dummy_dimension_value'",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/name_edge_case_manifest/semantic_models/bookings_source.yaml",
+            "file_slice": {
+              "filename": "bookings_source.yaml",
+              "content": "name: homonymous_metric_and_dimension\nexpr: \"'dummy_dimension_value'\"\ntype: categorical\n",
+              "start_line_number": 23,
+              "end_line_number": 25
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__day",
+          "qualified_name": "metric_time__day",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "bookings_source"
+      ]
+    }
+  ]
+}

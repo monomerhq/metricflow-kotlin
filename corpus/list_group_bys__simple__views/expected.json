@@ -1,0 +1,797 @@
+{
+  "dimensions": [
+    {
+      "name": "capacity_latest",
+      "dunder_name": "listing__capacity_latest",
+      "qualified_name": "listing__capacity_latest",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "listing"
+      ],
+      "semantic_model_name": "listings_latest",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": "capacity",
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
+        "file_slice": {
+          "filename": "listings_latest.yaml",
+          "content": "name: capacity_latest\ntype: categorical\nexpr: capacity\n",
+          "start_line_number": 40,
+          "end_line_number": 43
+        }
+      }
+    },
+    {
+      "name": "country_latest",
+      "dunder_name": "listing__country_latest",
+      "qualified_name": "listing__country_latest",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "listing"
+      ],
+      "semantic_model_name": "listings_latest",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": "country",
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
+        "file_slice": {
+          "filename": "listings_latest.yaml",
+          "content": "name: country_latest\ntype: categorical\nexpr: country\n",
+          "start_line_number": 34,
+          "end_line_number": 36
+        }
+      }
+    },
+    {
+      "name": "created_at",
+      "dunder_name": "listing__created_at",
+      "qualified_name": "listing__created_at",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "listing"
+      ],
+      "semantic_model_name": "listings_latest",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
+        "file_slice": {
+          "filename": "listings_latest.yaml",
+          "content": "name: created_at\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 30,
+          "end_line_number": 33
+        }
+      }
+    },
+    {
+      "name": "ds",
+      "dunder_name": "listing__ds",
+      "qualified_name": "listing__ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "listing"
+      ],
+      "semantic_model_name": "listings_latest",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": "created_at",
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
+        "file_slice": {
+          "filename": "listings_latest.yaml",
+          "content": "name: ds\ntype: time\nexpr: created_at\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 25,
+          "end_line_number": 29
+        }
+      }
+    },
+    {
+      "name": "is_lux_latest",
+      "dunder_name": "listing__is_lux_latest",
+      "qualified_name": "listing__is_lux_latest",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "listing"
+      ],
+      "semantic_model_name": "listings_latest",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": "is_lux",
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
+        "file_slice": {
+          "filename": "listings_latest.yaml",
+          "content": "name: is_lux_latest\ntype: categorical\nexpr: is_lux\n",
+          "start_line_number": 37,
+          "end_line_number": 39
+        }
+      }
+    },
+    {
+      "name": "archived_at",
+      "dunder_name": "listing__user__archived_at",
+      "qualified_name": "listing__user__archived_at",
+      "type": "time",
+      "granularity": "hour",
+      "entity_links": [
+        "listing",
+        "user"
+      ],
+      "semantic_model_name": "users_ds_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "file_slice": {
+          "filename": "user_sm_source.yaml",
+          "content": "name: archived_at\ntype: time\ntype_params:\n  time_granularity: hour\n",
+          "start_line_number": 41,
+          "end_line_number": 46
+        }
+      }
+    },
+    {
+      "name": "bio_added_ts",
+      "dunder_name": "listing__user__bio_added_ts",
+      "qualified_name": "listing__user__bio_added_ts",
+      "type": "time",
+      "granularity": "second",
+      "entity_links": [
+        "listing",
+        "user"
+      ],
+      "semantic_model_name": "users_ds_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "file_slice": {
+          "filename": "user_sm_source.yaml",
+          "content": "name: bio_added_ts\ntype: time\ntype_params:\n  time_granularity: second\n",
+          "start_line_number": 33,
+          "end_line_number": 36
+        }
+      }
+    },
+    {
+      "name": "company_name",
+      "dunder_name": "listing__user__company_name",
+      "qualified_name": "listing__user__company_name",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "listing",
+        "user"
+      ],
+      "semantic_model_name": "companies",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/companies.yaml",
+        "file_slice": {
+          "filename": "companies.yaml",
+          "content": "name: company_name\ntype: categorical\n",
+          "start_line_number": 11,
+          "end_line_number": 13
+        }
+      }
+    },
+    {
+      "name": "created_at",
+      "dunder_name": "listing__user__created_at",
+      "qualified_name": "listing__user__created_at",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "listing",
+        "user"
+      ],
+      "semantic_model_name": "users_ds_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "file_slice": {
+          "filename": "user_sm_source.yaml",
+          "content": "name: created_at\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 18,
+          "end_line_number": 21
+        }
+      }
+    },
+    {
+      "name": "ds",
+      "dunder_name": "listing__user__ds",
+      "qualified_name": "listing__user__ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "listing",
+        "user"
+      ],
+      "semantic_model_name": "users_ds_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "file_slice": {
+          "filename": "user_sm_source.yaml",
+          "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 14,
+          "end_line_number": 17
+        }
+      }
+    },
+    {
+      "name": "ds_latest",
+      "dunder_name": "listing__user__ds_latest",
+      "qualified_name": "listing__user__ds_latest",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "listing",
+        "user"
+      ],
+      "semantic_model_name": "users_latest",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": "ds",
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/users_latest.yaml",
+        "file_slice": {
+          "filename": "users_latest.yaml",
+          "content": "name: ds_latest\ntype: time\nexpr: ds\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 11,
+          "end_line_number": 15
+        }
+      }
+    },
+    {
+      "name": "ds_partitioned",
+      "dunder_name": "listing__user__ds_partitioned",
+      "qualified_name": "listing__user__ds_partitioned",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "listing",
+        "user"
+      ],
+      "semantic_model_name": "users_ds_source",
+      "is_partition": true,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "file_slice": {
+          "filename": "user_sm_source.yaml",
+          "content": "name: ds_partitioned\ntype: time\nis_partition: true\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 22,
+          "end_line_number": 26
+        }
+      }
+    },
+    {
+      "name": "home_state",
+      "dunder_name": "listing__user__home_state",
+      "qualified_name": "listing__user__home_state",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "listing",
+        "user"
+      ],
+      "semantic_model_name": "users_ds_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "file_slice": {
+          "filename": "user_sm_source.yaml",
+          "content": "name: home_state\ntype: categorical\n",
+          "start_line_number": 27,
+          "end_line_number": 28
+        }
+      }
+    },
+    {
+      "name": "home_state_latest",
+      "dunder_name": "listing__user__home_state_latest",
+      "qualified_name": "listing__user__home_state_latest",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "listing",
+        "user"
+      ],
+      "semantic_model_name": "users_latest",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/users_latest.yaml",
+        "file_slice": {
+          "filename": "users_latest.yaml",
+          "content": "name: home_state_latest\ntype: categorical\n",
+          "start_line_number": 16,
+          "end_line_number": 18
+        }
+      }
+    },
+    {
+      "name": "last_login_ts",
+      "dunder_name": "listing__user__last_login_ts",
+      "qualified_name": "listing__user__last_login_ts",
+      "type": "time",
+      "granularity": "minute",
+      "entity_links": [
+        "listing",
+        "user"
+      ],
+      "semantic_model_name": "users_ds_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "file_slice": {
+          "filename": "user_sm_source.yaml",
+          "content": "name: last_login_ts\ntype: time\ntype_params:\n  time_granularity: minute\n",
+          "start_line_number": 37,
+          "end_line_number": 40
+        }
+      }
+    },
+    {
+      "name": "last_profile_edit_ts",
+      "dunder_name": "listing__user__last_profile_edit_ts",
+      "qualified_name": "listing__user__last_profile_edit_ts",
+      "type": "time",
+      "granularity": "millisecond",
+      "entity_links": [
+        "listing",
+        "user"
+      ],
+      "semantic_model_name": "users_ds_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "file_slice": {
+          "filename": "user_sm_source.yaml",
+          "content": "name: last_profile_edit_ts\ntype: time\ntype_params:\n  time_granularity: millisecond\n",
+          "start_line_number": 29,
+          "end_line_number": 32
+        }
+      }
+    },
+    {
+      "name": "metric_time",
+      "dunder_name": "metric_time__day",
+      "qualified_name": "metric_time__day",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [],
+      "semantic_model_name": null,
+      "is_partition": false,
+      "is_metric_time": true,
+      "description": "Event time for metrics.",
+      "label": null,
+      "expr": null,
+      "metadata": null
+    },
+    {
+      "name": "archived_at",
+      "dunder_name": "user__archived_at",
+      "qualified_name": "user__archived_at",
+      "type": "time",
+      "granularity": "hour",
+      "entity_links": [
+        "user"
+      ],
+      "semantic_model_name": "users_ds_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "file_slice": {
+          "filename": "user_sm_source.yaml",
+          "content": "name: archived_at\ntype: time\ntype_params:\n  time_granularity: hour\n",
+          "start_line_number": 41,
+          "end_line_number": 46
+        }
+      }
+    },
+    {
+      "name": "bio_added_ts",
+      "dunder_name": "user__bio_added_ts",
+      "qualified_name": "user__bio_added_ts",
+      "type": "time",
+      "granularity": "second",
+      "entity_links": [
+        "user"
+      ],
+      "semantic_model_name": "users_ds_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "file_slice": {
+          "filename": "user_sm_source.yaml",
+          "content": "name: bio_added_ts\ntype: time\ntype_params:\n  time_granularity: second\n",
+          "start_line_number": 33,
+          "end_line_number": 36
+        }
+      }
+    },
+    {
+      "name": "company_name",
+      "dunder_name": "user__company_name",
+      "qualified_name": "user__company_name",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "user"
+      ],
+      "semantic_model_name": "companies",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/companies.yaml",
+        "file_slice": {
+          "filename": "companies.yaml",
+          "content": "name: company_name\ntype: categorical\n",
+          "start_line_number": 11,
+          "end_line_number": 13
+        }
+      }
+    },
+    {
+      "name": "created_at",
+      "dunder_name": "user__created_at",
+      "qualified_name": "user__created_at",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "user"
+      ],
+      "semantic_model_name": "users_ds_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "file_slice": {
+          "filename": "user_sm_source.yaml",
+          "content": "name: created_at\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 18,
+          "end_line_number": 21
+        }
+      }
+    },
+    {
+      "name": "ds",
+      "dunder_name": "user__ds",
+      "qualified_name": "user__ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "user"
+      ],
+      "semantic_model_name": "users_ds_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "file_slice": {
+          "filename": "user_sm_source.yaml",
+          "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 14,
+          "end_line_number": 17
+        }
+      }
+    },
+    {
+      "name": "ds_latest",
+      "dunder_name": "user__ds_latest",
+      "qualified_name": "user__ds_latest",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "user"
+      ],
+      "semantic_model_name": "users_latest",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": "ds",
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/users_latest.yaml",
+        "file_slice": {
+          "filename": "users_latest.yaml",
+          "content": "name: ds_latest\ntype: time\nexpr: ds\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 11,
+          "end_line_number": 15
+        }
+      }
+    },
+    {
+      "name": "ds_partitioned",
+      "dunder_name": "user__ds_partitioned",
+      "qualified_name": "user__ds_partitioned",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "user"
+      ],
+      "semantic_model_name": "users_ds_source",
+      "is_partition": true,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "file_slice": {
+          "filename": "user_sm_source.yaml",
+          "content": "name: ds_partitioned\ntype: time\nis_partition: true\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 22,
+          "end_line_number": 26
+        }
+      }
+    },
+    {
+      "name": "home_state",
+      "dunder_name": "user__home_state",
+      "qualified_name": "user__home_state",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "user"
+      ],
+      "semantic_model_name": "users_ds_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "file_slice": {
+          "filename": "user_sm_source.yaml",
+          "content": "name: home_state\ntype: categorical\n",
+          "start_line_number": 27,
+          "end_line_number": 28
+        }
+      }
+    },
+    {
+      "name": "home_state_latest",
+      "dunder_name": "user__home_state_latest",
+      "qualified_name": "user__home_state_latest",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "user"
+      ],
+      "semantic_model_name": "users_latest",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/users_latest.yaml",
+        "file_slice": {
+          "filename": "users_latest.yaml",
+          "content": "name: home_state_latest\ntype: categorical\n",
+          "start_line_number": 16,
+          "end_line_number": 18
+        }
+      }
+    },
+    {
+      "name": "last_login_ts",
+      "dunder_name": "user__last_login_ts",
+      "qualified_name": "user__last_login_ts",
+      "type": "time",
+      "granularity": "minute",
+      "entity_links": [
+        "user"
+      ],
+      "semantic_model_name": "users_ds_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "file_slice": {
+          "filename": "user_sm_source.yaml",
+          "content": "name: last_login_ts\ntype: time\ntype_params:\n  time_granularity: minute\n",
+          "start_line_number": 37,
+          "end_line_number": 40
+        }
+      }
+    },
+    {
+      "name": "last_profile_edit_ts",
+      "dunder_name": "user__last_profile_edit_ts",
+      "qualified_name": "user__last_profile_edit_ts",
+      "type": "time",
+      "granularity": "millisecond",
+      "entity_links": [
+        "user"
+      ],
+      "semantic_model_name": "users_ds_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "file_slice": {
+          "filename": "user_sm_source.yaml",
+          "content": "name: last_profile_edit_ts\ntype: time\ntype_params:\n  time_granularity: millisecond\n",
+          "start_line_number": 29,
+          "end_line_number": 32
+        }
+      }
+    },
+    {
+      "name": "ds",
+      "dunder_name": "view__ds",
+      "qualified_name": "view__ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "view"
+      ],
+      "semantic_model_name": "views_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/views_source.yaml",
+        "file_slice": {
+          "filename": "views_source.yaml",
+          "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 19,
+          "end_line_number": 22
+        }
+      }
+    },
+    {
+      "name": "ds_partitioned",
+      "dunder_name": "view__ds_partitioned",
+      "qualified_name": "view__ds_partitioned",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "view"
+      ],
+      "semantic_model_name": "views_source",
+      "is_partition": true,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/views_source.yaml",
+        "file_slice": {
+          "filename": "views_source.yaml",
+          "content": "name: ds_partitioned\ntype: time\nis_partition: true\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 23,
+          "end_line_number": 28
+        }
+      }
+    }
+  ],
+  "entities": [
+    {
+      "name": "company",
+      "type": "primary",
+      "role": null,
+      "semantic_model_name": "companies",
+      "description": null,
+      "expr": "company_id"
+    },
+    {
+      "name": "listing",
+      "type": "foreign",
+      "role": null,
+      "semantic_model_name": "views_source",
+      "description": null,
+      "expr": "listing_id"
+    },
+    {
+      "name": "lux_listing",
+      "type": "foreign",
+      "role": null,
+      "semantic_model_name": "lux_listing_mapping",
+      "description": null,
+      "expr": "lux_listing_id"
+    },
+    {
+      "name": "user",
+      "type": "foreign",
+      "role": null,
+      "semantic_model_name": "views_source",
+      "description": null,
+      "expr": "user_id"
+    },
+    {
+      "name": "user",
+      "type": "foreign",
+      "role": null,
+      "semantic_model_name": "listings_latest",
+      "description": null,
+      "expr": "user_id"
+    }
+  ]
+}

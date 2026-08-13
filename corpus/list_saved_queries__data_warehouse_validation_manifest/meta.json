@@ -1,0 +1,9 @@
+{
+  "case_id": "list_saved_queries__data_warehouse_validation_manifest",
+  "subcommand": "list_saved_queries",
+  "manifest_id": "data_warehouse_validation_manifest",
+  "args": {},
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

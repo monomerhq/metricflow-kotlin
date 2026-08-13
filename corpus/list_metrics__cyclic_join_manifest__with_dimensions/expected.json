@@ -1,0 +1,227 @@
+{
+  "metrics": [
+    {
+      "name": "listings",
+      "type": "simple",
+      "description": null,
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "listings",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "listings",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "listings_latest",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/cyclic_join_manifest/listings_latest.yaml",
+        "file_slice": {
+          "filename": "listings_latest.yaml",
+          "content": "name: listings\nexpr: 1\nagg: sum\ncreate_metric: true\n",
+          "start_line_number": 14,
+          "end_line_number": 18
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "capacity_latest",
+          "dunder_name": "cyclic_entity__capacity_latest",
+          "qualified_name": "cyclic_entity__capacity_latest",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "cyclic_entity"
+          ],
+          "semantic_model_name": "listings_latest_cyclic",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "capacity",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/cyclic_join_manifest/listings_latest_cyclic.yaml",
+            "file_slice": {
+              "filename": "listings_latest_cyclic.yaml",
+              "content": "name: capacity_latest\ntype: categorical\nexpr: capacity\n",
+              "start_line_number": 11,
+              "end_line_number": 14
+            }
+          }
+        },
+        {
+          "name": "country_latest",
+          "dunder_name": "cyclic_entity__country_latest",
+          "qualified_name": "cyclic_entity__country_latest",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "cyclic_entity"
+          ],
+          "semantic_model_name": "listings_latest",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "country",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/cyclic_join_manifest/listings_latest.yaml",
+            "file_slice": {
+              "filename": "listings_latest.yaml",
+              "content": "name: country_latest\ntype: categorical\nexpr: country\n",
+              "start_line_number": 25,
+              "end_line_number": 28
+            }
+          }
+        },
+        {
+          "name": "ds",
+          "dunder_name": "cyclic_entity__ds",
+          "qualified_name": "cyclic_entity__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "cyclic_entity"
+          ],
+          "semantic_model_name": "listings_latest",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "created_at",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/cyclic_join_manifest/listings_latest.yaml",
+            "file_slice": {
+              "filename": "listings_latest.yaml",
+              "content": "name: ds\ntype: time\nexpr: created_at\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 20,
+              "end_line_number": 24
+            }
+          }
+        },
+        {
+          "name": "capacity_latest",
+          "dunder_name": "listing__capacity_latest",
+          "qualified_name": "listing__capacity_latest",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings_latest_cyclic",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "capacity",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/cyclic_join_manifest/listings_latest_cyclic.yaml",
+            "file_slice": {
+              "filename": "listings_latest_cyclic.yaml",
+              "content": "name: capacity_latest\ntype: categorical\nexpr: capacity\n",
+              "start_line_number": 11,
+              "end_line_number": 14
+            }
+          }
+        },
+        {
+          "name": "country_latest",
+          "dunder_name": "listing__country_latest",
+          "qualified_name": "listing__country_latest",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings_latest",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "country",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/cyclic_join_manifest/listings_latest.yaml",
+            "file_slice": {
+              "filename": "listings_latest.yaml",
+              "content": "name: country_latest\ntype: categorical\nexpr: country\n",
+              "start_line_number": 25,
+              "end_line_number": 28
+            }
+          }
+        },
+        {
+          "name": "ds",
+          "dunder_name": "listing__ds",
+          "qualified_name": "listing__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings_latest",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "created_at",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/cyclic_join_manifest/listings_latest.yaml",
+            "file_slice": {
+              "filename": "listings_latest.yaml",
+              "content": "name: ds\ntype: time\nexpr: created_at\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 20,
+              "end_line_number": 24
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__day",
+          "qualified_name": "metric_time__day",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "listings_latest"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "case_id": "list_saved_queries__partitioned_multi_hop_join_manifest",
+  "subcommand": "list_saved_queries",
+  "manifest_id": "partitioned_multi_hop_join_manifest",
+  "args": {},
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

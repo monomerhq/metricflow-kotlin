@@ -1,0 +1,1828 @@
+{
+  "metrics": [
+    {
+      "name": "bookings",
+      "type": "simple",
+      "description": "raw booking count",
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "bookings",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "bookings",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "bookings_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_metrics.yaml",
+        "file_slice": {
+          "filename": "scd_metrics.yaml",
+          "content": "name: bookings\ndescription: raw booking count\ntype: SIMPLE\ntype_params:\n  measure: bookings\n",
+          "start_line_number": 3,
+          "end_line_number": 7
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking__ds",
+          "qualified_name": "booking__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_bookings.yaml",
+            "file_slice": {
+              "filename": "scd_bookings.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 36,
+              "end_line_number": 39
+            }
+          }
+        },
+        {
+          "name": "ds_partitioned",
+          "dunder_name": "booking__ds_partitioned",
+          "qualified_name": "booking__ds_partitioned",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": true,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_bookings.yaml",
+            "file_slice": {
+              "filename": "scd_bookings.yaml",
+              "content": "name: ds_partitioned\ntype: time\nis_partition: true\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 40,
+              "end_line_number": 44
+            }
+          }
+        },
+        {
+          "name": "is_instant",
+          "dunder_name": "booking__is_instant",
+          "qualified_name": "booking__is_instant",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_bookings.yaml",
+            "file_slice": {
+              "filename": "scd_bookings.yaml",
+              "content": "name: is_instant\ntype: categorical\n",
+              "start_line_number": 34,
+              "end_line_number": 35
+            }
+          }
+        },
+        {
+          "name": "paid_at",
+          "dunder_name": "booking__paid_at",
+          "qualified_name": "booking__paid_at",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_bookings.yaml",
+            "file_slice": {
+              "filename": "scd_bookings.yaml",
+              "content": "name: paid_at\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 45,
+              "end_line_number": 49
+            }
+          }
+        },
+        {
+          "name": "capacity",
+          "dunder_name": "listing__capacity",
+          "qualified_name": "listing__capacity",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_listings.yaml",
+            "file_slice": {
+              "filename": "scd_listings.yaml",
+              "content": "name: capacity\ntype: categorical\n",
+              "start_line_number": 29,
+              "end_line_number": 31
+            }
+          }
+        },
+        {
+          "name": "country",
+          "dunder_name": "listing__country",
+          "qualified_name": "listing__country",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_listings.yaml",
+            "file_slice": {
+              "filename": "scd_listings.yaml",
+              "content": "name: country\ntype: categorical\n",
+              "start_line_number": 25,
+              "end_line_number": 26
+            }
+          }
+        },
+        {
+          "name": "is_lux",
+          "dunder_name": "listing__is_lux",
+          "qualified_name": "listing__is_lux",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_listings.yaml",
+            "file_slice": {
+              "filename": "scd_listings.yaml",
+              "content": "name: is_lux\ntype: categorical\n",
+              "start_line_number": 27,
+              "end_line_number": 28
+            }
+          }
+        },
+        {
+          "name": "is_confirmed_lux",
+          "dunder_name": "listing__lux_listing__is_confirmed_lux",
+          "qualified_name": "listing__lux_listing__is_confirmed_lux",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing",
+            "lux_listing"
+          ],
+          "semantic_model_name": "lux_listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_lux_listings.yaml",
+            "file_slice": {
+              "filename": "scd_lux_listings.yaml",
+              "content": "name: is_confirmed_lux\ntype: categorical\n",
+              "start_line_number": 41,
+              "end_line_number": 43
+            }
+          }
+        },
+        {
+          "name": "window_end",
+          "dunder_name": "listing__lux_listing__window_end",
+          "qualified_name": "listing__lux_listing__window_end",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing",
+            "lux_listing"
+          ],
+          "semantic_model_name": "lux_listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "valid_to",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_lux_listings.yaml",
+            "file_slice": {
+              "filename": "scd_lux_listings.yaml",
+              "content": "name: window_end\ntype: time\nexpr: valid_to\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_end: True\n",
+              "start_line_number": 34,
+              "end_line_number": 40
+            }
+          }
+        },
+        {
+          "name": "window_start",
+          "dunder_name": "listing__lux_listing__window_start",
+          "qualified_name": "listing__lux_listing__window_start",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing",
+            "lux_listing"
+          ],
+          "semantic_model_name": "lux_listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "valid_from",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_lux_listings.yaml",
+            "file_slice": {
+              "filename": "scd_lux_listings.yaml",
+              "content": "name: window_start\ntype: time\nexpr: valid_from\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_start: True\n",
+              "start_line_number": 27,
+              "end_line_number": 33
+            }
+          }
+        },
+        {
+          "name": "company_name",
+          "dunder_name": "listing__user__company_name",
+          "qualified_name": "listing__user__company_name",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing",
+            "user"
+          ],
+          "semantic_model_name": "companies",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/non_scd_companies.yaml",
+            "file_slice": {
+              "filename": "non_scd_companies.yaml",
+              "content": "name: company_name\ntype: categorical\n",
+              "start_line_number": 11,
+              "end_line_number": 13
+            }
+          }
+        },
+        {
+          "name": "ds",
+          "dunder_name": "listing__user__ds",
+          "qualified_name": "listing__user__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing",
+            "user"
+          ],
+          "semantic_model_name": "users_latest",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_users.yaml",
+            "file_slice": {
+              "filename": "scd_users.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 11,
+              "end_line_number": 14
+            }
+          }
+        },
+        {
+          "name": "home_state_latest",
+          "dunder_name": "listing__user__home_state_latest",
+          "qualified_name": "listing__user__home_state_latest",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing",
+            "user"
+          ],
+          "semantic_model_name": "users_latest",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_users.yaml",
+            "file_slice": {
+              "filename": "scd_users.yaml",
+              "content": "name: home_state_latest\ntype: categorical\n",
+              "start_line_number": 15,
+              "end_line_number": 17
+            }
+          }
+        },
+        {
+          "name": "window_end",
+          "dunder_name": "listing__window_end",
+          "qualified_name": "listing__window_end",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "active_to",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_listings.yaml",
+            "file_slice": {
+              "filename": "scd_listings.yaml",
+              "content": "name: window_end\ntype: time\nexpr: active_to\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_end: True\n",
+              "start_line_number": 18,
+              "end_line_number": 24
+            }
+          }
+        },
+        {
+          "name": "window_start",
+          "dunder_name": "listing__window_start",
+          "qualified_name": "listing__window_start",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "active_from",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_listings.yaml",
+            "file_slice": {
+              "filename": "scd_listings.yaml",
+              "content": "name: window_start\ntype: time\nexpr: active_from\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_start: True\n",
+              "start_line_number": 11,
+              "end_line_number": 17
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__day",
+          "qualified_name": "metric_time__day",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "account_type",
+          "dunder_name": "user__account_type",
+          "qualified_name": "user__account_type",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "primary_accounts",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_accounts.yaml",
+            "file_slice": {
+              "filename": "scd_accounts.yaml",
+              "content": "name: account_type\ntype: categorical\n",
+              "start_line_number": 25,
+              "end_line_number": 27
+            }
+          }
+        },
+        {
+          "name": "company_name",
+          "dunder_name": "user__company_name",
+          "qualified_name": "user__company_name",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "companies",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/non_scd_companies.yaml",
+            "file_slice": {
+              "filename": "non_scd_companies.yaml",
+              "content": "name: company_name\ntype: categorical\n",
+              "start_line_number": 11,
+              "end_line_number": 13
+            }
+          }
+        },
+        {
+          "name": "ds",
+          "dunder_name": "user__ds",
+          "qualified_name": "user__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "users_latest",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_users.yaml",
+            "file_slice": {
+              "filename": "scd_users.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 11,
+              "end_line_number": 14
+            }
+          }
+        },
+        {
+          "name": "home_state_latest",
+          "dunder_name": "user__home_state_latest",
+          "qualified_name": "user__home_state_latest",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "users_latest",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_users.yaml",
+            "file_slice": {
+              "filename": "scd_users.yaml",
+              "content": "name: home_state_latest\ntype: categorical\n",
+              "start_line_number": 15,
+              "end_line_number": 17
+            }
+          }
+        },
+        {
+          "name": "primary_from",
+          "dunder_name": "user__primary_from",
+          "qualified_name": "user__primary_from",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "primary_accounts",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "set_as_primary",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_accounts.yaml",
+            "file_slice": {
+              "filename": "scd_accounts.yaml",
+              "content": "name: primary_from\ntype: time\nexpr: set_as_primary\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_start: True\n",
+              "start_line_number": 11,
+              "end_line_number": 17
+            }
+          }
+        },
+        {
+          "name": "primary_to",
+          "dunder_name": "user__primary_to",
+          "qualified_name": "user__primary_to",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "primary_accounts",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "removed_as_primary",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_accounts.yaml",
+            "file_slice": {
+              "filename": "scd_accounts.yaml",
+              "content": "name: primary_to\ntype: time\nexpr: removed_as_primary\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_end: True\n",
+              "start_line_number": 18,
+              "end_line_number": 24
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "bookings_source"
+      ]
+    },
+    {
+      "name": "family_bookings",
+      "type": "simple",
+      "description": "Bookings of units with capacity for more than 2 people.",
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "bookings",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "bookings",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "bookings_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": {
+        "where_filters": [
+          {
+            "where_sql_template": "{{ Dimension('listing__capacity') }} > 2"
+          }
+        ]
+      },
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_metrics.yaml",
+        "file_slice": {
+          "filename": "scd_metrics.yaml",
+          "content": "name: family_bookings\ndescription: Bookings of units with capacity for more than 2 people.\ntype: SIMPLE\nfilter: \"{{ Dimension('listing__capacity') }} > 2\"\ntype_params:\n  measure: bookings\n",
+          "start_line_number": 10,
+          "end_line_number": 16
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking__ds",
+          "qualified_name": "booking__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_bookings.yaml",
+            "file_slice": {
+              "filename": "scd_bookings.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 36,
+              "end_line_number": 39
+            }
+          }
+        },
+        {
+          "name": "ds_partitioned",
+          "dunder_name": "booking__ds_partitioned",
+          "qualified_name": "booking__ds_partitioned",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": true,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_bookings.yaml",
+            "file_slice": {
+              "filename": "scd_bookings.yaml",
+              "content": "name: ds_partitioned\ntype: time\nis_partition: true\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 40,
+              "end_line_number": 44
+            }
+          }
+        },
+        {
+          "name": "is_instant",
+          "dunder_name": "booking__is_instant",
+          "qualified_name": "booking__is_instant",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_bookings.yaml",
+            "file_slice": {
+              "filename": "scd_bookings.yaml",
+              "content": "name: is_instant\ntype: categorical\n",
+              "start_line_number": 34,
+              "end_line_number": 35
+            }
+          }
+        },
+        {
+          "name": "paid_at",
+          "dunder_name": "booking__paid_at",
+          "qualified_name": "booking__paid_at",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_bookings.yaml",
+            "file_slice": {
+              "filename": "scd_bookings.yaml",
+              "content": "name: paid_at\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 45,
+              "end_line_number": 49
+            }
+          }
+        },
+        {
+          "name": "capacity",
+          "dunder_name": "listing__capacity",
+          "qualified_name": "listing__capacity",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_listings.yaml",
+            "file_slice": {
+              "filename": "scd_listings.yaml",
+              "content": "name: capacity\ntype: categorical\n",
+              "start_line_number": 29,
+              "end_line_number": 31
+            }
+          }
+        },
+        {
+          "name": "country",
+          "dunder_name": "listing__country",
+          "qualified_name": "listing__country",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_listings.yaml",
+            "file_slice": {
+              "filename": "scd_listings.yaml",
+              "content": "name: country\ntype: categorical\n",
+              "start_line_number": 25,
+              "end_line_number": 26
+            }
+          }
+        },
+        {
+          "name": "is_lux",
+          "dunder_name": "listing__is_lux",
+          "qualified_name": "listing__is_lux",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_listings.yaml",
+            "file_slice": {
+              "filename": "scd_listings.yaml",
+              "content": "name: is_lux\ntype: categorical\n",
+              "start_line_number": 27,
+              "end_line_number": 28
+            }
+          }
+        },
+        {
+          "name": "is_confirmed_lux",
+          "dunder_name": "listing__lux_listing__is_confirmed_lux",
+          "qualified_name": "listing__lux_listing__is_confirmed_lux",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing",
+            "lux_listing"
+          ],
+          "semantic_model_name": "lux_listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_lux_listings.yaml",
+            "file_slice": {
+              "filename": "scd_lux_listings.yaml",
+              "content": "name: is_confirmed_lux\ntype: categorical\n",
+              "start_line_number": 41,
+              "end_line_number": 43
+            }
+          }
+        },
+        {
+          "name": "window_end",
+          "dunder_name": "listing__lux_listing__window_end",
+          "qualified_name": "listing__lux_listing__window_end",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing",
+            "lux_listing"
+          ],
+          "semantic_model_name": "lux_listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "valid_to",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_lux_listings.yaml",
+            "file_slice": {
+              "filename": "scd_lux_listings.yaml",
+              "content": "name: window_end\ntype: time\nexpr: valid_to\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_end: True\n",
+              "start_line_number": 34,
+              "end_line_number": 40
+            }
+          }
+        },
+        {
+          "name": "window_start",
+          "dunder_name": "listing__lux_listing__window_start",
+          "qualified_name": "listing__lux_listing__window_start",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing",
+            "lux_listing"
+          ],
+          "semantic_model_name": "lux_listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "valid_from",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_lux_listings.yaml",
+            "file_slice": {
+              "filename": "scd_lux_listings.yaml",
+              "content": "name: window_start\ntype: time\nexpr: valid_from\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_start: True\n",
+              "start_line_number": 27,
+              "end_line_number": 33
+            }
+          }
+        },
+        {
+          "name": "company_name",
+          "dunder_name": "listing__user__company_name",
+          "qualified_name": "listing__user__company_name",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing",
+            "user"
+          ],
+          "semantic_model_name": "companies",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/non_scd_companies.yaml",
+            "file_slice": {
+              "filename": "non_scd_companies.yaml",
+              "content": "name: company_name\ntype: categorical\n",
+              "start_line_number": 11,
+              "end_line_number": 13
+            }
+          }
+        },
+        {
+          "name": "ds",
+          "dunder_name": "listing__user__ds",
+          "qualified_name": "listing__user__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing",
+            "user"
+          ],
+          "semantic_model_name": "users_latest",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_users.yaml",
+            "file_slice": {
+              "filename": "scd_users.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 11,
+              "end_line_number": 14
+            }
+          }
+        },
+        {
+          "name": "home_state_latest",
+          "dunder_name": "listing__user__home_state_latest",
+          "qualified_name": "listing__user__home_state_latest",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing",
+            "user"
+          ],
+          "semantic_model_name": "users_latest",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_users.yaml",
+            "file_slice": {
+              "filename": "scd_users.yaml",
+              "content": "name: home_state_latest\ntype: categorical\n",
+              "start_line_number": 15,
+              "end_line_number": 17
+            }
+          }
+        },
+        {
+          "name": "window_end",
+          "dunder_name": "listing__window_end",
+          "qualified_name": "listing__window_end",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "active_to",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_listings.yaml",
+            "file_slice": {
+              "filename": "scd_listings.yaml",
+              "content": "name: window_end\ntype: time\nexpr: active_to\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_end: True\n",
+              "start_line_number": 18,
+              "end_line_number": 24
+            }
+          }
+        },
+        {
+          "name": "window_start",
+          "dunder_name": "listing__window_start",
+          "qualified_name": "listing__window_start",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "active_from",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_listings.yaml",
+            "file_slice": {
+              "filename": "scd_listings.yaml",
+              "content": "name: window_start\ntype: time\nexpr: active_from\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_start: True\n",
+              "start_line_number": 11,
+              "end_line_number": 17
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__day",
+          "qualified_name": "metric_time__day",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "account_type",
+          "dunder_name": "user__account_type",
+          "qualified_name": "user__account_type",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "primary_accounts",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_accounts.yaml",
+            "file_slice": {
+              "filename": "scd_accounts.yaml",
+              "content": "name: account_type\ntype: categorical\n",
+              "start_line_number": 25,
+              "end_line_number": 27
+            }
+          }
+        },
+        {
+          "name": "company_name",
+          "dunder_name": "user__company_name",
+          "qualified_name": "user__company_name",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "companies",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/non_scd_companies.yaml",
+            "file_slice": {
+              "filename": "non_scd_companies.yaml",
+              "content": "name: company_name\ntype: categorical\n",
+              "start_line_number": 11,
+              "end_line_number": 13
+            }
+          }
+        },
+        {
+          "name": "ds",
+          "dunder_name": "user__ds",
+          "qualified_name": "user__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "users_latest",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_users.yaml",
+            "file_slice": {
+              "filename": "scd_users.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 11,
+              "end_line_number": 14
+            }
+          }
+        },
+        {
+          "name": "home_state_latest",
+          "dunder_name": "user__home_state_latest",
+          "qualified_name": "user__home_state_latest",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "users_latest",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_users.yaml",
+            "file_slice": {
+              "filename": "scd_users.yaml",
+              "content": "name: home_state_latest\ntype: categorical\n",
+              "start_line_number": 15,
+              "end_line_number": 17
+            }
+          }
+        },
+        {
+          "name": "primary_from",
+          "dunder_name": "user__primary_from",
+          "qualified_name": "user__primary_from",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "primary_accounts",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "set_as_primary",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_accounts.yaml",
+            "file_slice": {
+              "filename": "scd_accounts.yaml",
+              "content": "name: primary_from\ntype: time\nexpr: set_as_primary\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_start: True\n",
+              "start_line_number": 11,
+              "end_line_number": 17
+            }
+          }
+        },
+        {
+          "name": "primary_to",
+          "dunder_name": "user__primary_to",
+          "qualified_name": "user__primary_to",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "primary_accounts",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "removed_as_primary",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_accounts.yaml",
+            "file_slice": {
+              "filename": "scd_accounts.yaml",
+              "content": "name: primary_to\ntype: time\nexpr: removed_as_primary\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_end: True\n",
+              "start_line_number": 18,
+              "end_line_number": 24
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "bookings_source"
+      ]
+    },
+    {
+      "name": "potentially_lux_bookings",
+      "type": "simple",
+      "description": "raw booking count for listings that are lux, or unknown",
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "bookings",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "bookings",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "bookings_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": {
+        "where_filters": [
+          {
+            "where_sql_template": "{{ Dimension('listing__is_lux') }} OR {{ Dimension('listing__is_lux') }} IS NULL"
+          }
+        ]
+      },
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_metrics.yaml",
+        "file_slice": {
+          "filename": "scd_metrics.yaml",
+          "content": "name: potentially_lux_bookings\ndescription: raw booking count for listings that are lux, or unknown\ntype: SIMPLE\nfilter: \"{{ Dimension('listing__is_lux') }} OR {{ Dimension('listing__is_lux') }}\\\n  \\ IS NULL\"\ntype_params:\n  measure: bookings\n",
+          "start_line_number": 19,
+          "end_line_number": 25
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking__ds",
+          "qualified_name": "booking__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_bookings.yaml",
+            "file_slice": {
+              "filename": "scd_bookings.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 36,
+              "end_line_number": 39
+            }
+          }
+        },
+        {
+          "name": "ds_partitioned",
+          "dunder_name": "booking__ds_partitioned",
+          "qualified_name": "booking__ds_partitioned",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": true,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_bookings.yaml",
+            "file_slice": {
+              "filename": "scd_bookings.yaml",
+              "content": "name: ds_partitioned\ntype: time\nis_partition: true\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 40,
+              "end_line_number": 44
+            }
+          }
+        },
+        {
+          "name": "is_instant",
+          "dunder_name": "booking__is_instant",
+          "qualified_name": "booking__is_instant",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_bookings.yaml",
+            "file_slice": {
+              "filename": "scd_bookings.yaml",
+              "content": "name: is_instant\ntype: categorical\n",
+              "start_line_number": 34,
+              "end_line_number": 35
+            }
+          }
+        },
+        {
+          "name": "paid_at",
+          "dunder_name": "booking__paid_at",
+          "qualified_name": "booking__paid_at",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_bookings.yaml",
+            "file_slice": {
+              "filename": "scd_bookings.yaml",
+              "content": "name: paid_at\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 45,
+              "end_line_number": 49
+            }
+          }
+        },
+        {
+          "name": "capacity",
+          "dunder_name": "listing__capacity",
+          "qualified_name": "listing__capacity",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_listings.yaml",
+            "file_slice": {
+              "filename": "scd_listings.yaml",
+              "content": "name: capacity\ntype: categorical\n",
+              "start_line_number": 29,
+              "end_line_number": 31
+            }
+          }
+        },
+        {
+          "name": "country",
+          "dunder_name": "listing__country",
+          "qualified_name": "listing__country",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_listings.yaml",
+            "file_slice": {
+              "filename": "scd_listings.yaml",
+              "content": "name: country\ntype: categorical\n",
+              "start_line_number": 25,
+              "end_line_number": 26
+            }
+          }
+        },
+        {
+          "name": "is_lux",
+          "dunder_name": "listing__is_lux",
+          "qualified_name": "listing__is_lux",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_listings.yaml",
+            "file_slice": {
+              "filename": "scd_listings.yaml",
+              "content": "name: is_lux\ntype: categorical\n",
+              "start_line_number": 27,
+              "end_line_number": 28
+            }
+          }
+        },
+        {
+          "name": "is_confirmed_lux",
+          "dunder_name": "listing__lux_listing__is_confirmed_lux",
+          "qualified_name": "listing__lux_listing__is_confirmed_lux",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing",
+            "lux_listing"
+          ],
+          "semantic_model_name": "lux_listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_lux_listings.yaml",
+            "file_slice": {
+              "filename": "scd_lux_listings.yaml",
+              "content": "name: is_confirmed_lux\ntype: categorical\n",
+              "start_line_number": 41,
+              "end_line_number": 43
+            }
+          }
+        },
+        {
+          "name": "window_end",
+          "dunder_name": "listing__lux_listing__window_end",
+          "qualified_name": "listing__lux_listing__window_end",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing",
+            "lux_listing"
+          ],
+          "semantic_model_name": "lux_listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "valid_to",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_lux_listings.yaml",
+            "file_slice": {
+              "filename": "scd_lux_listings.yaml",
+              "content": "name: window_end\ntype: time\nexpr: valid_to\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_end: True\n",
+              "start_line_number": 34,
+              "end_line_number": 40
+            }
+          }
+        },
+        {
+          "name": "window_start",
+          "dunder_name": "listing__lux_listing__window_start",
+          "qualified_name": "listing__lux_listing__window_start",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing",
+            "lux_listing"
+          ],
+          "semantic_model_name": "lux_listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "valid_from",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_lux_listings.yaml",
+            "file_slice": {
+              "filename": "scd_lux_listings.yaml",
+              "content": "name: window_start\ntype: time\nexpr: valid_from\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_start: True\n",
+              "start_line_number": 27,
+              "end_line_number": 33
+            }
+          }
+        },
+        {
+          "name": "company_name",
+          "dunder_name": "listing__user__company_name",
+          "qualified_name": "listing__user__company_name",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing",
+            "user"
+          ],
+          "semantic_model_name": "companies",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/non_scd_companies.yaml",
+            "file_slice": {
+              "filename": "non_scd_companies.yaml",
+              "content": "name: company_name\ntype: categorical\n",
+              "start_line_number": 11,
+              "end_line_number": 13
+            }
+          }
+        },
+        {
+          "name": "ds",
+          "dunder_name": "listing__user__ds",
+          "qualified_name": "listing__user__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing",
+            "user"
+          ],
+          "semantic_model_name": "users_latest",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_users.yaml",
+            "file_slice": {
+              "filename": "scd_users.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 11,
+              "end_line_number": 14
+            }
+          }
+        },
+        {
+          "name": "home_state_latest",
+          "dunder_name": "listing__user__home_state_latest",
+          "qualified_name": "listing__user__home_state_latest",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing",
+            "user"
+          ],
+          "semantic_model_name": "users_latest",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_users.yaml",
+            "file_slice": {
+              "filename": "scd_users.yaml",
+              "content": "name: home_state_latest\ntype: categorical\n",
+              "start_line_number": 15,
+              "end_line_number": 17
+            }
+          }
+        },
+        {
+          "name": "window_end",
+          "dunder_name": "listing__window_end",
+          "qualified_name": "listing__window_end",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "active_to",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_listings.yaml",
+            "file_slice": {
+              "filename": "scd_listings.yaml",
+              "content": "name: window_end\ntype: time\nexpr: active_to\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_end: True\n",
+              "start_line_number": 18,
+              "end_line_number": 24
+            }
+          }
+        },
+        {
+          "name": "window_start",
+          "dunder_name": "listing__window_start",
+          "qualified_name": "listing__window_start",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "active_from",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_listings.yaml",
+            "file_slice": {
+              "filename": "scd_listings.yaml",
+              "content": "name: window_start\ntype: time\nexpr: active_from\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_start: True\n",
+              "start_line_number": 11,
+              "end_line_number": 17
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__day",
+          "qualified_name": "metric_time__day",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "account_type",
+          "dunder_name": "user__account_type",
+          "qualified_name": "user__account_type",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "primary_accounts",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_accounts.yaml",
+            "file_slice": {
+              "filename": "scd_accounts.yaml",
+              "content": "name: account_type\ntype: categorical\n",
+              "start_line_number": 25,
+              "end_line_number": 27
+            }
+          }
+        },
+        {
+          "name": "company_name",
+          "dunder_name": "user__company_name",
+          "qualified_name": "user__company_name",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "companies",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/non_scd_companies.yaml",
+            "file_slice": {
+              "filename": "non_scd_companies.yaml",
+              "content": "name: company_name\ntype: categorical\n",
+              "start_line_number": 11,
+              "end_line_number": 13
+            }
+          }
+        },
+        {
+          "name": "ds",
+          "dunder_name": "user__ds",
+          "qualified_name": "user__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "users_latest",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_users.yaml",
+            "file_slice": {
+              "filename": "scd_users.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 11,
+              "end_line_number": 14
+            }
+          }
+        },
+        {
+          "name": "home_state_latest",
+          "dunder_name": "user__home_state_latest",
+          "qualified_name": "user__home_state_latest",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "users_latest",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_users.yaml",
+            "file_slice": {
+              "filename": "scd_users.yaml",
+              "content": "name: home_state_latest\ntype: categorical\n",
+              "start_line_number": 15,
+              "end_line_number": 17
+            }
+          }
+        },
+        {
+          "name": "primary_from",
+          "dunder_name": "user__primary_from",
+          "qualified_name": "user__primary_from",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "primary_accounts",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "set_as_primary",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_accounts.yaml",
+            "file_slice": {
+              "filename": "scd_accounts.yaml",
+              "content": "name: primary_from\ntype: time\nexpr: set_as_primary\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_start: True\n",
+              "start_line_number": 11,
+              "end_line_number": 17
+            }
+          }
+        },
+        {
+          "name": "primary_to",
+          "dunder_name": "user__primary_to",
+          "qualified_name": "user__primary_to",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "user"
+          ],
+          "semantic_model_name": "primary_accounts",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": "removed_as_primary",
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/scd_manifest/scd_accounts.yaml",
+            "file_slice": {
+              "filename": "scd_accounts.yaml",
+              "content": "name: primary_to\ntype: time\nexpr: removed_as_primary\ntype_params:\n  time_granularity: day\n  validity_params:\n    is_end: True\n",
+              "start_line_number": 18,
+              "end_line_number": 24
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "bookings_source"
+      ]
+    }
+  ]
+}

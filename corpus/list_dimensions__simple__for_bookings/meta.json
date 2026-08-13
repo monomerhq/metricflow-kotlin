@@ -1,0 +1,13 @@
+{
+  "case_id": "list_dimensions__simple__for_bookings",
+  "subcommand": "list_dimensions",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "bookings"
+    ]
+  },
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

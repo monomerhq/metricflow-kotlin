@@ -1,0 +1,331 @@
+{
+  "metrics": [
+    {
+      "name": "bookings",
+      "type": "simple",
+      "description": null,
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "booking_count",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "booking_count",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "bookings_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/sg_05_derived_metric/manifest.yaml",
+        "file_slice": {
+          "filename": "manifest.yaml",
+          "content": "name: bookings\ntype: simple\ntype_params:\n  measure: booking_count\n",
+          "start_line_number": 57,
+          "end_line_number": 61
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "booking_time",
+          "dunder_name": "booking__booking_time",
+          "qualified_name": "booking__booking_time",
+          "type": "time",
+          "granularity": "quarter",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/sg_05_derived_metric/manifest.yaml",
+            "file_slice": {
+              "filename": "manifest.yaml",
+              "content": "name: booking_time\ntype: time\ntype_params:\n  time_granularity: quarter\n",
+              "start_line_number": 23,
+              "end_line_number": 27
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__quarter",
+          "qualified_name": "metric_time__quarter",
+          "type": "time",
+          "granularity": "quarter",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "bookings_source"
+      ]
+    },
+    {
+      "name": "bookings_per_view",
+      "type": "ratio",
+      "description": null,
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": {
+          "name": "bookings",
+          "filter": null,
+          "alias": null,
+          "offset_window": null,
+          "offset_to_grain": null
+        },
+        "denominator": {
+          "name": "views",
+          "filter": null,
+          "alias": null,
+          "offset_window": null,
+          "offset_to_grain": null
+        },
+        "expr": null,
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "booking_count",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          },
+          {
+            "name": "view_count",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/sg_05_derived_metric/manifest.yaml",
+        "file_slice": {
+          "filename": "manifest.yaml",
+          "content": "name: bookings_per_view\ntype: ratio\ntype_params:\n  numerator:\n    name: bookings\n  denominator:\n    name: views\n",
+          "start_line_number": 71,
+          "end_line_number": 77
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "booking_time",
+          "dunder_name": "booking__booking_time",
+          "qualified_name": "booking__booking_time",
+          "type": "time",
+          "granularity": "quarter",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/sg_05_derived_metric/manifest.yaml",
+            "file_slice": {
+              "filename": "manifest.yaml",
+              "content": "name: booking_time\ntype: time\ntype_params:\n  time_granularity: quarter\n",
+              "start_line_number": 23,
+              "end_line_number": 27
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__quarter",
+          "qualified_name": "metric_time__quarter",
+          "type": "time",
+          "granularity": "quarter",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "bookings_source",
+        "views_source"
+      ]
+    },
+    {
+      "name": "views",
+      "type": "simple",
+      "description": null,
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "view_count",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "view_count",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "views_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/sg_05_derived_metric/manifest.yaml",
+        "file_slice": {
+          "filename": "manifest.yaml",
+          "content": "name: views\ntype: simple\ntype_params:\n  measure: view_count\n",
+          "start_line_number": 64,
+          "end_line_number": 68
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "booking_time",
+          "dunder_name": "booking__booking_time",
+          "qualified_name": "booking__booking_time",
+          "type": "time",
+          "granularity": "quarter",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/sg_05_derived_metric/manifest.yaml",
+            "file_slice": {
+              "filename": "manifest.yaml",
+              "content": "name: booking_time\ntype: time\ntype_params:\n  time_granularity: quarter\n",
+              "start_line_number": 23,
+              "end_line_number": 27
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__quarter",
+          "qualified_name": "metric_time__quarter",
+          "type": "time",
+          "granularity": "quarter",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        },
+        {
+          "name": "view_time",
+          "dunder_name": "view__view_time",
+          "qualified_name": "view__view_time",
+          "type": "time",
+          "granularity": "quarter",
+          "entity_links": [
+            "view"
+          ],
+          "semantic_model_name": "views_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/sg_05_derived_metric/manifest.yaml",
+            "file_slice": {
+              "filename": "manifest.yaml",
+              "content": "name: view_time\ntype: time\ntype_params:\n  time_granularity: quarter\n",
+              "start_line_number": 45,
+              "end_line_number": 49
+            }
+          }
+        }
+      ],
+      "semantic_models": [
+        "views_source"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "dimensions": [
+    {
+      "name": "ds",
+      "dunder_name": "id__ds",
+      "qualified_name": "id__ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "id"
+      ],
+      "semantic_model_name": "animals",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/data_warehouse_validation_manifest/semantic_models/semantic_model1.yml",
+        "file_slice": {
+          "filename": "semantic_model1.yml",
+          "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 14,
+          "end_line_number": 17
+        }
+      }
+    },
+    {
+      "name": "is_dog",
+      "dunder_name": "id__is_dog",
+      "qualified_name": "id__is_dog",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "id"
+      ],
+      "semantic_model_name": "animals",
+      "is_partition": true,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/data_warehouse_validation_manifest/semantic_models/semantic_model1.yml",
+        "file_slice": {
+          "filename": "semantic_model1.yml",
+          "content": "name: is_dog\ntype: categorical\nis_partition: True\n",
+          "start_line_number": 18,
+          "end_line_number": 21
+        }
+      }
+    }
+  ]
+}

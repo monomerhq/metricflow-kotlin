@@ -1,0 +1,79 @@
+{
+  "dimensions": [
+    {
+      "name": "ds",
+      "dunder_name": "booking__ds",
+      "qualified_name": "booking__ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "booking"
+      ],
+      "semantic_model_name": "extended_bookings_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/extended_bookings_source.yaml",
+        "file_slice": {
+          "filename": "extended_bookings_source.yaml",
+          "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 24,
+          "end_line_number": 28
+        }
+      }
+    },
+    {
+      "name": "ds",
+      "dunder_name": "booking_monthly__ds",
+      "qualified_name": "booking_monthly__ds",
+      "type": "time",
+      "granularity": "month",
+      "entity_links": [
+        "booking_monthly"
+      ],
+      "semantic_model_name": "monthly_bookings_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/bookings_monthly_source.yaml",
+        "file_slice": {
+          "filename": "bookings_monthly_source.yaml",
+          "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: month\n",
+          "start_line_number": 23,
+          "end_line_number": 27
+        }
+      }
+    },
+    {
+      "name": "ds",
+      "dunder_name": "listing__ds",
+      "qualified_name": "listing__ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "listing"
+      ],
+      "semantic_model_name": "listings_extended_source",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": "listing_creation_ds",
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/extended_date_manifest/semantic_models/listings_extended_source.yaml",
+        "file_slice": {
+          "filename": "listings_extended_source.yaml",
+          "content": "name: ds\nexpr: listing_creation_ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 11,
+          "end_line_number": 16
+        }
+      }
+    }
+  ]
+}

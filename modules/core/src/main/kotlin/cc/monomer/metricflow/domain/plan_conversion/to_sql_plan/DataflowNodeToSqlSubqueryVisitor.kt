@@ -1,0 +1,1468 @@
+package cc.monomer.metricflow.domain.plan_conversion.to_sql_plan
+
+import cc.monomer.metricflow.common.dag.SequentialIdGenerator
+import cc.monomer.metricflow.common.dag.StaticIdPrefix
+import cc.monomer.metricflow.common.time.TimeRangeConstraint
+import cc.monomer.metricflow.domain.dataflow.DataflowPlanNode
+import cc.monomer.metricflow.domain.dataflow.DataflowPlanNodeVisitor
+import cc.monomer.metricflow.domain.dataflow.dataset.AnnotatedSqlDataSet
+import cc.monomer.metricflow.domain.dataflow.dataset.SqlDataSet
+import cc.monomer.metricflow.domain.dataflow.instance.DimensionInstance
+import cc.monomer.metricflow.domain.dataflow.instance.EntityInstance
+import cc.monomer.metricflow.domain.dataflow.instance.GroupByMetricInstance
+import cc.monomer.metricflow.domain.dataflow.instance.InstanceSet
+import cc.monomer.metricflow.domain.dataflow.instance.LinkableInstance
+import cc.monomer.metricflow.domain.dataflow.instance.MdoInstance
+import cc.monomer.metricflow.domain.dataflow.instance.MetadataInstance
+import cc.monomer.metricflow.domain.dataflow.instance.MetricInstance
+import cc.monomer.metricflow.domain.dataflow.instance.SimpleMetricInputInstance
+import cc.monomer.metricflow.domain.dataflow.instance.TimeDimensionInstance
+import cc.monomer.metricflow.domain.dataflow.nodes.AddGeneratedUuidColumnNode
+import cc.monomer.metricflow.domain.dataflow.nodes.AggregateSimpleMetricInputsNode
+import cc.monomer.metricflow.domain.dataflow.nodes.AliasSpecsNode
+import cc.monomer.metricflow.domain.dataflow.nodes.CombineAggregatedOutputsNode
+import cc.monomer.metricflow.domain.dataflow.nodes.ComputeMetricsNode
+import cc.monomer.metricflow.domain.dataflow.nodes.ConstrainTimeRangeNode
+import cc.monomer.metricflow.domain.dataflow.nodes.JoinConversionEventsNode
+import cc.monomer.metricflow.domain.dataflow.nodes.JoinOnEntitiesNode
+import cc.monomer.metricflow.domain.dataflow.nodes.JoinOverTimeRangeNode
+import cc.monomer.metricflow.domain.dataflow.nodes.JoinToCustomGranularityNode
+import cc.monomer.metricflow.domain.dataflow.nodes.JoinToTimeSpineNode
+import cc.monomer.metricflow.domain.dataflow.nodes.MetricTimeDimensionTransformNode
+import cc.monomer.metricflow.domain.dataflow.nodes.MinMaxNode
+import cc.monomer.metricflow.domain.dataflow.nodes.OffsetBaseGrainByCustomGrainNode
+import cc.monomer.metricflow.domain.dataflow.nodes.OffsetCustomGranularityNode
+import cc.monomer.metricflow.domain.dataflow.nodes.OrderByLimitNode
+import cc.monomer.metricflow.domain.dataflow.nodes.ReadSqlSourceNode
+import cc.monomer.metricflow.domain.dataflow.nodes.SelectorNode
+import cc.monomer.metricflow.domain.dataflow.nodes.SemiAdditiveJoinNode
+import cc.monomer.metricflow.domain.dataflow.nodes.WhereFilterNode
+import cc.monomer.metricflow.domain.dataflow.nodes.WindowReaggregationNode
+import cc.monomer.metricflow.domain.dataflow.nodes.WriteToResultDataTableNode
+import cc.monomer.metricflow.domain.dataflow.nodes.WriteToResultTableNode
+import cc.monomer.metricflow.domain.dataflow.support.NullFillValueMapping
+import cc.monomer.metricflow.domain.lookup.SemanticManifestLookup
+import cc.monomer.metricflow.domain.manifest.model.enums.AggregationType
+import cc.monomer.metricflow.domain.manifest.model.enums.ConversionCalculationType
+import cc.monomer.metricflow.domain.manifest.model.enums.MetricType
+import cc.monomer.metricflow.domain.manifest.model.references.MetricModelReference
+import cc.monomer.metricflow.domain.plan_conversion.helpers.SelectColumnSet
+import cc.monomer.metricflow.domain.plan_conversion.helpers.SqlPlanJoinBuilder
+import cc.monomer.metricflow.domain.plan_conversion.instance_transforms.AddGroupByMetric
+import cc.monomer.metricflow.domain.plan_conversion.instance_transforms.AddMetadata
+import cc.monomer.metricflow.domain.plan_conversion.instance_transforms.AddMetrics
+import cc.monomer.metricflow.domain.plan_conversion.instance_transforms.ChangeAssociatedColumns
+import cc.monomer.metricflow.domain.plan_conversion.instance_transforms.ChangeSimpleMetricInputAggregationState
+import cc.monomer.metricflow.domain.plan_conversion.instance_transforms.ConvertToMetadata
+import cc.monomer.metricflow.domain.plan_conversion.instance_transforms.CreateAggregatedSimpleMetricInputsTransform
+import cc.monomer.metricflow.domain.plan_conversion.instance_transforms.CreateSelectColumnForCombineOutputNode
+import cc.monomer.metricflow.domain.plan_conversion.instance_transforms.CreateSelectColumnsForInstances
+import cc.monomer.metricflow.domain.plan_conversion.instance_transforms.FilterLinkableInstancesWithLeadingLink
+import cc.monomer.metricflow.domain.plan_conversion.instance_transforms.RemoveMetrics
+import cc.monomer.metricflow.domain.plan_conversion.instance_transforms.RemoveSimpleMetricInputTransform
+import cc.monomer.metricflow.domain.plan_conversion.instance_transforms.SelectElementsTransform
+import cc.monomer.metricflow.domain.plan_conversion.instance_transforms.UpdateSimpleMetricInputFillNullsWith
+import cc.monomer.metricflow.domain.plan_conversion.instance_transforms.createSimpleSelectColumnsForInstanceSets
+import cc.monomer.metricflow.domain.plan_conversion.spec_transforms.CreateColumnAssociations
+import cc.monomer.metricflow.domain.plan_conversion.spec_transforms.CreateSelectCoalescedColumnsForLinkableSpecs
+import cc.monomer.metricflow.domain.plan_conversion.spec_transforms.SelectOnlyLinkableSpecs
+import cc.monomer.metricflow.domain.spec.AggregationState
+import cc.monomer.metricflow.domain.spec.ColumnAssociationResolver
+import cc.monomer.metricflow.domain.spec.GroupByMetricSpec
+import cc.monomer.metricflow.domain.spec.InstanceSpec
+import cc.monomer.metricflow.domain.spec.InstanceSpecSet
+import cc.monomer.metricflow.domain.spec.MetadataSpec
+import cc.monomer.metricflow.domain.spec.MetricSpec
+import cc.monomer.metricflow.domain.spec.bind.SqlJoinType
+import cc.monomer.metricflow.domain.spec.where.WhereFilterSpec
+import cc.monomer.metricflow.domain.sql.plan.ColumnAliasRenamer
+import cc.monomer.metricflow.domain.sql.plan.SqlSelectColumn
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlBetweenExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlColumnReference
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlColumnReferenceExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlExpressionNode
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlFunction
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlFunctionExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlGenerateUuidExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlLogicalExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlLogicalOperator
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlRatioComputationExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlStringExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlStringLiteralExpression
+import cc.monomer.metricflow.domain.sql.plan.nodes.SqlCreateTableAsNode
+import cc.monomer.metricflow.domain.sql.plan.nodes.SqlJoinDescription
+import cc.monomer.metricflow.domain.sql.plan.nodes.SqlOrderByDescription
+import cc.monomer.metricflow.domain.sql.plan.nodes.SqlSelectStatementNode
+import java.time.LocalDateTime
+
+/**
+ * Converts a single [DataflowPlanNode] into a [SqlDataSet] — the central engine of the
+ * dataflow→SQL conversion layer.
+ *
+ * Port of `metricflow.plan_conversion.to_sql_plan.dataflow_to_subquery
+ * .DataflowNodeToSqlSubqueryVisitor` (Python ~2.4k LOC). Each `visit*` override knows how to
+ * realise one dataflow node type as a sub-SELECT or table reference. The visitor walks the
+ * dataflow DAG bottom-up: every parent node is converted first via [getOutputDataSet], the
+ * result is wrapped into a `SqlSelectStatementNode` that joins/filters/aggregates as required,
+ * and the new [SqlDataSet] is cached so multi-parent dataflow nodes don't re-emit common
+ * branches.
+ *
+ * ## Status — W14c port (17 of 23 visit methods filled)
+ *
+ * W13 filled the simpler 15 visit methods (read source, projection, terminal nodes, time-range
+ * constraint, aggregation, compute metrics, join-on-entities, combine, etc.). W14c added two
+ * more — [visitSemiAdditiveJoinNode] (entity-key + non-additive time-dim filter join) and
+ * [visitWindowReaggregationNode] (FIRST_VALUE / LAST_VALUE / AVG re-aggregation over cumulative
+ * metrics).
+ *
+ * Remaining W15 deferrals (5 of 23 — all time-spine/custom-granularity related):
+ * - `visitJoinOverTimeRangeNode` — cumulative-metric time-range join
+ * - `visitJoinToTimeSpineNode` — explicit metric-time-to-spine join
+ * - `visitJoinToCustomGranularityNode` — custom-grain (`fiscal_quarter`) column lookup
+ * - `visitJoinConversionEventsNode` — conversion-metric CTE + window-function pipeline
+ * - `visitOffsetCustomGranularityNode` / `visitOffsetBaseGrainByCustomGrainNode` — offset-by-
+ *   custom-grain time-window expression building (~270 LOC Python — longest in the file)
+ *
+ * None of the W14c corpus cases (`tests_metricflow/snapshots/test_explain_plans`) exercise
+ * these paths. See the "Deferred to W15" block at the end of this file for the wiring
+ * pre-conditions each method needs.
+ *
+ * @property columnAssociationResolver How instance specs map to SQL column names.
+ * @property semanticManifestLookup The W7a/W7c lookup composition root.
+ * @property outputColumnOrderer Optional orderer for the final SELECT projection.
+ */
+class DataflowNodeToSqlSubqueryVisitor(
+    val columnAssociationResolver: ColumnAssociationResolver,
+    val semanticManifestLookup: SemanticManifestLookup,
+    val outputColumnOrderer: OutputColumnOrderer?,
+) : DataflowPlanNodeVisitor<SqlDataSet> {
+
+    private val metricLookup = semanticManifestLookup.metricLookup
+    private val nodeToOutputDataSet: MutableMap<DataflowPlanNode, SqlDataSet> = LinkedHashMap()
+
+    /**
+     * Convert [dataflowPlanNode] into a [SqlDataSet]. Port of `get_output_data_set`. Caches
+     * results so multi-parent DAGs convert each node exactly once. Note: as in Python, the
+     * cached value is **not** copied on re-fetch yet — the W14 wiring should match the Python
+     * `with_copied_sql_node()` semantics once the `copyNode()` story is fully exercised by
+     * corpus tests.
+     */
+    fun getOutputDataSet(dataflowPlanNode: DataflowPlanNode): SqlDataSet {
+        val cached = nodeToOutputDataSet[dataflowPlanNode]
+        if (cached != null) return cached
+        val result = dataflowPlanNode.accept(this)
+        nodeToOutputDataSet[dataflowPlanNode] = result
+        return result
+    }
+
+    private fun nextUniqueTableAlias(): String =
+        SequentialIdGenerator.createNextId(StaticIdPrefix.SUB_QUERY).strValue
+
+    // ---------------------------------------------------------------------------------------
+    // Simple leaf / projection nodes
+    // ---------------------------------------------------------------------------------------
+
+    /** Port of `visit_source_node`. */
+    override fun visitSourceNode(node: ReadSqlSourceNode): SqlDataSet {
+        // The ReadSqlSourceNode.dataSet is the W9a marker interface; the W12 builder seeds the
+        // real concrete `SqlDataSet`. We cast and emit a fresh copy of the SELECT to satisfy
+        // the SqlColumnPrunerOptimizer assumption that every dataflow node owns its own SELECT.
+        val concrete = node.dataSet as SqlDataSet
+        val freshSelect = concrete.checkedSqlSelectNode.copyNode()
+        return SqlDataSet(instanceSet = concrete.instanceSet, sqlSelectNode = freshSelect)
+    }
+
+    /** Port of `visit_write_to_result_data_table_node`. */
+    override fun visitWriteToResultDataTableNode(node: WriteToResultDataTableNode): SqlDataSet {
+        val inputDataSet = getOutputDataSet(node.parentNode)
+        val inputAlias = nextUniqueTableAlias()
+        val createResult = CreateSelectColumnsForInstances(
+            tableAlias = inputAlias,
+            columnResolver = columnAssociationResolver,
+        ).transform(inputDataSet.instanceSet)
+        return SqlDataSet(
+            instanceSet = inputDataSet.instanceSet,
+            sqlSelectNode = makeSelect(
+                description = node.description,
+                selectColumns = createResult.getColumns(outputColumnOrderer),
+                fromSource = inputDataSet.checkedSqlSelectNode,
+                fromSourceAlias = inputAlias,
+            ),
+        )
+    }
+
+    /** Port of `visit_write_to_result_table_node`. */
+    override fun visitWriteToResultTableNode(node: WriteToResultTableNode): SqlDataSet {
+        val inputDataSet = getOutputDataSet(node.parentNode)
+        val inputAlias = nextUniqueTableAlias()
+        val createResult = CreateSelectColumnsForInstances(
+            tableAlias = inputAlias,
+            columnResolver = columnAssociationResolver,
+        ).transform(inputDataSet.instanceSet)
+        return SqlDataSet(
+            instanceSet = inputDataSet.instanceSet,
+            sqlNode = SqlCreateTableAsNode.create(
+                sqlTable = node.outputSqlTable,
+                parentNode = makeSelect(
+                    description = node.description,
+                    selectColumns = createResult.getColumns(outputColumnOrderer),
+                    fromSource = inputDataSet.checkedSqlSelectNode,
+                    fromSourceAlias = inputAlias,
+                ),
+            ),
+        )
+    }
+
+    /** Port of `visit_selector_node`. */
+    override fun visitSelectorNode(node: SelectorNode): SqlDataSet {
+        val fromDataSet = getOutputDataSet(node.parentNode)
+        var outputInstanceSet = fromDataSet.instanceSet.transform(
+            SelectElementsTransform(includeSpecs = node.includeSpecs, excludeSpecs = null),
+        )
+        val fromAlias = nextUniqueTableAlias()
+        outputInstanceSet = outputInstanceSet.transform(
+            ChangeAssociatedColumns(columnAssociationResolver),
+        )
+        val selectColumns = CreateSelectColumnsForInstances(fromAlias, columnAssociationResolver)
+            .transform(outputInstanceSet)
+            .getColumns(null)
+        return SqlDataSet(
+            instanceSet = outputInstanceSet,
+            sqlSelectNode = SqlSelectStatementNode.create(
+                description = node.description,
+                selectColumns = selectColumns,
+                fromSource = fromDataSet.checkedSqlSelectNode,
+                fromSourceAlias = fromAlias,
+                cteSources = emptyList(),
+                joinDescs = emptyList(),
+                groupBys = if (node.distinct) selectColumns else emptyList(),
+                orderBys = emptyList(),
+                where = null,
+                limit = null,
+                distinct = false,
+            ),
+        )
+    }
+
+    /** Port of `visit_order_by_limit_node`. */
+    override fun visitOrderByLimitNode(node: OrderByLimitNode): SqlDataSet {
+        val fromDataSet = getOutputDataSet(node.parentNode)
+        val fromAlias = nextUniqueTableAlias()
+        val outputInstanceSet = fromDataSet.instanceSet.transform(
+            ChangeAssociatedColumns(columnAssociationResolver),
+        )
+        val orderByDescriptions = node.orderBySpecs.map { spec ->
+            SqlOrderByDescription(
+                expr = SqlColumnReferenceExpression.create(
+                    colRef = SqlColumnReference(
+                        tableAlias = fromAlias,
+                        columnName = columnAssociationResolver.resolveSpec(spec.instanceSpec).columnName,
+                    ),
+                    shouldRenderTableAlias = true,
+                ),
+                desc = spec.descending,
+            )
+        }
+        val selectColumns = CreateSelectColumnsForInstances(fromAlias, columnAssociationResolver)
+            .transform(outputInstanceSet).getColumns(null)
+        return SqlDataSet(
+            instanceSet = outputInstanceSet,
+            sqlSelectNode = SqlSelectStatementNode.create(
+                description = node.description,
+                selectColumns = selectColumns,
+                fromSource = fromDataSet.checkedSqlSelectNode,
+                fromSourceAlias = fromAlias,
+                cteSources = emptyList(),
+                joinDescs = emptyList(),
+                groupBys = emptyList(),
+                orderBys = orderByDescriptions,
+                where = null,
+                limit = node.limit,
+                distinct = false,
+            ),
+        )
+    }
+
+    /** Port of `visit_constrain_time_range_node`. */
+    override fun visitConstrainTimeRangeNode(node: ConstrainTimeRangeNode): SqlDataSet {
+        val fromDataSet = getOutputDataSet(node.parentNode)
+        val fromAlias = nextUniqueTableAlias()
+        val metricTimeInstance = fromDataSet.metricTimeInstanceForTimeConstraint
+        val whereCond = makeTimeRangeComparisonExpr(
+            tableAlias = fromAlias,
+            columnAlias = metricTimeInstance.associatedColumn.columnName,
+            timeRangeConstraint = node.timeRangeConstraint,
+        )
+        val outputInstanceSet = fromDataSet.instanceSet.transform(
+            ChangeAssociatedColumns(columnAssociationResolver),
+        )
+        val selectColumns = CreateSelectColumnsForInstances(fromAlias, columnAssociationResolver)
+            .transform(outputInstanceSet).getColumns(null)
+        return SqlDataSet(
+            instanceSet = outputInstanceSet,
+            sqlSelectNode = SqlSelectStatementNode.create(
+                description = node.description,
+                selectColumns = selectColumns,
+                fromSource = fromDataSet.checkedSqlSelectNode,
+                fromSourceAlias = fromAlias,
+                cteSources = emptyList(),
+                joinDescs = emptyList(),
+                groupBys = emptyList(),
+                orderBys = emptyList(),
+                where = whereCond,
+                limit = null,
+                distinct = false,
+            ),
+        )
+    }
+
+    /** Port of `visit_add_generated_uuid_column_node`. */
+    override fun visitAddGeneratedUuidColumnNode(node: AddGeneratedUuidColumnNode): SqlDataSet {
+        val inputDataSet = getOutputDataSet(node.parentNode)
+        val inputAlias = nextUniqueTableAlias()
+        val genUuidSpec = MetadataSpec(elementName = "mf_internal_uuid", aggType = null)
+        val outputColumnAssociation = columnAssociationResolver.resolveSpec(genUuidSpec)
+        val outputInstanceSet = inputDataSet.instanceSet.transform(
+            AddMetadata(
+                listOf(
+                    MetadataInstance(
+                        associatedColumns = listOf(outputColumnAssociation),
+                        spec = genUuidSpec,
+                    ),
+                ),
+            ),
+        )
+        val uuidColumn = SqlSelectColumn(
+            expr = SqlGenerateUuidExpression.create(),
+            columnAlias = outputColumnAssociation.columnName,
+        )
+        val passthroughColumns = CreateSelectColumnsForInstances(inputAlias, columnAssociationResolver)
+            .transform(inputDataSet.instanceSet)
+            .getColumns(null)
+        return SqlDataSet(
+            instanceSet = outputInstanceSet,
+            sqlSelectNode = makeSelect(
+                description = "Add column with generated UUID",
+                selectColumns = passthroughColumns + uuidColumn,
+                fromSource = inputDataSet.checkedSqlSelectNode,
+                fromSourceAlias = inputAlias,
+            ),
+        )
+    }
+
+    /** Port of `visit_min_max_node`. */
+    override fun visitMinMaxNode(node: MinMaxNode): SqlDataSet {
+        val parentDataSet = getOutputDataSet(node.parentNode)
+        val parentAlias = nextUniqueTableAlias()
+        check(parentDataSet.checkedSqlSelectNode.selectColumns.size == 1) {
+            "MinMaxNode supports exactly one parent select column."
+        }
+        val parentColumnAlias = parentDataSet.checkedSqlSelectNode.selectColumns[0].columnAlias
+        val selectColumns = mutableListOf<SqlSelectColumn>()
+        val metadataInstances = mutableListOf<MetadataInstance>()
+        for (aggType in listOf(AggregationType.MIN, AggregationType.MAX)) {
+            val metadataSpec = MetadataSpec(elementName = parentColumnAlias, aggType = aggType)
+            val outputAssociation = columnAssociationResolver.resolveSpec(metadataSpec)
+            selectColumns += SqlSelectColumn(
+                expr = SqlFunctionExpression.buildExpressionFromAggregationType(
+                    aggregationType = aggType,
+                    sqlColumnExpression = SqlColumnReferenceExpression.create(
+                        colRef = SqlColumnReference(tableAlias = parentAlias, columnName = parentColumnAlias),
+                        shouldRenderTableAlias = true,
+                    ),
+                    aggParams = null,
+                ),
+                columnAlias = outputAssociation.columnName,
+            )
+            metadataInstances += MetadataInstance(
+                associatedColumns = listOf(outputAssociation),
+                spec = metadataSpec,
+            )
+        }
+        return SqlDataSet(
+            instanceSet = parentDataSet.instanceSet.transform(ConvertToMetadata(metadataInstances)),
+            sqlSelectNode = makeSelect(
+                description = node.description,
+                selectColumns = selectColumns,
+                fromSource = parentDataSet.checkedSqlSelectNode,
+                fromSourceAlias = parentAlias,
+            ),
+        )
+    }
+
+    /** Port of `visit_alias_specs_node`. */
+    override fun visitAliasSpecsNode(node: AliasSpecsNode): SqlDataSet {
+        val parentDataSet = getOutputDataSet(node.parentNode)
+        val parentAlias = nextUniqueTableAlias()
+
+        val inputToOutputs = LinkedHashMap<InstanceSpec, MutableList<InstanceSpec>>()
+        for (change in node.changeSpecs) {
+            inputToOutputs.getOrPut(change.inputSpec) { mutableListOf() } += change.outputSpec
+        }
+
+        val outputInstances = mutableListOf<MdoInstance>()
+        val outputSelectColumns = mutableListOf<SqlSelectColumn>()
+        for (parentInstance in parentDataSet.instanceSet.asList) {
+            val parentSpec = parentInstance.spec.withoutFilterSpecs()
+            val newSpecs = inputToOutputs[parentSpec]
+            if (newSpecs != null) {
+                for (newSpec in newSpecs) {
+                    val newInstance = aliasInstance(parentInstance, newSpec)
+                    outputInstances += newInstance
+                    outputSelectColumns += SqlSelectColumn(
+                        expr = SqlColumnReferenceExpression.fromColumnReference(
+                            tableAlias = parentAlias,
+                            columnName = parentInstance.associatedColumn.columnName,
+                        ),
+                        columnAlias = newInstance.associatedColumn.columnName,
+                    )
+                }
+            } else {
+                outputInstances += parentInstance
+                val columnName = parentInstance.associatedColumn.columnName
+                outputSelectColumns += SqlSelectColumn(
+                    expr = SqlColumnReferenceExpression.fromColumnReference(
+                        tableAlias = parentAlias,
+                        columnName = columnName,
+                    ),
+                    columnAlias = columnName,
+                )
+            }
+        }
+
+        return SqlDataSet(
+            instanceSet = InstanceSet.groupInstancesByType(outputInstances),
+            sqlSelectNode = makeSelect(
+                description = node.description,
+                selectColumns = outputSelectColumns,
+                fromSource = parentDataSet.checkedSqlSelectNode,
+                fromSourceAlias = parentAlias,
+            ),
+        )
+    }
+
+    /** Port of `visit_metric_time_dimension_transform_node`. */
+    override fun visitMetricTimeDimensionTransformNode(node: MetricTimeDimensionTransformNode): SqlDataSet {
+        val inputDataSet = getOutputDataSet(node.parentNode)
+
+        // Match Python: filter simple metric inputs whose agg_time_dimension equals the node's
+        // aggregation_time_dimension_reference. The Python uses manifest_object_lookup to find
+        // the SimpleMetricInput by element name; we use the lookup as well.
+        val manifestObjectLookup = semanticManifestLookup.let { lookup ->
+            // ManifestObjectLookup is constructed lazily in W7c — but the W12 builder threads
+            // it via the converter only, not the lookup. We re-build a transient instance here
+            // mirroring the SemanticManifestLookup wiring. If this becomes a bottleneck, W14
+            // can move ManifestObjectLookup onto SemanticManifestLookup.
+            cc.monomer.metricflow.domain.semantic_graph.ManifestObjectLookup(lookup.semanticManifest)
+        }
+
+        val outputSimpleMetricInputInstances = mutableListOf<SimpleMetricInputInstance>()
+        for (instance in inputDataSet.instanceSet.simpleMetricInputInstances) {
+            val simpleMetricInput = manifestObjectLookup.simpleMetricNameToInput[instance.spec.elementName]
+                ?: continue
+            val aggTimeDim = simpleMetricInput.aggTimeDimensionName
+            if (aggTimeDim == node.aggregationTimeDimensionReference.elementName) {
+                outputSimpleMetricInputInstances += instance
+            }
+        }
+
+        val matchingTimeDimensionInstances = mutableListOf<TimeDimensionInstance>()
+        for (instance in inputDataSet.instanceSet.timeDimensionInstances) {
+            if (instance.spec.entityLinks.isEmpty() &&
+                instance.spec.reference == node.aggregationTimeDimensionReference
+            ) {
+                matchingTimeDimensionInstances += instance
+            }
+        }
+
+        val outputTimeDimensionInstances = inputDataSet.instanceSet.timeDimensionInstances.toMutableList()
+        val outputColumnToInputColumn = LinkedHashMap<String, String>()
+        for (matching in matchingTimeDimensionInstances) {
+            val metricTimeSpec =
+                cc.monomer.metricflow.domain.dataflow.dataset.DataSet.metricTimeDimensionSpec(
+                    matching.spec.timeGranularity ?: continue,
+                ).let { base ->
+                    if (matching.spec.datePart != null) {
+                        cc.monomer.metricflow.domain.dataflow.dataset.DataSet
+                            .metricTimeDimensionSpec(matching.spec.datePart!!)
+                    } else {
+                        base
+                    }
+                }
+            val metricTimeColumnAssociation = columnAssociationResolver.resolveSpec(metricTimeSpec)
+            outputTimeDimensionInstances += TimeDimensionInstance(
+                associatedColumns = listOf(metricTimeColumnAssociation),
+                spec = metricTimeSpec,
+                definedFrom = matching.definedFrom,
+            )
+            outputColumnToInputColumn[metricTimeColumnAssociation.columnName] =
+                matching.associatedColumn.columnName
+        }
+
+        var outputInstanceSet = InstanceSet(
+            simpleMetricInputInstances = outputSimpleMetricInputInstances,
+            dimensionInstances = inputDataSet.instanceSet.dimensionInstances,
+            timeDimensionInstances = outputTimeDimensionInstances,
+            entityInstances = inputDataSet.instanceSet.entityInstances,
+            metricInstances = inputDataSet.instanceSet.metricInstances,
+            groupByMetricInstances = inputDataSet.instanceSet.groupByMetricInstances,
+            metadataInstances = inputDataSet.instanceSet.metadataInstances,
+        )
+        outputInstanceSet = ChangeAssociatedColumns(columnAssociationResolver).transform(outputInstanceSet)
+
+        val fromAlias = nextUniqueTableAlias()
+        val selectColumns = CreateSelectColumnsForInstances(
+            tableAlias = fromAlias,
+            columnResolver = columnAssociationResolver,
+            outputToInputColumnMapping = outputColumnToInputColumn,
+        ).transform(outputInstanceSet).getColumns(null)
+
+        return SqlDataSet(
+            instanceSet = outputInstanceSet,
+            sqlSelectNode = makeSelect(
+                description = node.description,
+                selectColumns = selectColumns,
+                fromSource = inputDataSet.checkedSqlSelectNode,
+                fromSourceAlias = fromAlias,
+            ),
+        )
+    }
+
+    /** Port of `visit_aggregate_simple_metric_inputs_node`. */
+    override fun visitAggregateSimpleMetricInputsNode(node: AggregateSimpleMetricInputsNode): SqlDataSet {
+        val fromDataSet = getOutputDataSet(node.parentNode)
+        var aggregatedInstanceSet = fromDataSet.instanceSet.transform(
+            ChangeSimpleMetricInputAggregationState(
+                mapOf(
+                    AggregationState.NON_AGGREGATED to AggregationState.COMPLETE,
+                    AggregationState.COMPLETE to AggregationState.COMPLETE,
+                    AggregationState.PARTIAL to AggregationState.COMPLETE,
+                ),
+            ),
+        )
+        aggregatedInstanceSet = aggregatedInstanceSet.transform(
+            ChangeAssociatedColumns(columnAssociationResolver),
+        )
+        aggregatedInstanceSet = aggregatedInstanceSet.transform(
+            UpdateSimpleMetricInputFillNullsWith(node.nullFillValueMapping),
+        )
+
+        val fromAlias = nextUniqueTableAlias()
+        val manifestObjectLookup = cc.monomer.metricflow.domain.semantic_graph
+            .ManifestObjectLookup(semanticManifestLookup.semanticManifest)
+
+        val createResult = aggregatedInstanceSet.transform(
+            CreateAggregatedSimpleMetricInputsTransform(
+                tableAlias = fromAlias,
+                columnResolver = columnAssociationResolver,
+                manifestObjectLookup = manifestObjectLookup,
+            ),
+        )
+
+        return SqlDataSet(
+            instanceSet = aggregatedInstanceSet,
+            sqlSelectNode = SqlSelectStatementNode.create(
+                description = node.description,
+                selectColumns = createResult.selectColumnSet.columnsInDefaultOrder,
+                fromSource = fromDataSet.checkedSqlSelectNode,
+                fromSourceAlias = fromAlias,
+                cteSources = emptyList(),
+                joinDescs = emptyList(),
+                groupBys = createResult.groupByColumnSet.columnsInDefaultOrder,
+                orderBys = emptyList(),
+                where = null,
+                limit = null,
+                distinct = false,
+            ),
+        )
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // Compute metrics + combine outputs
+    // ---------------------------------------------------------------------------------------
+
+    /** Port of `visit_compute_metrics_node`. */
+    override fun visitComputeMetricsNode(node: ComputeMetricsNode): SqlDataSet {
+        val fromDataSet = getOutputDataSet(node.parentNode)
+        val fromAlias = nextUniqueTableAlias()
+
+        var outputInstanceSet = fromDataSet.instanceSet.transform(RemoveSimpleMetricInputTransform())
+        outputInstanceSet = outputInstanceSet.transform(ChangeAssociatedColumns(columnAssociationResolver))
+        outputInstanceSet = outputInstanceSet.transform(RemoveMetrics(node.passthroughMetricSpecs))
+
+        if (node.outputGroupByMetricInstances) {
+            check(
+                node.metricSpecs.size == 1 && outputInstanceSet.entityInstances.size == 1,
+            ) {
+                "Group by metrics currently only support exactly one metric grouped by exactly one entity."
+            }
+        }
+
+        val nonMetricSelectColumnSet: SelectColumnSet = CreateSelectColumnsForInstances(
+            tableAlias = fromAlias,
+            columnResolver = columnAssociationResolver,
+        ).transform(outputInstanceSet).selectColumnSet
+
+        val metricSelectColumns = mutableListOf<SqlSelectColumn>()
+        val metricInstances = mutableListOf<MetricInstance>()
+        var groupByMetricInstance: GroupByMetricInstance? = null
+
+        val simpleMetricInputElementNameToInstance: Map<String, SimpleMetricInputInstance> =
+            fromDataSet.instanceSet.simpleMetricInputInstances.associateBy { it.spec.elementName }
+
+        for (metricSpec in node.computedMetricSpecs) {
+            val metric = metricLookup.getMetric(
+                cc.monomer.metricflow.domain.manifest.model.references.MetricReference(
+                    elementName = metricSpec.elementName,
+                ),
+            )
+            val metricExpr: SqlExpressionNode = when (metric.type) {
+                MetricType.RATIO -> {
+                    val numerator = checkNotNull(metric.typeParams.numerator) {
+                        "Missing numerator for ratio metric, should have been caught in validation."
+                    }
+                    val denominator = checkNotNull(metric.typeParams.denominator) {
+                        "Missing denominator for ratio metric, should have been caught in validation."
+                    }
+                    val numeratorColumn = columnAssociationResolver.resolveSpec(
+                        MetricSpec.fromReference(numerator.postAggregationReference),
+                    ).columnName
+                    val denominatorColumn = columnAssociationResolver.resolveSpec(
+                        MetricSpec.fromReference(denominator.postAggregationReference),
+                    ).columnName
+                    SqlRatioComputationExpression.create(
+                        numerator = SqlColumnReferenceExpression.create(
+                            colRef = SqlColumnReference(tableAlias = fromAlias, columnName = numeratorColumn),
+                            shouldRenderTableAlias = true,
+                        ),
+                        denominator = SqlColumnReferenceExpression.create(
+                            colRef = SqlColumnReference(tableAlias = fromAlias, columnName = denominatorColumn),
+                            shouldRenderTableAlias = true,
+                        ),
+                    )
+                }
+                MetricType.SIMPLE -> {
+                    val instance = checkNotNull(simpleMetricInputElementNameToInstance[metricSpec.elementName]) {
+                        "Expected a simple metric instance with element name matching the metric " +
+                            "name to be present in the input. metric=${metricSpec.elementName}"
+                    }
+                    makeColRefOrCoalesceExpr(
+                        columnName = instance.associatedColumn.columnName,
+                        nullFillValue = metric.typeParams.fillNullsWith,
+                        fromAlias = fromAlias,
+                    )
+                }
+                MetricType.CUMULATIVE -> {
+                    val cumulativeTypeParams = checkNotNull(metric.typeParams.cumulativeTypeParams) {
+                        "A cumulative metric should have `cumulativeTypeParams` set: metric=$metric"
+                    }
+                    val cumulativeMetric = checkNotNull(cumulativeTypeParams.metric) {
+                        "A cumulative metric should have `cumulativeTypeParams.metric` set: metric=$metric"
+                    }
+                    makeColRefOrCoalesceExpr(
+                        columnName = cumulativeMetric.name,
+                        nullFillValue = metric.typeParams.fillNullsWith,
+                        fromAlias = fromAlias,
+                    )
+                }
+                MetricType.DERIVED -> {
+                    val expr = checkNotNull(metric.typeParams.expr) {
+                        "Derived metrics are required to have an `expr` in their YAML definition."
+                    }
+                    SqlStringExpression.create(
+                        sqlExpr = expr,
+                        bindParameterSet =
+                            cc.monomer.metricflow.domain.spec.bind.SqlBindParameterSet.EMPTY,
+                        requiresParenthesis = true,
+                        usedColumns = null,
+                    )
+                }
+                MetricType.CONVERSION -> {
+                    val conversionTypeParams = checkNotNull(metric.typeParams.conversionTypeParams) {
+                        "A conversion metric should have typeParams.conversionTypeParams defined."
+                    }
+                    val baseInputMetric = checkNotNull(conversionTypeParams.baseMetric) {
+                        "A conversion metric must have a base metric."
+                    }
+                    val convInputMetric = checkNotNull(conversionTypeParams.conversionMetric) {
+                        "A conversion metric must have a conversion metric."
+                    }
+                    val baseInstance = checkNotNull(simpleMetricInputElementNameToInstance[baseInputMetric.name]) {
+                        "Expected base input instance: ${baseInputMetric.name}"
+                    }
+                    val convInstance = checkNotNull(simpleMetricInputElementNameToInstance[convInputMetric.name]) {
+                        "Expected conversion input instance: ${convInputMetric.name}"
+                    }
+                    val baseRef = SqlColumnReferenceExpression.create(
+                        colRef = SqlColumnReference(
+                            tableAlias = fromAlias,
+                            columnName = baseInstance.associatedColumn.columnName,
+                        ),
+                        shouldRenderTableAlias = true,
+                    )
+                    val convRef = SqlColumnReferenceExpression.create(
+                        colRef = SqlColumnReference(
+                            tableAlias = fromAlias,
+                            columnName = convInstance.associatedColumn.columnName,
+                        ),
+                        shouldRenderTableAlias = true,
+                    )
+                    when (conversionTypeParams.calculation) {
+                        ConversionCalculationType.CONVERSION_RATE ->
+                            SqlRatioComputationExpression.create(numerator = convRef, denominator = baseRef)
+                        ConversionCalculationType.CONVERSIONS -> convRef
+                    }
+                }
+            }
+
+            val definedFrom = MetricModelReference(metricName = metricSpec.elementName)
+            val outputColumnAssociation: cc.monomer.metricflow.domain.spec.ColumnAssociation
+            if (node.outputGroupByMetricInstances) {
+                val entitySpec = outputInstanceSet.entityInstances[0].spec
+                val groupBySpec = GroupByMetricSpec(
+                    elementName = metricSpec.elementName,
+                    entityLinks = emptyList(),
+                    metricSubqueryEntityLinks = entitySpec.entityLinks + entitySpec.reference,
+                    alias = null,
+                )
+                outputColumnAssociation = columnAssociationResolver.resolveSpec(groupBySpec)
+                groupByMetricInstance = GroupByMetricInstance(
+                    associatedColumns = listOf(outputColumnAssociation),
+                    definedFrom = definedFrom,
+                    spec = groupBySpec,
+                )
+            } else {
+                outputColumnAssociation = columnAssociationResolver.resolveSpec(metricSpec)
+                metricInstances += MetricInstance(
+                    associatedColumns = listOf(outputColumnAssociation),
+                    definedFrom = definedFrom,
+                    spec = metricSpec,
+                )
+            }
+            metricSelectColumns += SqlSelectColumn(
+                expr = metricExpr,
+                columnAlias = outputColumnAssociation.columnName,
+            )
+        }
+
+        val capturedGroupBy = groupByMetricInstance
+        outputInstanceSet = if (capturedGroupBy != null) {
+            outputInstanceSet.transform(AddGroupByMetric(capturedGroupBy))
+        } else {
+            outputInstanceSet.transform(AddMetrics(metricInstances))
+        }
+
+        val combinedSelectColumnSet = nonMetricSelectColumnSet.merge(
+            SelectColumnSet.create(
+                metricColumns = metricSelectColumns,
+                simpleMetricInputColumns = emptyList(),
+                dimensionColumns = emptyList(),
+                timeDimensionColumns = emptyList(),
+                entityColumns = emptyList(),
+                groupByMetricColumns = emptyList(),
+                metadataColumns = emptyList(),
+            ),
+        )
+
+        return SqlDataSet(
+            instanceSet = outputInstanceSet,
+            sqlSelectNode = makeSelect(
+                description = node.description,
+                selectColumns = combinedSelectColumnSet.columnsInDefaultOrder,
+                fromSource = fromDataSet.checkedSqlSelectNode,
+                fromSourceAlias = fromAlias,
+            ),
+        )
+    }
+
+    /** Port of `visit_combine_aggregated_outputs_node`. */
+    override fun visitCombineAggregatedOutputsNode(node: CombineAggregatedOutputsNode): SqlDataSet {
+        check(node.parentNodes.size > 1) {
+            "Shouldn't have a CombineAggregatedOutputsNode in the dataflow plan if there's only 1 parent."
+        }
+        val parentDataSets = mutableListOf<AnnotatedSqlDataSet>()
+        val tableAliasToInstanceSet = LinkedHashMap<String, InstanceSet>()
+        for (parentNode in node.parentNodes) {
+            val parentSqlDataSet = getOutputDataSet(parentNode)
+            val tableAlias = nextUniqueTableAlias()
+            parentDataSets += AnnotatedSqlDataSet(dataSet = parentSqlDataSet, alias = tableAlias)
+            tableAliasToInstanceSet[tableAlias] = parentSqlDataSet.instanceSet
+        }
+        val fromDataSet = parentDataSets[0]
+        val joinDataSets = parentDataSets.drop(1)
+
+        val linkableSpecs = fromDataSet.dataSet.instanceSet.specSet.linkableSpecs
+        check(joinDataSets.all { it.dataSet.instanceSet.specSet.linkableSpecs.toSet() == linkableSpecs.toSet() }) {
+            "All join data sets should have the same set of linkable instances as the `from` dataset " +
+                "since all values are coalesced."
+        }
+
+        val linkableSpecSet = SelectOnlyLinkableSpecs().transform(fromDataSet.dataSet.instanceSet.specSet)
+        val joinType = if (linkableSpecSet.allSpecs.isEmpty()) SqlJoinType.CROSS_JOIN else SqlJoinType.FULL_OUTER
+
+        val joinDescriptions = mutableListOf<SqlJoinDescription>()
+        val columnAssociations = linkableSpecSet.allSpecs.map { columnAssociationResolver.resolveSpec(it) }
+        val columnNames = columnAssociations.map { it.columnName }
+        val aliasesSeen = mutableListOf(fromDataSet.alias)
+        for (joinDataSet in joinDataSets) {
+            joinDescriptions += SqlPlanJoinBuilder.makeJoinDescriptionForCombiningDatasets(
+                fromDataSet = fromDataSet,
+                joinDataSet = joinDataSet,
+                joinType = joinType,
+                columnNames = columnNames,
+                tableAliasesForCoalesce = aliasesSeen.toList(),
+            )
+            aliasesSeen += joinDataSet.alias
+        }
+
+        var outputInstanceSet = InstanceSet.merge(parentDataSets.map { it.dataSet.instanceSet })
+        outputInstanceSet = outputInstanceSet.transform(ChangeAssociatedColumns(columnAssociationResolver))
+
+        var aggregatedSelectColumns = SelectColumnSet.EMPTY
+        for ((tableAlias, instanceSet) in tableAliasToInstanceSet) {
+            aggregatedSelectColumns = aggregatedSelectColumns.merge(
+                CreateSelectColumnForCombineOutputNode(
+                    tableAlias = tableAlias,
+                    columnResolver = columnAssociationResolver,
+                    metricLookup = metricLookup,
+                ).transform(instanceSet),
+            )
+        }
+        val linkableSelectColumnSet = CreateSelectCoalescedColumnsForLinkableSpecs(
+            columnAssociationResolver = columnAssociationResolver,
+            tableAliases = parentDataSets.map { it.alias },
+        ).transform(linkableSpecSet)
+        val combinedSelectColumnSet = linkableSelectColumnSet.merge(aggregatedSelectColumns)
+
+        return SqlDataSet(
+            instanceSet = outputInstanceSet,
+            sqlSelectNode = SqlSelectStatementNode.create(
+                description = node.description,
+                selectColumns = combinedSelectColumnSet.columnsInDefaultOrder,
+                fromSource = fromDataSet.dataSet.checkedSqlSelectNode,
+                fromSourceAlias = fromDataSet.alias,
+                cteSources = emptyList(),
+                joinDescs = joinDescriptions,
+                groupBys = linkableSelectColumnSet.columnsInDefaultOrder,
+                orderBys = emptyList(),
+                where = null,
+                limit = null,
+                distinct = false,
+            ),
+        )
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // Joins
+    // ---------------------------------------------------------------------------------------
+
+    /** Port of `visit_join_on_entities_node`. */
+    override fun visitJoinOnEntitiesNode(node: JoinOnEntitiesNode): SqlDataSet {
+        val fromDataSet = getOutputDataSet(node.leftNode)
+        val fromAlias = nextUniqueTableAlias()
+
+        val fromDataSetOutputInstanceSet = fromDataSet.instanceSet.transform(
+            SelectElementsTransform(
+                includeSpecs = fromDataSet.instanceSet.specSet,
+                excludeSpecs = null,
+            ),
+        ).transform(
+            ChangeSimpleMetricInputAggregationState(
+                mapOf(
+                    AggregationState.NON_AGGREGATED to AggregationState.NON_AGGREGATED,
+                    AggregationState.COMPLETE to AggregationState.PARTIAL,
+                    AggregationState.PARTIAL to AggregationState.PARTIAL,
+                ),
+            ),
+        )
+        val instancesToBuildSimpleSelectColumnsFor = LinkedHashMap<String, InstanceSet>()
+        instancesToBuildSimpleSelectColumnsFor[fromAlias] = fromDataSetOutputInstanceSet
+
+        var outputInstanceSet = fromDataSetOutputInstanceSet
+        val selectColumns = mutableListOf<SqlSelectColumn>()
+        val sqlJoinDescs = mutableListOf<SqlJoinDescription>()
+
+        for (joinDescription in node.joinTargets) {
+            val joinOnEntity = joinDescription.joinOnEntity
+            val rightNodeToJoin = joinDescription.joinNode
+            val rightDataSet = getOutputDataSet(rightNodeToJoin)
+            val rightDataSetAlias = nextUniqueTableAlias()
+
+            val sqlJoinDesc = SqlPlanJoinBuilder.makeBaseOutputJoinDescription(
+                leftDataSet = AnnotatedSqlDataSet(dataSet = fromDataSet, alias = fromAlias),
+                rightDataSet = AnnotatedSqlDataSet(dataSet = rightDataSet, alias = rightDataSetAlias),
+                joinDescription = joinDescription,
+            )
+            sqlJoinDescs += sqlJoinDesc
+
+            val rightInstanceSetAfterJoin: InstanceSet
+            if (joinOnEntity != null) {
+                val rightInstanceSetFiltered = FilterLinkableInstancesWithLeadingLink(joinOnEntity)
+                    .transform(rightDataSet.instanceSet)
+                val newInstances = mutableListOf<MdoInstance>()
+                for (original in rightInstanceSetFiltered.linkableInstances) {
+                    val newInstance = original.withEntityPrefix(
+                        joinOnEntity, columnAssociationResolver,
+                    )
+                    val originalColumnName = original.associatedColumn.columnName
+                    val newColumnName = newInstance.associatedColumn.columnName
+                    selectColumns += SqlSelectColumn(
+                        expr = SqlColumnReferenceExpression.fromColumnReference(
+                            tableAlias = rightDataSetAlias,
+                            columnName = originalColumnName,
+                        ),
+                        columnAlias = newColumnName,
+                    )
+                    newInstances += newInstance
+                }
+                rightInstanceSetAfterJoin = InstanceSet.groupInstancesByType(newInstances)
+            } else {
+                rightInstanceSetAfterJoin = rightDataSet.instanceSet
+                instancesToBuildSimpleSelectColumnsFor[rightDataSetAlias] = rightInstanceSetAfterJoin
+            }
+            outputInstanceSet = InstanceSet.merge(listOf(outputInstanceSet, rightInstanceSetAfterJoin))
+        }
+
+        val simpleSelectColumns = createSimpleSelectColumnsForInstanceSets(
+            columnResolver = columnAssociationResolver,
+            tableAliasToInstanceSet = instancesToBuildSimpleSelectColumnsFor,
+        )
+
+        return SqlDataSet(
+            instanceSet = outputInstanceSet,
+            sqlSelectNode = SqlSelectStatementNode.create(
+                description = node.description,
+                selectColumns = selectColumns + simpleSelectColumns,
+                fromSource = fromDataSet.checkedSqlSelectNode,
+                fromSourceAlias = fromAlias,
+                cteSources = emptyList(),
+                joinDescs = sqlJoinDescs,
+                groupBys = emptyList(),
+                orderBys = emptyList(),
+                where = null,
+                limit = null,
+                distinct = false,
+            ),
+        )
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // Where filter
+    // ---------------------------------------------------------------------------------------
+
+    /** Port of `visit_where_constraint_node`. */
+    override fun visitWhereConstraintNode(node: WhereFilterNode): SqlDataSet {
+        val inputDataSet = getOutputDataSet(node.parentNode)
+        val modifiedResolver = columnAssociationResolver.withOptions(
+            dunderPrefixSimpleMetricInputs = false,
+        )
+
+        val columnAliasRenamer = ColumnAliasRenamer()
+        val inputAliasToIntermediate = LinkedHashMap<String, String>()
+        val intermediateAliasToInstance = LinkedHashMap<String, MdoInstance>()
+        for (instance in inputDataSet.instanceSet.asList) {
+            val nextAlias = modifiedResolver.resolveSpec(instance.spec).columnName
+            inputAliasToIntermediate[instance.associatedColumn.columnName] = nextAlias
+            intermediateAliasToInstance[nextAlias] = instance
+        }
+
+        val innerQueryAlias = nextUniqueTableAlias()
+        var outerSelectNode = columnAliasRenamer.renameViaSubquery(
+            selectStatementNode = inputDataSet.checkedSqlSelectNode,
+            previousToNext = inputAliasToIntermediate,
+            description = "Constrain Output with WHERE",
+            innerQueryAlias = innerQueryAlias,
+        )
+        outerSelectNode = outerSelectNode.withWhereClause(renderWhereConstraintExpr(node.filterSpecs))
+
+        val intermediateToOutput = LinkedHashMap<String, String>()
+        for ((interAlias, instance) in intermediateAliasToInstance) {
+            intermediateToOutput[interAlias] = columnAssociationResolver.resolveSpec(instance.spec).columnName
+        }
+        outerSelectNode = columnAliasRenamer.rename(
+            selectStatementNode = outerSelectNode,
+            previousToNext = intermediateToOutput,
+        )
+
+        return SqlDataSet(
+            instanceSet = inputDataSet.instanceSet.transform(
+                ChangeAssociatedColumns(columnAssociationResolver),
+            ),
+            sqlSelectNode = outerSelectNode,
+        )
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // Deferred to W15 — time-spine / custom-grain / conversion / offset paths
+    // ---------------------------------------------------------------------------------------
+    //
+    // The remaining 5 visit methods all depend on either the `_make_time_spine_data_set` helper
+    // (which threads `TimeSpineSource.choose_time_spine_sources` + the configured time-spine
+    // ReadSqlSourceNodes from the engine pipeline) or on `_custom_granularity_time_spine_sources`
+    // (which the visitor receives in its constructor in Python). Wiring these requires:
+    //
+    // 1. The engine's `time_spine_metric_time_nodes` map populated from the manifest (currently
+    //    an empty placeholder in [ExplainPipeline] — see its KDoc).
+    // 2. Threading a `Map<String, TimeSpineSource>` for custom-granularity lookups into this
+    //    visitor's constructor.
+    // 3. Porting `_make_time_spine_data_set` proper (~135 LOC Python).
+    //
+    // None of the W14c corpus cases exercise these paths (no cumulative / time-offset / custom
+    // granularity / conversion-event explain cases in the snapshot fixtures); the deferrals are
+    // honest and unblock W15 to land them as a focused wave.
+
+    private fun w15Deferred(method: String, reason: String): Nothing =
+        throw NotImplementedError(
+            "DataflowNodeToSqlSubqueryVisitor.$method body is deferred to W15: $reason. " +
+                "The signature is stable; the conversion algorithm depends on the time-spine / " +
+                "custom-granularity / offset wiring that is W15 scope (see file-level KDoc + " +
+                "Deferred-to-W15 block).",
+        )
+
+    override fun visitJoinOverTimeRangeNode(node: JoinOverTimeRangeNode): SqlDataSet =
+        w15Deferred(
+            "visitJoinOverTimeRangeNode",
+            "requires the internal `_make_time_spine_data_set` helper (cumulative metric pipeline)",
+        )
+
+    override fun visitJoinToTimeSpineNode(node: JoinToTimeSpineNode): SqlDataSet =
+        w15Deferred(
+            "visitJoinToTimeSpineNode",
+            "requires the time-spine `_choose_instance_for_time_spine_join` helper",
+        )
+
+    override fun visitJoinToCustomGranularityNode(node: JoinToCustomGranularityNode): SqlDataSet =
+        w15Deferred(
+            "visitJoinToCustomGranularityNode",
+            "requires `_get_time_spine_for_custom_granularity` + `_get_custom_granularity_column_name` helpers",
+        )
+
+    override fun visitJoinConversionEventsNode(node: JoinConversionEventsNode): SqlDataSet =
+        w15Deferred(
+            "visitJoinConversionEventsNode",
+            "conversion event join requires CTE wrap + window-function machinery",
+        )
+
+    /**
+     * Port of `visit_semi_additive_join_node`.
+     *
+     * Builds a right-side sub-SELECT that aggregates the non-additive time dimension via MIN/MAX
+     * grouped by entities (and optionally a queried time-dim window), then INNER-JOINs the
+     * parent dataset back on the entity-set + the aggregated time-dim.
+     */
+    override fun visitSemiAdditiveJoinNode(node: SemiAdditiveJoinNode): SqlDataSet {
+        val fromDataSet = getOutputDataSet(node.parentNode)
+        val fromAlias = nextUniqueTableAlias()
+        val outputInstanceSet = fromDataSet.instanceSet.transform(
+            ChangeAssociatedColumns(columnAssociationResolver),
+        )
+
+        val innerJoinAlias = nextUniqueTableAlias()
+        val columnEqualityDescriptions = mutableListOf<
+            cc.monomer.metricflow.domain.plan_conversion.helpers.ColumnEqualityDescription,
+            >()
+
+        val timeDimensionColumnName = columnAssociationResolver.resolveSpec(node.timeDimensionSpec).columnName
+        val joinTimeDimensionColumnName = columnAssociationResolver
+            .resolveSpec(node.timeDimensionSpec.withAggregationState(AggregationState.COMPLETE))
+            .columnName
+
+        val timeDimensionSelectColumn = SqlSelectColumn(
+            expr = SqlFunctionExpression.buildExpressionFromAggregationType(
+                aggregationType = node.aggByFunction,
+                sqlColumnExpression = SqlColumnReferenceExpression.create(
+                    colRef = SqlColumnReference(
+                        tableAlias = innerJoinAlias,
+                        columnName = timeDimensionColumnName,
+                    ),
+                    shouldRenderTableAlias = true,
+                ),
+                aggParams = null,
+            ),
+            columnAlias = joinTimeDimensionColumnName,
+        )
+        columnEqualityDescriptions += cc.monomer.metricflow.domain.plan_conversion.helpers
+            .ColumnEqualityDescription(
+                leftColumnAlias = timeDimensionColumnName,
+                rightColumnAlias = joinTimeDimensionColumnName,
+                treatNullsAsEqual = false,
+            )
+
+        val entitySelectColumns = mutableListOf<SqlSelectColumn>()
+        for (entityRef in node.entityReferences) {
+            val entitySpec = cc.monomer.metricflow.domain.spec.EntitySpec(
+                elementName = entityRef.elementName,
+                entityLinks = emptyList(),
+                alias = null,
+            )
+            val entityColumnName = columnAssociationResolver.resolveSpec(entitySpec).columnName
+            entitySelectColumns += SqlSelectColumn(
+                expr = SqlColumnReferenceExpression.fromColumnReference(
+                    tableAlias = innerJoinAlias,
+                    columnName = entityColumnName,
+                ),
+                columnAlias = entityColumnName,
+            )
+            columnEqualityDescriptions += cc.monomer.metricflow.domain.plan_conversion.helpers
+                .ColumnEqualityDescription(
+                    leftColumnAlias = entityColumnName,
+                    rightColumnAlias = entityColumnName,
+                    treatNullsAsEqual = false,
+                )
+        }
+
+        val queriedTimeDimSelectColumn: SqlSelectColumn? = node.queriedTimeDimensionSpec?.let { qSpec ->
+            val name = columnAssociationResolver.resolveSpec(qSpec).columnName
+            SqlSelectColumn(
+                expr = SqlColumnReferenceExpression.fromColumnReference(
+                    tableAlias = innerJoinAlias,
+                    columnName = name,
+                ),
+                columnAlias = name,
+            )
+        }
+
+        val rowFilterGroupBys = entitySelectColumns + listOfNotNull(queriedTimeDimSelectColumn)
+        val rightSourceSelectNode = SqlSelectStatementNode.create(
+            description = "Filter row on ${node.aggByFunction.name}($timeDimensionColumnName)",
+            selectColumns = rowFilterGroupBys + timeDimensionSelectColumn,
+            fromSource = fromDataSet.checkedSqlSelectNode.copyNode(),
+            fromSourceAlias = innerJoinAlias,
+            cteSources = emptyList(),
+            joinDescs = emptyList(),
+            groupBys = rowFilterGroupBys,
+            orderBys = emptyList(),
+            where = null,
+            limit = null,
+            distinct = false,
+        )
+        val rightSourceAlias = nextUniqueTableAlias()
+        val sqlJoinDesc = SqlPlanJoinBuilder.makeColumnEqualitySqlJoinDescription(
+            rightSourceNode = rightSourceSelectNode,
+            leftSourceAlias = fromAlias,
+            rightSourceAlias = rightSourceAlias,
+            columnEqualityDescriptions = columnEqualityDescriptions,
+            joinType = SqlJoinType.INNER,
+            additionalOnConditions = emptyList(),
+        )
+        val outputColumns = CreateSelectColumnsForInstances(
+            tableAlias = fromAlias,
+            columnResolver = columnAssociationResolver,
+        ).transform(outputInstanceSet).getColumns(null)
+
+        return SqlDataSet(
+            instanceSet = outputInstanceSet,
+            sqlSelectNode = SqlSelectStatementNode.create(
+                description = node.description,
+                selectColumns = outputColumns,
+                fromSource = fromDataSet.checkedSqlSelectNode,
+                fromSourceAlias = fromAlias,
+                cteSources = emptyList(),
+                joinDescs = listOf(sqlJoinDesc),
+                groupBys = emptyList(),
+                orderBys = emptyList(),
+                where = null,
+                limit = null,
+                distinct = false,
+            ),
+        )
+    }
+
+    /**
+     * Port of `visit_window_reaggregation_node`.
+     *
+     * The pattern: build an inner SELECT that applies the window function over the metric column
+     * (`FIRST_VALUE`/`LAST_VALUE`/`AVG` based on the `PeriodAggregation`), then wrap with an
+     * outer SELECT that does the final GROUP BY (since window functions can't appear inside a
+     * GROUP BY expression).
+     */
+    override fun visitWindowReaggregationNode(node: WindowReaggregationNode): SqlDataSet {
+        val fromDataSet = getOutputDataSet(node.parentNode)
+        val parentInstanceSet = fromDataSet.instanceSet
+        val parentAlias = nextUniqueTableAlias()
+
+        var metricInstance: MdoInstance? = null
+        var orderByInstance: MdoInstance? = null
+        val partitionByInstances = mutableListOf<MdoInstance>()
+        for (instance in parentInstanceSet.asList) {
+            val spec = instance.spec
+            if (spec == node.metricSpec) {
+                metricInstance = instance
+            } else if (spec == node.orderBySpec) {
+                orderByInstance = instance
+            } else if (spec in node.partitionBySpecs) {
+                partitionByInstances += instance
+            }
+        }
+        val mi = checkNotNull(metricInstance) { "WindowReaggregationNode: missing metric instance for ${node.metricSpec}" }
+        val oi = checkNotNull(orderByInstance) { "WindowReaggregationNode: missing order-by instance for ${node.orderBySpec}" }
+        check(partitionByInstances.isNotEmpty()) {
+            "WindowReaggregationNode: missing partition-by instances for ${node.partitionBySpecs}"
+        }
+
+        val metric = metricLookup.getMetric(node.metricSpec.reference)
+        val periodAgg = metric.typeParams.cumulativeTypeParams?.periodAgg
+            ?: cc.monomer.metricflow.domain.manifest.model.enums.PeriodAggregation.FIRST
+        val windowFunction =
+            cc.monomer.metricflow.domain.sql.plan.expr.SqlWindowFunction.forPeriodAgg(periodAgg)
+
+        val orderByArgs: List<cc.monomer.metricflow.domain.sql.plan.expr.SqlWindowOrderByArgument> =
+            if (windowFunction.requiresOrdering) {
+                listOf(
+                    cc.monomer.metricflow.domain.sql.plan.expr.SqlWindowOrderByArgument(
+                        expr = SqlColumnReferenceExpression.fromColumnReference(
+                            tableAlias = parentAlias,
+                            columnName = oi.associatedColumn.columnName,
+                        ),
+                        descending = null,
+                        nullsLast = null,
+                    ),
+                )
+            } else {
+                emptyList()
+            }
+        val metricSelectColumn = SqlSelectColumn(
+            expr = cc.monomer.metricflow.domain.sql.plan.expr.SqlWindowFunctionExpression.create(
+                sqlFunction = windowFunction,
+                sqlFunctionArgs = listOf(
+                    SqlColumnReferenceExpression.fromColumnReference(
+                        tableAlias = parentAlias,
+                        columnName = mi.associatedColumn.columnName,
+                    ),
+                ),
+                partitionByArgs = partitionByInstances.map { pbInstance ->
+                    SqlColumnReferenceExpression.fromColumnReference(
+                        tableAlias = parentAlias,
+                        columnName = pbInstance.associatedColumn.columnName,
+                    )
+                },
+                orderByArgs = orderByArgs,
+            ),
+            columnAlias = mi.associatedColumn.columnName,
+        )
+
+        // Order-by instance is excluded from the output (it isn't a queried element).
+        val orderBySpecForExclusion = oi.spec as? cc.monomer.metricflow.domain.spec.TimeDimensionSpec
+            ?: error("WindowReaggregationNode expected a TimeDimensionSpec order_by; got ${oi.spec}")
+        val outputInstanceSet = parentInstanceSet.transform(
+            SelectElementsTransform(
+                includeSpecs = null,
+                excludeSpecs = cc.monomer.metricflow.domain.spec.InstanceSpecSet(
+                    timeDimensionSpecs = listOf(orderBySpecForExclusion),
+                    metricSpecs = emptyList(),
+                    simpleMetricInputSpecs = emptyList(),
+                    dimensionSpecs = emptyList(),
+                    entitySpecs = emptyList(),
+                    groupByMetricSpecs = emptyList(),
+                    metadataSpecs = emptyList(),
+                ),
+            ),
+        )
+
+        // Build the inner subquery: pass-through columns + the window-function metric column.
+        val passThroughInstanceSet = outputInstanceSet.transform(
+            SelectElementsTransform(
+                includeSpecs = null,
+                excludeSpecs = cc.monomer.metricflow.domain.spec.InstanceSpecSet(
+                    metricSpecs = listOf(node.metricSpec),
+                    simpleMetricInputSpecs = emptyList(),
+                    dimensionSpecs = emptyList(),
+                    entitySpecs = emptyList(),
+                    timeDimensionSpecs = emptyList(),
+                    groupByMetricSpecs = emptyList(),
+                    metadataSpecs = emptyList(),
+                ),
+            ),
+        )
+        val subqueryColumns = CreateSelectColumnsForInstances(
+            tableAlias = parentAlias,
+            columnResolver = columnAssociationResolver,
+        ).transform(passThroughInstanceSet).getColumns(null) + metricSelectColumn
+
+        val subquery = SqlSelectStatementNode.create(
+            description = "Window Function for Metric Re-aggregation",
+            selectColumns = subqueryColumns,
+            fromSource = fromDataSet.checkedSqlSelectNode,
+            fromSourceAlias = parentAlias,
+            cteSources = emptyList(),
+            joinDescs = emptyList(),
+            groupBys = emptyList(),
+            orderBys = emptyList(),
+            where = null,
+            limit = null,
+            distinct = false,
+        )
+        val subqueryAlias = nextUniqueTableAlias()
+        val outerColumns = CreateSelectColumnsForInstances(
+            tableAlias = subqueryAlias,
+            columnResolver = columnAssociationResolver,
+        ).transform(outputInstanceSet).getColumns(null)
+
+        return SqlDataSet(
+            instanceSet = outputInstanceSet,
+            sqlSelectNode = SqlSelectStatementNode.create(
+                description = "Re-aggregate Metric via Group By",
+                selectColumns = outerColumns,
+                fromSource = subquery,
+                fromSourceAlias = subqueryAlias,
+                cteSources = emptyList(),
+                joinDescs = emptyList(),
+                groupBys = outerColumns,
+                orderBys = emptyList(),
+                where = null,
+                limit = null,
+                distinct = false,
+            ),
+        )
+    }
+
+    override fun visitOffsetCustomGranularityNode(node: OffsetCustomGranularityNode): SqlDataSet =
+        w15Deferred(
+            "visitOffsetCustomGranularityNode",
+            "custom-grain offset requires time-spine resolution + 270 LOC of custom expression building",
+        )
+
+    override fun visitOffsetBaseGrainByCustomGrainNode(node: OffsetBaseGrainByCustomGrainNode): SqlDataSet =
+        w15Deferred(
+            "visitOffsetBaseGrainByCustomGrainNode",
+            "270 LOC of custom-grain offset machinery — Python implementation is the longest in this file",
+        )
+
+    // ---------------------------------------------------------------------------------------
+    // Helpers
+    // ---------------------------------------------------------------------------------------
+
+    private fun makeSelect(
+        description: String,
+        selectColumns: List<SqlSelectColumn>,
+        fromSource: SqlSelectStatementNode,
+        fromSourceAlias: String,
+    ): SqlSelectStatementNode = SqlSelectStatementNode.create(
+        description = description,
+        selectColumns = selectColumns,
+        fromSource = fromSource,
+        fromSourceAlias = fromSourceAlias,
+        cteSources = emptyList(),
+        joinDescs = emptyList(),
+        groupBys = emptyList(),
+        orderBys = emptyList(),
+        where = null,
+        limit = null,
+        distinct = false,
+    )
+
+    /** Port of `__make_col_reference_or_coalesce_expr`. */
+    private fun makeColRefOrCoalesceExpr(
+        columnName: String,
+        nullFillValue: Int?,
+        fromAlias: String,
+    ): SqlExpressionNode {
+        val ref: SqlExpressionNode = SqlColumnReferenceExpression.create(
+            colRef = SqlColumnReference(tableAlias = fromAlias, columnName = columnName),
+            shouldRenderTableAlias = true,
+        )
+        if (nullFillValue == null) return ref
+        return cc.monomer.metricflow.domain.sql.plan.expr.SqlAggregateFunctionExpression.create(
+            sqlFunction = SqlFunction.COALESCE,
+            sqlFunctionArgs = listOf(
+                ref,
+                SqlStringExpression.create(
+                    sqlExpr = nullFillValue.toString(),
+                    bindParameterSet =
+                        cc.monomer.metricflow.domain.spec.bind.SqlBindParameterSet.EMPTY,
+                    requiresParenthesis = false,
+                    usedColumns = null,
+                ),
+            ),
+        )
+    }
+
+    /** Port of `_render_where_constraint_expr`. */
+    private fun renderWhereConstraintExpr(filterSpecs: List<WhereFilterSpec>): SqlExpressionNode? {
+        val filterKeyToStringExpression = LinkedHashMap<
+            Pair<String, cc.monomer.metricflow.domain.spec.bind.SqlBindParameterSet>,
+            SqlStringExpression,
+            >()
+        for (spec in filterSpecs) {
+            val key = spec.whereSql to spec.bindParameters
+            if (key in filterKeyToStringExpression) continue
+            val instanceSpecSet = InstanceSpecSet.createFromSpecs(spec.linkableSpecs)
+            val columnAssociations = CreateColumnAssociations(columnAssociationResolver)
+                .transform(instanceSpecSet)
+            filterKeyToStringExpression[key] = SqlStringExpression.create(
+                sqlExpr = spec.whereSql,
+                bindParameterSet = spec.bindParameters,
+                requiresParenthesis = true,
+                usedColumns = columnAssociations.map { it.columnName },
+            )
+        }
+        val stringExpressions = filterKeyToStringExpression.values.toList()
+        return when (stringExpressions.size) {
+            0 -> null
+            1 -> stringExpressions[0]
+            else -> SqlLogicalExpression.create(
+                operator = SqlLogicalOperator.AND,
+                args = stringExpressions,
+            )
+        }
+    }
+
+    /** Port of `_make_time_range_comparison_expr`. */
+    private fun makeTimeRangeComparisonExpr(
+        tableAlias: String,
+        columnAlias: String,
+        timeRangeConstraint: TimeRangeConstraint,
+    ): SqlExpressionNode {
+        val constraintUsesDayOrLargerGrain = listOf(
+            timeRangeConstraint.startTime,
+            timeRangeConstraint.endTime,
+        ).all { it == it.toLocalDate().atStartOfDay() }
+
+        val format = if (constraintUsesDayOrLargerGrain) ISO_DATE_FORMAT else ISO_TS_FORMAT
+        return SqlBetweenExpression.create(
+            columnArg = SqlColumnReferenceExpression.create(
+                colRef = SqlColumnReference(tableAlias = tableAlias, columnName = columnAlias),
+                shouldRenderTableAlias = true,
+            ),
+            startExpr = SqlStringLiteralExpression.create(
+                literalValue = formatLocalDateTime(timeRangeConstraint.startTime, format),
+            ),
+            endExpr = SqlStringLiteralExpression.create(
+                literalValue = formatLocalDateTime(timeRangeConstraint.endTime, format),
+            ),
+        )
+    }
+
+    private fun aliasInstance(instance: MdoInstance, newSpec: InstanceSpec): MdoInstance = when (instance) {
+        is SimpleMetricInputInstance -> instance.withNewSpec(
+            newSpec as cc.monomer.metricflow.domain.spec.SimpleMetricInputSpec,
+            columnAssociationResolver,
+        )
+        is DimensionInstance -> instance.withNewSpec(
+            newSpec as cc.monomer.metricflow.domain.spec.DimensionSpec,
+            columnAssociationResolver,
+        )
+        is TimeDimensionInstance -> instance.withNewSpec(
+            newSpec as cc.monomer.metricflow.domain.spec.TimeDimensionSpec,
+            columnAssociationResolver,
+        )
+        is EntityInstance -> instance.withNewSpec(
+            newSpec as cc.monomer.metricflow.domain.spec.EntitySpec,
+            columnAssociationResolver,
+        )
+        is MetricInstance -> instance.withNewSpec(newSpec as MetricSpec, columnAssociationResolver)
+        is MetadataInstance -> instance.withNewSpec(newSpec as MetadataSpec, columnAssociationResolver)
+        is GroupByMetricInstance -> instance.withNewSpec(
+            newSpec as GroupByMetricSpec,
+            columnAssociationResolver,
+        )
+    }
+
+    private fun formatLocalDateTime(value: LocalDateTime, format: String): String =
+        value.format(java.time.format.DateTimeFormatter.ofPattern(format))
+
+    companion object {
+        private const val ISO_DATE_FORMAT = "yyyy-MM-dd"
+        private const val ISO_TS_FORMAT = "yyyy-MM-dd HH:mm:ss"
+    }
+}

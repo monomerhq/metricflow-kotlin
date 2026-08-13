@@ -1,0 +1,11 @@
+{
+  "case_id": "list_metrics__name_edge_case_manifest__with_dimensions",
+  "subcommand": "list_metrics",
+  "manifest_id": "name_edge_case_manifest",
+  "args": {
+    "include_dimensions": true
+  },
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

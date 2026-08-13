@@ -1,0 +1,304 @@
+{
+  "dimensions": [
+    {
+      "name": "account_month",
+      "dunder_name": "account_id__account_month",
+      "qualified_name": "account_id__account_month",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "account_id"
+      ],
+      "semantic_model_name": "account_month_txns",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/account_month_txns.yaml",
+        "file_slice": {
+          "filename": "account_month_txns.yaml",
+          "content": "name: account_month\ntype: categorical\n",
+          "start_line_number": 28,
+          "end_line_number": 30
+        }
+      }
+    },
+    {
+      "name": "ds",
+      "dunder_name": "account_id__ds",
+      "qualified_name": "account_id__ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "account_id"
+      ],
+      "semantic_model_name": "account_month_txns",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/account_month_txns.yaml",
+        "file_slice": {
+          "filename": "account_month_txns.yaml",
+          "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 24,
+          "end_line_number": 27
+        }
+      }
+    },
+    {
+      "name": "ds_partitioned",
+      "dunder_name": "account_id__ds_partitioned",
+      "qualified_name": "account_id__ds_partitioned",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "account_id"
+      ],
+      "semantic_model_name": "account_month_txns",
+      "is_partition": true,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/account_month_txns.yaml",
+        "file_slice": {
+          "filename": "account_month_txns.yaml",
+          "content": "name: ds_partitioned\ntype: time\ntype_params:\n  time_granularity: day\nis_partition: true\n",
+          "start_line_number": 19,
+          "end_line_number": 23
+        }
+      }
+    },
+    {
+      "name": "ds_partitioned",
+      "dunder_name": "bridge_account__ds_partitioned",
+      "qualified_name": "bridge_account__ds_partitioned",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "bridge_account"
+      ],
+      "semantic_model_name": "bridge_table",
+      "is_partition": true,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/bridge_table.yaml",
+        "file_slice": {
+          "filename": "bridge_table.yaml",
+          "content": "name: ds_partitioned\ntype: time\ntype_params:\n  time_granularity: day\nis_partition: true\n",
+          "start_line_number": 22,
+          "end_line_number": 27
+        }
+      }
+    },
+    {
+      "name": "extra_dim",
+      "dunder_name": "bridge_account__extra_dim",
+      "qualified_name": "bridge_account__extra_dim",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "bridge_account"
+      ],
+      "semantic_model_name": "bridge_table",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/bridge_table.yaml",
+        "file_slice": {
+          "filename": "bridge_table.yaml",
+          "content": "name: extra_dim\ntype: categorical\n",
+          "start_line_number": 20,
+          "end_line_number": 21
+        }
+      }
+    },
+    {
+      "name": "acquired_ds",
+      "dunder_name": "customer_id__acquired_ds",
+      "qualified_name": "customer_id__acquired_ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "customer_id"
+      ],
+      "semantic_model_name": "customer_other_data",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_other_data.yaml",
+        "file_slice": {
+          "filename": "customer_other_data.yaml",
+          "content": "name: acquired_ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 21,
+          "end_line_number": 25
+        }
+      }
+    },
+    {
+      "name": "country",
+      "dunder_name": "customer_id__country",
+      "qualified_name": "customer_id__country",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "customer_id"
+      ],
+      "semantic_model_name": "customer_other_data",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_other_data.yaml",
+        "file_slice": {
+          "filename": "customer_other_data.yaml",
+          "content": "name: country\ntype: categorical\n",
+          "start_line_number": 19,
+          "end_line_number": 20
+        }
+      }
+    },
+    {
+      "name": "customer_atomic_weight",
+      "dunder_name": "customer_id__customer_atomic_weight",
+      "qualified_name": "customer_id__customer_atomic_weight",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "customer_id"
+      ],
+      "semantic_model_name": "customer_table",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_table.yaml",
+        "file_slice": {
+          "filename": "customer_table.yaml",
+          "content": "name: customer_atomic_weight\ntype: categorical\n",
+          "start_line_number": 23,
+          "end_line_number": 24
+        }
+      }
+    },
+    {
+      "name": "customer_name",
+      "dunder_name": "customer_id__customer_name",
+      "qualified_name": "customer_id__customer_name",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "customer_id"
+      ],
+      "semantic_model_name": "customer_table",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_table.yaml",
+        "file_slice": {
+          "filename": "customer_table.yaml",
+          "content": "name: customer_name\ntype: categorical\n",
+          "start_line_number": 21,
+          "end_line_number": 22
+        }
+      }
+    },
+    {
+      "name": "ds_partitioned",
+      "dunder_name": "customer_id__ds_partitioned",
+      "qualified_name": "customer_id__ds_partitioned",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "customer_id"
+      ],
+      "semantic_model_name": "customer_table",
+      "is_partition": true,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/customer_table.yaml",
+        "file_slice": {
+          "filename": "customer_table.yaml",
+          "content": "name: ds_partitioned\ntype: time\ntype_params:\n  time_granularity: day\nis_partition: true\n",
+          "start_line_number": 25,
+          "end_line_number": 30
+        }
+      }
+    },
+    {
+      "name": "third_hop_ds",
+      "dunder_name": "customer_third_hop_id__third_hop_ds",
+      "qualified_name": "customer_third_hop_id__third_hop_ds",
+      "type": "time",
+      "granularity": "day",
+      "entity_links": [
+        "customer_third_hop_id"
+      ],
+      "semantic_model_name": "third_hop_table",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/third_hop_table.yaml",
+        "file_slice": {
+          "filename": "third_hop_table.yaml",
+          "content": "name: third_hop_ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+          "start_line_number": 22,
+          "end_line_number": 26
+        }
+      }
+    },
+    {
+      "name": "value",
+      "dunder_name": "customer_third_hop_id__value",
+      "qualified_name": "customer_third_hop_id__value",
+      "type": "categorical",
+      "granularity": null,
+      "entity_links": [
+        "customer_third_hop_id"
+      ],
+      "semantic_model_name": "third_hop_table",
+      "is_partition": false,
+      "is_metric_time": false,
+      "description": null,
+      "label": null,
+      "expr": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/partitioned_multi_hop_join_manifest/third_hop_table.yaml",
+        "file_slice": {
+          "filename": "third_hop_table.yaml",
+          "content": "name: value\ntype: categorical\n",
+          "start_line_number": 20,
+          "end_line_number": 21
+        }
+      }
+    }
+  ]
+}

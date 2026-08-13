@@ -1,0 +1,11 @@
+{
+  "case_id": "list_metrics__extended_date_manifest__with_dimensions",
+  "subcommand": "list_metrics",
+  "manifest_id": "extended_date_manifest",
+  "args": {
+    "include_dimensions": true
+  },
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

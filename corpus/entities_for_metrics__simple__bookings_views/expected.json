@@ -1,0 +1,36 @@
+{
+  "entities": [
+    {
+      "name": "company",
+      "type": "primary",
+      "role": null,
+      "semantic_model_name": "companies",
+      "description": null,
+      "expr": "company_id"
+    },
+    {
+      "name": "listing",
+      "type": "foreign",
+      "role": null,
+      "semantic_model_name": "bookings_source",
+      "description": null,
+      "expr": "listing_id"
+    },
+    {
+      "name": "lux_listing",
+      "type": "foreign",
+      "role": null,
+      "semantic_model_name": "lux_listing_mapping",
+      "description": null,
+      "expr": "lux_listing_id"
+    },
+    {
+      "name": "user",
+      "type": "foreign",
+      "role": null,
+      "semantic_model_name": "listings_latest",
+      "description": null,
+      "expr": "user_id"
+    }
+  ]
+}

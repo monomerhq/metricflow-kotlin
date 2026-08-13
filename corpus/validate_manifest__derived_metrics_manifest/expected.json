@@ -1,0 +1,16 @@
+{
+  "issues": [
+    {
+      "level": "WARNING",
+      "message": "To avoid unexpected query errors, configuring a time spine at or below the smallest time dimension granularity is recommended. Smallest time dimension granularity: DAY; Smallest time spine granularity: TimeGranularity.QUARTER",
+      "context": null,
+      "context_str": "",
+      "extra_detail": null,
+      "readable": "WARNING: To avoid unexpected query errors, configuring a time spine at or below the smallest time dimension granularity is recommended. Smallest time dimension granularity: DAY; Smallest time spine granularity: TimeGranularity.QUARTER"
+    }
+  ],
+  "error_count": 0,
+  "future_error_count": 0,
+  "warning_count": 1,
+  "has_blocking_issues": false
+}

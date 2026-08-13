@@ -1,0 +1,2890 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>metricflow 의미층 엔진 — Kotlin 포팅의 작동 방식</title>
+<meta name="monomer:status" content="v1" />
+<meta name="monomer:summary" content="metricflow 0.210.0 의미층 엔진의 Kotlin 포팅을 큰 그림부터 변환 단계, 코드 위치까지 차례로 설명한다." />
+<meta name="monomer:related" content="CLAUDE.md, FEASIBILITY.md, docs/scope.md, docs/dependency-dag.md, docs/module-mapping.md" />
+<style>
+  :root {
+    --ivory:      #FAF9F5;
+    --paper:      #FFFFFF;
+    --oat:        #E3DACC;
+    --oat-soft:   rgba(227, 218, 204, 0.35);
+    --gray-100:   #F5F3EC;
+    --gray-150:   #F0EEE6;
+    --gray-300:   #D1CFC5;
+    --gray-500:   #87867F;
+    --gray-700:   #3D3D3A;
+    --slate:      #141413;
+
+    --clay:       #D97757;
+    --clay-soft:  #F5E0D2;
+
+    --olive:      #788C5D;
+    --sky:        #6A8CAF;
+    --error:      #B04A3F;
+
+    --serif: "Iowan Old Style", "Charter", "Palatino Linotype", Palatino, Georgia, ui-serif, serif;
+    --sans:  -apple-system, "Inter", "Segoe UI", system-ui, sans-serif;
+    --mono:  ui-monospace, "JetBrains Mono", "SF Mono", "Menlo", monospace;
+
+    --measure:        680px;
+    --sidebar-w:      220px;
+    --gap:            64px;
+    --radius:         12px;
+    --radius-sm:      8px;
+    --border:         1.5px solid var(--gray-300);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--ivory);
+    color: var(--gray-700);
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .page {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 64px 32px 160px;
+    display: grid;
+    grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+    gap: var(--gap);
+    align-items: start;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 32px;
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+    padding-right: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .sidebar .eyebrow { margin-bottom: 12px; }
+  .sidebar h4 {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--gray-500);
+    margin: 28px 0 10px;
+  }
+  .sidebar nav ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-left: 2px solid var(--gray-150);
+  }
+  .sidebar nav ol li { margin: 0; padding: 0; }
+  .sidebar nav ol li a {
+    display: block;
+    padding: 7px 14px;
+    color: var(--gray-700);
+    border-bottom: none;
+    margin-left: -2px;
+    border-left: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    font-size: 14px;
+  }
+  .sidebar nav ol li a:hover {
+    color: var(--slate);
+    border-left-color: var(--slate);
+  }
+  .sidebar nav ol li .num {
+    display: inline-block;
+    width: 28px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--gray-500);
+    letter-spacing: 0.04em;
+  }
+  .sidebar .meta {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--gray-500);
+    line-height: 1.8;
+    margin-top: 28px;
+  }
+  .sidebar .meta dt { color: var(--gray-500); display: inline; }
+  .sidebar .meta dd { color: var(--gray-700); display: inline; margin: 0; }
+  .sidebar .meta dl { margin: 0; }
+  .sidebar .meta dl > div { margin-bottom: 4px; }
+
+  .content { min-width: 0; }
+  .content > * { max-width: 100%; }
+  .content > p,
+  .content > ul,
+  .content > ol,
+  .content > .lede,
+  .content > .lead,
+  .content section > p,
+  .content section > ul,
+  .content section > ol,
+  .content section > .lead { max-width: var(--measure); }
+
+  h1, h2, h3, h4 {
+    font-family: var(--serif);
+    color: var(--slate);
+    font-weight: 500;
+    letter-spacing: -0.012em;
+  }
+  h1 { font-size: 48px; line-height: 1.08; margin: 0 0 18px; }
+  h1 em { font-style: italic; color: var(--clay); }
+  h2 {
+    font-size: 28px; line-height: 1.2;
+    margin: 56px 0 12px;
+    max-width: var(--measure);
+  }
+  h2:first-of-type { margin-top: 0; }
+  h3 {
+    font-family: var(--sans);
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gray-500);
+    font-weight: 500;
+    margin: 36px 0 12px;
+    max-width: var(--measure);
+  }
+  h3.serif {
+    font-family: var(--serif);
+    font-size: 20px;
+    text-transform: none;
+    letter-spacing: -0.005em;
+    color: var(--slate);
+  }
+  p { margin: 0 0 14px; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--gray-500);
+    font-weight: 500;
+    margin: 0 0 14px;
+  }
+  .lede {
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--gray-700);
+    font-weight: 400;
+    margin: 0 0 36px;
+    max-width: var(--measure);
+  }
+  .lead {
+    font-size: 17.5px;
+    line-height: 1.55;
+    color: var(--slate);
+    margin: 8px 0 20px;
+    max-width: var(--measure);
+  }
+  .lead strong { color: var(--slate); }
+  strong { font-weight: 600; color: var(--slate); }
+  em { font-style: italic; }
+  a {
+    color: var(--clay);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+  a:hover { border-bottom-color: var(--clay); }
+  hr { border: 0; border-top: var(--border); margin: 56px 0; max-width: var(--measure); }
+
+  .tldr {
+    background: var(--paper);
+    border: var(--border);
+    border-left: 3px solid var(--clay);
+    border-radius: var(--radius);
+    padding: 18px 22px 20px;
+    margin: 0 0 48px;
+    max-width: var(--measure);
+  }
+  .tldr-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--clay);
+    font-weight: 500;
+    margin: 0 0 8px;
+  }
+  .tldr-body {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--gray-700);
+    margin: 0;
+  }
+  .tldr-body strong { color: var(--slate); }
+
+  section.stage { margin: 80px 0 0; scroll-margin-top: 32px; }
+  section.stage:first-of-type { margin-top: 0; }
+  .stage-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--clay);
+    font-weight: 500;
+    margin: 0 0 6px;
+  }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.9em;
+  }
+  p code, li code, td code, summary code, h3 code, h2 code, dd code, dt code {
+    font-size: 0.85em;
+    color: var(--slate);
+    background: var(--gray-150);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  pre {
+    font-family: var(--mono);
+    background: var(--paper);
+    border: var(--border);
+    border-radius: var(--radius);
+    color: var(--slate);
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 16px 0 22px;
+  }
+  pre code { background: transparent; border: 0; padding: 0; color: inherit; font-size: 1em; }
+  .hl { color: var(--clay); }
+  .cm { color: var(--gray-500); }
+
+  .note, .tip {
+    background: var(--oat-soft);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    margin: 18px 0;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--gray-700);
+    max-width: var(--measure);
+  }
+  .note p, .tip p { font-size: inherit; margin: 0 0 8px; color: inherit; }
+  .note p:last-child, .tip p:last-child { margin-bottom: 0; }
+  .tip {
+    background: var(--paper);
+    border: var(--border);
+    border-left: 3px solid var(--clay);
+    border-radius: var(--radius);
+  }
+
+  .refs {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--gray-500);
+    margin: 0 0 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    max-width: var(--measure);
+  }
+  .refs span { white-space: nowrap; }
+
+  table.facts {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0 28px;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  table.facts th, table.facts td {
+    text-align: left;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--gray-300);
+    vertical-align: top;
+    color: var(--gray-700);
+    padding-right: 24px;
+  }
+  table.facts thead th {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gray-500);
+    font-weight: 500;
+    border-bottom: 2px solid var(--gray-300);
+    padding-bottom: 10px;
+  }
+  table.facts tbody th {
+    width: 180px;
+    font-weight: 500;
+    color: var(--slate);
+  }
+  table.facts.wide tbody th { width: 140px; }
+  table.facts tr:last-child th, table.facts tr:last-child td { border-bottom: 0; }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 20px 0 28px;
+  }
+  .card {
+    background: var(--paper);
+    border: var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: var(--slate);
+    box-shadow: 0 10px 30px rgba(20, 20, 19, 0.08);
+  }
+  .card h4 {
+    font-family: var(--serif);
+    font-size: 18px;
+    color: var(--slate);
+    margin: 0 0 10px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+  }
+  .card .card-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray-500);
+    background: var(--gray-150);
+    border-radius: 999px;
+    padding: 2px 8px;
+    margin-bottom: 12px;
+  }
+  .card p { font-size: 14.5px; line-height: 1.55; margin: 0 0 8px; color: var(--gray-700); }
+  .card p:last-child { margin-bottom: 0; }
+
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: var(--oat);
+    color: var(--slate);
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    padding: 2px 8px;
+    vertical-align: 2px;
+  }
+  .pill.olive { background: rgba(120, 140, 93, 0.18); border-color: rgba(120, 140, 93, 0.4); }
+  .pill.clay  { background: var(--clay-soft); border-color: var(--clay); color: var(--slate); }
+
+  ul, ol {
+    margin: 8px 0 18px;
+    padding-left: 22px;
+  }
+  ul li, ol li {
+    margin: 6px 0;
+    padding-left: 4px;
+  }
+  ul li::marker { color: var(--gray-500); }
+  ol li::marker { color: var(--gray-500); font-family: var(--mono); font-size: 0.92em; }
+
+  ul.flow {
+    padding-left: 0;
+    list-style: none;
+    margin: 6px 0 18px;
+    max-width: var(--measure);
+  }
+  ul.flow li {
+    padding: 7px 0 7px 24px;
+    position: relative;
+    color: var(--gray-700);
+    font-size: 16px;
+    margin: 0;
+  }
+  ul.flow li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--clay);
+  }
+
+  .diagram-wrap {
+    margin: 28px 0 40px;
+    padding: 18px 20px 12px;
+    background: var(--paper);
+    border: var(--border);
+    border-radius: var(--radius);
+  }
+  .diagram-wrap svg { width: 100%; height: auto; display: block; }
+  .diagram-wrap figcaption {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray-500);
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--gray-150);
+  }
+
+  .collapsible-list { margin: 18px 0; max-width: var(--measure); }
+  details.opt {
+    background: var(--paper);
+    border: var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  details.opt[open] { border-color: var(--clay); }
+  details.opt summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 14px 18px;
+    font-weight: 500;
+    color: var(--slate);
+    font-size: 15.5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+  }
+  details.opt summary::-webkit-details-marker { display: none; }
+  details.opt summary::after {
+    content: "▸";
+    color: var(--clay);
+    font-size: 14px;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  details.opt[open] summary::after { transform: rotate(90deg); }
+  details.opt .opt-body {
+    padding: 0 18px 16px;
+    border-top: 1px solid var(--gray-150);
+    padding-top: 12px;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--gray-700);
+  }
+  details.opt .opt-body p { margin: 0 0 8px; font-size: inherit; }
+  details.opt .opt-body p:last-child { margin-bottom: 0; }
+
+  footer.doc-footer {
+    margin-top: 80px;
+    padding-top: 28px;
+    border-top: 1px solid var(--gray-300);
+    color: var(--gray-500);
+    font-size: 13px;
+    max-width: var(--measure);
+  }
+
+  @media (max-width: 920px) {
+    .page {
+      grid-template-columns: 1fr;
+      gap: 36px;
+      padding: 40px 22px 80px;
+    }
+    .sidebar {
+      position: static;
+      max-height: none;
+      padding-right: 0;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--gray-150);
+    }
+    h1 { font-size: 34px; }
+    h2 { font-size: 24px; }
+    .lede { font-size: 19px; }
+    .lead { font-size: 16.5px; }
+    body { font-size: 15.5px; }
+    pre { font-size: 12.5px; padding: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ======================== SIDEBAR ======================== -->
+  <aside class="sidebar">
+    <p class="eyebrow">metricflow-kotlin · 엔진 가이드 · v1</p>
+
+    <h4>Contents</h4>
+    <nav>
+      <ol>
+        <li><a href="#s1"><span class="num">01</span>의미층이란 무엇인가</a></li>
+        <li><a href="#s2"><span class="num">02</span>큰 그림 — 한 장</a></li>
+        <li><a href="#s3"><span class="num">03</span>7단계 개요</a></li>
+        <li><a href="#s4"><span class="num">04</span>의미 매니페스트</a></li>
+        <li><a href="#s5"><span class="num">05</span>변환과 검증</a></li>
+        <li><a href="#s6"><span class="num">06</span>쿼리 파싱</a></li>
+        <li><a href="#s7"><span class="num">07</span>의미 그래프</a></li>
+        <li><a href="#s8"><span class="num">08</span>Dataflow Plan</a></li>
+        <li><a href="#s9"><span class="num">09</span>Plan Conversion</a></li>
+        <li><a href="#s10"><span class="num">10</span>SQL Plan과 렌더링</a></li>
+        <li><a href="#s11"><span class="num">11</span>엔진 facade</a></li>
+        <li><a href="#s12"><span class="num">12</span>실제 쿼리 따라가기</a></li>
+        <li><a href="#s13"><span class="num">13</span>차등 테스트</a></li>
+        <li><a href="#s14"><span class="num">14</span>다음에 어디로</a></li>
+      </ol>
+    </nav>
+
+    <h4>핵심 파일</h4>
+    <div class="meta" style="margin-top: 8px;">
+      <dl>
+        <div><dt>engine:</dt> <dd>MetricFlowEngine.kt</dd></div>
+        <div><dt>spec:</dt> <dd>MetricFlowQuerySpec.kt</dd></div>
+        <div><dt>graph:</dt> <dd>SemanticGraph.kt</dd></div>
+        <div><dt>dataflow:</dt> <dd>DataflowPlan.kt</dd></div>
+        <div><dt>sql plan:</dt> <dd>SqlPlanNode.kt</dd></div>
+        <div><dt>render:</dt> <dd>DefaultSqlPlanRenderer</dd></div>
+      </dl>
+    </div>
+
+    <div class="meta">
+      <dl>
+        <div><dt>status:</dt> <dd>v1</dd></div>
+        <div><dt>updated:</dt> <dd>2026-05-16</dd></div>
+        <div><dt>upstream:</dt> <dd>metricflow 0.210.0</dd></div>
+        <div><dt>corpus:</dt> <dd>112/112 PASS</dd></div>
+      </dl>
+    </div>
+  </aside>
+
+  <!-- ======================== CONTENT ======================== -->
+  <main class="content">
+
+    <!-- HEADER -->
+    <header>
+      <p class="eyebrow">METRICFLOW-KOTLIN · 엔진 가이드 · v1</p>
+      <h1>metricflow 의미층 엔진 —<br/><em>Kotlin 포팅의 작동 방식</em></h1>
+      <p class="lede">
+        이 문서는 <strong>metricflow 0.210.0</strong>의 Kotlin 포팅(<code>metricflow-kotlin</code>)을
+        <em>큰 그림 → 데이터 흐름 → 코드 위치</em>의 시점에서 설명한다. 의미층이 무엇인지부터
+        매니페스트가 SQL이 되기까지의 모든 단계를, 그 단계가 어느 Kotlin 파일에 살아 있는지와 함께 짚는다.
+      </p>
+
+      <div class="tldr">
+        <p class="tldr-label">한 줄 요약</p>
+        <p class="tldr-body">
+          <strong>의미층 엔진은 "메트릭 정의 + 그룹 기준"을 받아 dialect별 SQL을 만들어내는 컴파일러다.</strong>
+          metricflow-kotlin은 그 컴파일러를 7단계 파이프라인(<em>manifest → transform/validate → query spec
+          → semantic graph → dataflow plan → SQL plan → SQL string</em>)으로 옮긴 결과물이며,
+          SQL 실행은 의도적으로 외부에 맡긴다. 모든 단계는 sealed 타입 + visitor 패턴으로 닫혀 있고,
+          112개 corpus를 Python oracle과 byte-동등으로 통과한다.
+        </p>
+      </div>
+    </header>
+
+    <!-- ========================================================
+         §01 — 의미층이란 무엇인가
+         ======================================================== -->
+    <section class="stage" id="s1">
+      <p class="stage-num">01 · CONCEPT</p>
+      <h2>의미층(semantic layer)이란 무엇인가</h2>
+      <p class="lead">
+        <strong>"같은 메트릭을 모든 팀이 같은 SQL로 묻는다"</strong>를 가능케 하는 컴파일러 계층이다.
+        지표(metric)와 차원(dimension)이라는 <em>의미</em>를 한 곳에 모아두고, 실제 SQL은 매번 생성한다.
+      </p>
+
+      <h3 class="serif">왜 존재하는가</h3>
+      <p>
+        BI/분석 환경에서 같은 지표(예: <code>bookings</code>)를 두고 팀마다 다른 SQL을 쓰는 일이 흔하다.
+        조인 순서가 살짝 다르고, 필터를 빼먹고, <code>NULL</code> 처리가 어긋난다. 결과는 같은 이름의 숫자가
+        대시보드마다 어긋나는 것. 의미층은 이 변동성을 줄이기 위해 <strong>지표 정의를 코드로 외부화</strong>하고,
+        쿼리 시점에 결정적으로(deterministically) SQL을 생성해 일관성을 강제한다.
+      </p>
+
+      <h3 class="serif">데이터 모델링 vs 데이터 의미</h3>
+      <p>
+        ETL/dbt는 <em>모델링</em>(테이블·뷰의 형태)을 다룬다. 의미층은 그 위에서 <em>의미</em>를 다룬다:
+        측정값(<code>measure</code>)이 어떻게 모이는가, 차원(<code>dimension</code>)이 어떻게 키(<code>entity</code>)로
+        연결되는가, 시간(<code>metric_time</code>)을 어떻게 통일하는가. metricflow는 dbt 0.x에서 출발해
+        독립 패키지로 분리된 의미층 엔진이며, <strong>Apache-2.0</strong> 라이선스로 풀 포팅이 가능하다.
+      </p>
+
+      <h3 class="serif">metricflow-kotlin이 떠맡는 것 / 떠맡지 않는 것</h3>
+      <p>
+        엔진의 책임은 <strong>SQL 생성까지</strong>다. JDBC/웨어하우스 연결, 실행, 결과 페치는 외부 시스템의
+        몫이다. 이는 우연이 아니라 설계 결정으로, Python <code>MetricFlowEngine.query()</code>를 비롯한 모든
+        실행 어댑터(<code>metricflow/execution/executor.py</code>, <code>SqlClient.query/execute/dry_run</code>)는
+        Kotlin 포팅에서 의도적으로 제외했다. 자세한 근거는 CLAUDE.md "엔진 인터페이스 표면" 참조.
+      </p>
+
+      <table class="facts">
+        <tr><th>포팅됨</th><td>매니페스트 데이터 모델, 변환·검증, 쿼리 파싱·해석, 데이터플로우 계획, SQL 계획, 8개 dialect 렌더러, 8개 RPC facade</td></tr>
+        <tr><th>제외됨</th><td>SQL 실행 (외부 클라이언트가 받아서 실행), 사용자별 인증, 캐싱 정책, dbt YAML 파싱 (JSON 입력만 받음)</td></tr>
+      </table>
+
+      <div class="refs">
+        <span>CLAUDE.md</span>
+        <span>FEASIBILITY.md</span>
+        <span>python_oracle/upstream/README.md</span>
+        <span>python_oracle/upstream/TENETS.md</span>
+      </div>
+
+      <p class="note">
+        <strong>더 깊이 가려면:</strong> 에이전트에게 <em>"dbt-labs/metricflow의 GLOSSARY를 한 번에 정리해줘"</em>
+        또는 <em>"의미층이 BI 도구(Tableau, Looker)와 어떻게 다른지 설명해줘"</em>처럼 물어보세요.
+      </p>
+    </section>
+
+    <!-- ========================================================
+         §02 — 큰 그림
+         ======================================================== -->
+    <section class="stage" id="s2">
+      <p class="stage-num">02 · BIG PICTURE</p>
+      <h2>큰 그림 — 한 장의 다이어그램</h2>
+      <p class="lead">
+        <strong>입력은 두 개, 출력은 SQL 문자열 하나.</strong> 그 사이에 7단계 파이프라인이 있고,
+        각 단계는 다음 단계로 넘기는 <em>중간 표현(IR)</em>을 하나 만든다.
+      </p>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 900 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="metricflow 7-stage pipeline overview">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#87867F"/>
+            </marker>
+            <marker id="arr-clay" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#D97757"/>
+            </marker>
+            <style>
+              .lane       { fill: #FAF9F5; stroke: #D1CFC5; stroke-width: 1; }
+              .lane-label { fill: #87867F; font: 500 10px ui-monospace, "SF Mono", monospace; letter-spacing: 0.12em; }
+              .node       { fill: #FFFFFF; stroke: #D1CFC5; stroke-width: 1.5; }
+              .node-accent{ fill: rgba(227, 218, 204, 0.5); stroke: #D97757; stroke-width: 1.5; }
+              .node-olive { fill: rgba(120, 140, 93, 0.15); stroke: #788C5D; stroke-width: 1.5; }
+              .node-label { fill: #141413; font: 500 13px -apple-system, system-ui, sans-serif; }
+              .node-sub   { fill: #87867F; font: 400 11px -apple-system, system-ui, sans-serif; }
+              .edge       { stroke: #87867F; stroke-width: 1.2; fill: none; }
+              .edge-clay  { stroke: #D97757; stroke-width: 1.5; fill: none; }
+              .edge-label { fill: #3D3D3A; font: 400 11px -apple-system, system-ui, sans-serif; }
+            </style>
+          </defs>
+
+          <!-- input lane -->
+          <rect class="lane" x="20" y="30" width="860" height="80" rx="6"/>
+          <text class="lane-label" x="34" y="50">INPUTS</text>
+
+          <rect class="node" x="60" y="60" width="200" height="40" rx="8"/>
+          <text class="node-label" x="160" y="78" text-anchor="middle">SemanticManifest (JSON)</text>
+          <text class="node-sub"   x="160" y="93" text-anchor="middle">semantic_models · metrics · saved_queries</text>
+
+          <rect class="node" x="640" y="60" width="200" height="40" rx="8"/>
+          <text class="node-label" x="740" y="78" text-anchor="middle">MetricFlowExplainRequest</text>
+          <text class="node-sub"   x="740" y="93" text-anchor="middle">metrics · group_by · where · limit · dialect</text>
+
+          <!-- pipeline lane -->
+          <rect class="lane" x="20" y="140" width="860" height="240" rx="6"/>
+          <text class="lane-label" x="34" y="160">PIPELINE — 7 STAGES</text>
+
+          <!-- stage 1 -->
+          <rect class="node node-olive" x="60" y="190" width="170" height="60" rx="8"/>
+          <text class="node-label" x="145" y="215" text-anchor="middle">① Transform</text>
+          <text class="node-sub"   x="145" y="232" text-anchor="middle">14 rules</text>
+
+          <!-- stage 2 -->
+          <rect class="node node-olive" x="240" y="190" width="170" height="60" rx="8"/>
+          <text class="node-label" x="325" y="215" text-anchor="middle">② Validate</text>
+          <text class="node-sub"   x="325" y="232" text-anchor="middle">28 rules</text>
+
+          <!-- stage 3 -->
+          <rect class="node" x="420" y="190" width="170" height="60" rx="8"/>
+          <text class="node-label" x="505" y="215" text-anchor="middle">③ Parse Query</text>
+          <text class="node-sub"   x="505" y="232" text-anchor="middle">→ MetricFlowQuerySpec</text>
+
+          <!-- stage 4 -->
+          <rect class="node" x="600" y="190" width="170" height="60" rx="8"/>
+          <text class="node-label" x="685" y="215" text-anchor="middle">④ Resolve</text>
+          <text class="node-sub"   x="685" y="232" text-anchor="middle">SemanticGraph + DFS</text>
+
+          <!-- stage 5 -->
+          <rect class="node node-accent" x="60" y="290" width="170" height="60" rx="8"/>
+          <text class="node-label" x="145" y="315" text-anchor="middle">⑤ Build Dataflow</text>
+          <text class="node-sub"   x="145" y="332" text-anchor="middle">23 node variants</text>
+
+          <!-- stage 6 -->
+          <rect class="node node-accent" x="240" y="290" width="170" height="60" rx="8"/>
+          <text class="node-label" x="325" y="315" text-anchor="middle">⑥ Convert to SQL</text>
+          <text class="node-sub"   x="325" y="332" text-anchor="middle">SqlPlanNode tree</text>
+
+          <!-- stage 7 -->
+          <rect class="node node-accent" x="420" y="290" width="170" height="60" rx="8"/>
+          <text class="node-label" x="505" y="315" text-anchor="middle">⑦ Render</text>
+          <text class="node-sub"   x="505" y="332" text-anchor="middle">DefaultSqlPlanRenderer + dialect</text>
+
+          <!-- output -->
+          <rect class="node node-olive" x="600" y="290" width="170" height="60" rx="8"/>
+          <text class="node-label" x="685" y="315" text-anchor="middle">SQL string</text>
+          <text class="node-sub"   x="685" y="332" text-anchor="middle">MetricFlowExplainResult</text>
+
+          <!-- arrows: inputs into pipeline -->
+          <path class="edge" d="M 160 100 L 160 188" marker-end="url(#arr)"/>
+          <path class="edge" d="M 740 100 L 685 188" marker-end="url(#arr)"/>
+
+          <!-- arrows: pipeline flow -->
+          <path class="edge-clay" d="M 230 220 L 240 220" marker-end="url(#arr-clay)"/>
+          <path class="edge-clay" d="M 410 220 L 420 220" marker-end="url(#arr-clay)"/>
+          <path class="edge-clay" d="M 590 220 L 600 220" marker-end="url(#arr-clay)"/>
+          <path class="edge-clay" d="M 770 250 L 770 270 L 145 270 L 145 290" marker-end="url(#arr-clay)"/>
+          <path class="edge-clay" d="M 230 320 L 240 320" marker-end="url(#arr-clay)"/>
+          <path class="edge-clay" d="M 410 320 L 420 320" marker-end="url(#arr-clay)"/>
+          <path class="edge-clay" d="M 590 320 L 600 320" marker-end="url(#arr-clay)"/>
+
+          <!-- output lane -->
+          <rect class="lane" x="20" y="400" width="860" height="50" rx="6"/>
+          <text class="lane-label" x="34" y="418">OUTPUT</text>
+          <text class="node-sub" x="450" y="432" text-anchor="middle">실행은 외부 — 엔진은 SQL을 만들기만 한다</text>
+        </svg>
+        <figcaption>Figure 01 — 7-stage pipeline from inputs to SQL string.</figcaption>
+      </div>
+
+      <p>
+        다이어그램의 7개 단계가 이 문서의 본문이다. 각 단계는 <em>닫힌 입력 타입</em>을 받아 <em>닫힌 출력 타입</em>을
+        내어놓는다. 단계 사이의 IR이 이 엔진의 핵심 어휘 — <code>SemanticManifest</code>, <code>MetricFlowQuerySpec</code>,
+        <code>DataflowPlan</code>, <code>SqlPlanNode</code>, 그리고 마지막으로 <code>String</code>이다.
+      </p>
+
+      <p class="tip">
+        <strong>읽기 팁.</strong> 어떤 단계의 코드를 읽다가 "이 입력이 어디서 왔지?" 싶으면 위 그림으로 돌아오라.
+        각 단계의 출력 타입이 다음 단계의 입력이다. 단계 안에서 막막해지면 그 IR의 <strong>sealed hierarchy</strong>를
+        먼저 한번 훑는 게 답이다.
+      </p>
+
+      <div class="refs">
+        <span>FEASIBILITY.md §5 (5-Phase 계획)</span>
+        <span>docs/scope.md</span>
+        <span>docs/dependency-dag.md</span>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         §03 — 7단계 개요
+         ======================================================== -->
+    <section class="stage" id="s3">
+      <p class="stage-num">03 · OVERVIEW</p>
+      <h2>데이터 흐름 7단계 개요</h2>
+      <p class="lead">
+        각 단계의 책임을 한 문단으로 요약하고, 입력/출력 타입과 핵심 Kotlin 파일을 표로 정리한다.
+        본문 §4–§11에서 같은 순서로 깊이 들어간다.
+      </p>
+
+      <table class="facts">
+        <thead>
+          <tr><th>단계</th><th>입력</th><th>출력</th><th>핵심 코드</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>① Manifest 로드</th><td>JSON</td><td><code>SemanticManifest</code></td><td><code>domain/manifest/model/</code></td></tr>
+          <tr><th>② Transform</th><td><code>SemanticManifest</code></td><td>canonical <code>SemanticManifest</code></td><td><code>domain/manifest/transformation/</code></td></tr>
+          <tr><th>③ Validate</th><td>canonical manifest</td><td>issues (error/warning)</td><td><code>domain/manifest/validation/</code></td></tr>
+          <tr><th>④ Parse Query</th><td>request + manifest lookup</td><td><code>MetricFlowQuerySpec</code></td><td><code>domain/query/</code></td></tr>
+          <tr><th>⑤ Build Dataflow</th><td>query spec + semantic graph</td><td><code>DataflowPlan</code></td><td><code>domain/dataflow/builder/</code></td></tr>
+          <tr><th>⑥ Convert</th><td><code>DataflowPlan</code></td><td><code>SqlPlanNode</code> tree</td><td><code>domain/plan_conversion/</code></td></tr>
+          <tr><th>⑦ Render</th><td>SQL plan + dialect</td><td><code>String</code></td><td><code>domain/sql/render/</code> + dialect 모듈</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="serif">각 단계가 한 일</h3>
+      <ul class="flow">
+        <li><strong>① 로드</strong> — JSON을 kotlinx-serialization으로 <code>SemanticManifest</code> 데이터 클래스로 역직렬화. 외부 입력 신뢰 경계.</li>
+        <li><strong>② Transform</strong> — Pydantic JSON 직렬화 시 "사용자가 안 쓴 필드"를 채우는 단계. 14개 규칙. 예: <code>SIMPLE</code> 메트릭에 <code>input_measure</code>를 자동으로 채움.</li>
+        <li><strong>③ Validate</strong> — 의미적 정합성 검사. 28개 규칙 × 16개 파일. 예: <code>agg_time_dimension</code>이 실제로 존재하는 시간 차원인지.</li>
+        <li><strong>④ Parse</strong> — 사용자 입력 문자열("listing__country")을 <code>DimensionSpec</code> 등 정형 타입으로 해석. 의미 그래프와 협업.</li>
+        <li><strong>⑤ Dataflow</strong> — 어떤 조인·필터·집계가 필요한지를 23-종 노드 DAG로 표현. <em>아직 SQL은 모른다.</em></li>
+        <li><strong>⑥ Plan Conversion</strong> — 각 dataflow 노드를 SQL plan 노드 트리로 변환하는 23-arm visitor.</li>
+        <li><strong>⑦ Render</strong> — SQL plan을 dialect별 문자열로 출력. 8개 dialect는 <code>DefaultSqlPlanRenderer</code>의 작은 override들.</li>
+      </ul>
+
+      <p class="note">
+        <strong>왜 IR이 둘인가?</strong> Dataflow plan과 SQL plan을 분리한 이유는 <em>관심사 분리</em>다.
+        Dataflow는 "<em>의미적</em>으로 어떤 데이터 흐름이 필요한가"를 표현하고, SQL plan은 "<em>구문적</em>으로
+        어떤 SELECT/JOIN/WHERE 트리가 되는가"를 표현한다. 한 dataflow 노드(예: <code>AggregateSimpleMetricInputsNode</code>)는
+        여러 SQL 표현(<code>SUM(x)</code> vs <code>COUNT(DISTINCT x)</code>)으로 갈리고, 한 SQL 표현은 여러
+        dataflow 노드의 공통 출력일 수 있다. 분리해야 깨끗하다.
+      </p>
+
+      <div class="refs">
+        <span>modules/core/README.md</span>
+        <span>modules/engine/README.md</span>
+        <span>docs/module-mapping.md</span>
+      </div>
+
+      <p class="note">
+        <strong>더 깊이 가려면:</strong> 에이전트에게 <em>"각 단계의 출력 IR 데이터 클래스 정의를 나열해줘"</em>처럼
+        물어보면 다음 단계로 자연스럽게 넘어간다.
+      </p>
+    </section>
+
+    <!-- ========================================================
+         §04 — 매니페스트
+         ======================================================== -->
+    <section class="stage" id="s4">
+      <p class="stage-num">04 · MANIFEST</p>
+      <h2>의미 매니페스트 — 모든 것의 입력</h2>
+      <p class="lead">
+        <strong><code>SemanticManifest</code>는 의미층 엔진의 "스키마"다.</strong> semantic model(원천 테이블),
+        그 위의 measure·dimension·entity, 그것들로 빚어진 metric, 그리고 saved query를 한 데 묶은 JSON 문서.
+      </p>
+
+      <h3 class="serif">최상위 구조</h3>
+      <p>
+        <code>SemanticManifest</code>는 <em>네 개의 리스트 + 한 개의 설정</em>으로 끝난다.
+        Python <code>PydanticSemanticManifest</code>의 1:1 포팅이며, kotlinx-serialization을 통해 JSON과 round-trip한다.
+      </p>
+
+      <pre><code><span class="cm">// modules/core/.../domain/manifest/model/SemanticManifest.kt</span>
+<span class="hl">@Serializable</span>
+<span class="hl">data class</span> SemanticManifest(
+    <span class="hl">val</span> semanticModels: List&lt;SemanticModel&gt;,
+    <span class="hl">val</span> metrics: List&lt;Metric&gt;,
+    <span class="hl">val</span> projectConfiguration: ProjectConfiguration,
+    <span class="hl">val</span> savedQueries: List&lt;SavedQuery&gt; = emptyList(),
+)</code></pre>
+
+      <h3 class="serif">5종의 핵심 도메인 타입</h3>
+
+      <div class="cards-grid">
+        <div class="card">
+          <p class="card-tag">data class</p>
+          <h4>SemanticModel</h4>
+          <p>물리 테이블 한 개에 대응. <code>nodeRelation</code>(데이터베이스·스키마·테이블), <code>measures</code>,
+          <code>dimensions</code>, <code>entities</code>를 묶는다. "이 테이블에서 측정 가능한 것은 무엇인가"의 선언.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">data class</p>
+          <h4>Measure</h4>
+          <p>집계 가능한 컬럼. <code>name</code>, <code>agg</code>(SUM/AVG/COUNT/…), <code>expr</code>(원천 SQL식),
+          <code>agg_time_dimension</code>. 모든 메트릭의 원자 단위.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">data class</p>
+          <h4>Dimension</h4>
+          <p>그룹 키. <code>type=CATEGORICAL</code>이면 <code>listing__country</code> 같은 분류 차원,
+          <code>type=TIME</code>이면 <code>ds</code>처럼 granularity와 함께 다루는 시간 차원.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">data class</p>
+          <h4>Entity</h4>
+          <p>조인 키. <code>type=PRIMARY|UNIQUE|FOREIGN|NATURAL</code>. semantic model 간 JOIN이 어떻게 일어날지를 결정.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">discriminated record</p>
+          <h4>Metric</h4>
+          <p>한 record에 <code>type: MetricType</code>(SIMPLE/RATIO/CUMULATIVE/DERIVED/CONVERSION) + 광폭 <code>typeParams</code>.
+          Python에서 Pydantic이 하나로 합쳤기 때문에 Kotlin도 sealed로 가르지 않고 record 모양을 보존했다.</p>
+        </div>
+      </div>
+
+      <h3 class="serif">예: 작은 manifest 발췌</h3>
+      <pre><code><span class="cm">// 한 semantic model — fct_bookings 테이블 위에 measure 1 + dim 2 + entity 1</span>
+{
+  "name": "bookings_source",
+  "node_relation": { "schema_name": "mf_corpus", "alias": "fct_bookings",
+                     "relation_name": "mf_corpus.fct_bookings" },
+  "measures": [
+    { "name": "bookings", "agg": "sum", "expr": "1", "agg_time_dimension": "ds" }
+  ],
+  "dimensions": [
+    { "name": "ds",      "type": "time", "type_params": { "time_granularity": "day" } },
+    { "name": "country", "type": "categorical" }
+  ],
+  "entities": [
+    { "name": "booking",  "type": "primary", "expr": "booking_id" },
+    { "name": "listing",  "type": "foreign", "expr": "listing_id" }
+  ]
+}</code></pre>
+
+      <p>
+        이 한 모델에서 자동으로 도출되는 group-by 후보: <code>ds</code>의 granularity 변형 (<code>ds__day/week/month/...</code>),
+        <code>country</code>, <code>listing</code>을 따라 JOIN한 cross-model dimension들 (예: <code>listing__country</code>).
+      </p>
+
+      <h3 class="serif">테이블 스키마와의 매핑 — JSON이 실제 SQL의 무엇을 가리키는가</h3>
+      <p>
+        위 manifest는 텍스트일 뿐이다. 실제 DB에 두 테이블이 있다고 하자. 의미층은 이 두 테이블 위에
+        <em>의미</em>를 얹는다.
+      </p>
+
+      <pre><code><span class="cm">-- 실제 DDL (Trino dialect 기준). 이 위에 의미 모델을 얹는다.</span>
+CREATE TABLE mf_corpus.fct_bookings (
+    booking_id      BIGINT,         <span class="cm">-- 한 booking을 식별 (primary entity)</span>
+    listing_id      BIGINT,         <span class="cm">-- 어느 listing인지 (foreign entity, JOIN 키)</span>
+    guest_id        BIGINT,
+    ds              DATE,           <span class="cm">-- booking 시각 (time dimension, agg 기준)</span>
+    country         VARCHAR,        <span class="cm">-- booking 시점의 국가 스냅샷 (categorical dimension)</span>
+    booking_value   DECIMAL(18,2),
+    is_instant      BOOLEAN
+);
+
+CREATE TABLE mf_corpus.dim_listings (
+    listing_id      BIGINT,         <span class="cm">-- listing의 row identity (primary entity)</span>
+    user_id         BIGINT,         <span class="cm">-- 호스트 user (foreign entity)</span>
+    country         VARCHAR,        <span class="cm">-- listing의 현재 국가 (categorical dimension)</span>
+    created_at      TIMESTAMP,      <span class="cm">-- listing이 만들어진 시각 (time dimension)</span>
+    is_lux          BOOLEAN,
+    capacity        INT
+);</code></pre>
+
+      <p>
+        같은 <code>country</code>가 양쪽에 있지만 의미가 다르다. <code>fct_bookings.country</code>는
+        <em>booking 시점의 스냅샷</em>이고, <code>dim_listings.country</code>는 <em>listing의 현재 값</em>이다.
+        두 컬럼은 이름은 같아도 의미가 달라 — 사용자가 group-by로 어떤 걸 의도하는지가 중요해진다. 이게
+        cross-model dimension의 의미적 가치다.
+      </p>
+
+      <p>
+        그러면 manifest의 각 JSON 필드가 위 DDL의 어디를 가리키는지 — <code>bookings_source</code> 모델 기준:
+      </p>
+
+      <table class="facts">
+        <thead>
+          <tr><th>manifest JSON 필드</th><th>실제 SQL 위치</th><th>역할</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><code>node_relation.relation_name</code></th>
+            <td><code>mf_corpus.fct_bookings</code> 테이블</td>
+            <td>이 모델이 보는 row source. <code>FROM</code> 절에 그대로 들어간다.</td>
+          </tr>
+          <tr>
+            <th><code>entities[booking].expr = "booking_id"</code></th>
+            <td><code>fct_bookings.booking_id</code> 컬럼</td>
+            <td>한 행 = 한 booking. primary entity. (semantic graph에서 노드 식별자 역할)</td>
+          </tr>
+          <tr>
+            <th><code>entities[listing].expr = "listing_id"</code></th>
+            <td><code>fct_bookings.listing_id</code> 컬럼</td>
+            <td>foreign entity. <code>dim_listings</code>의 primary entity와 매칭되어 JOIN 키.</td>
+          </tr>
+          <tr>
+            <th><code>measures[bookings].agg = "sum", expr = "1"</code></th>
+            <td><em>컬럼 아님</em> — 식 <code>SUM(1)</code></td>
+            <td>"booking 개수" 메트릭의 원자. <code>expr</code>은 컬럼명이 아니라 임의의 SQL 식이다.</td>
+          </tr>
+          <tr>
+            <th><code>measures[bookings].agg_time_dimension = "ds"</code></th>
+            <td><code>fct_bookings.ds</code> 컬럼</td>
+            <td><em>같은 모델의 time dim 이름</em>을 가리킨다. cumulative/time-spine 쪽에서 기준 컬럼.</td>
+          </tr>
+          <tr>
+            <th><code>dimensions[ds] type=time, time_granularity="day"</code></th>
+            <td><code>fct_bookings.ds</code> 컬럼</td>
+            <td>day 입자. <code>ds__week/month/...</code>는 SQL <code>DATE_TRUNC</code>로 자동 도출.</td>
+          </tr>
+          <tr>
+            <th><code>dimensions[country] type=categorical</code></th>
+            <td><code>fct_bookings.country</code> 컬럼</td>
+            <td>group-by 가능. "booking 시점 스냅샷" 의미는 manifest에 명시되어 있지 않다 — 모델러의 책임.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="note">
+        <strong>manifest는 컬럼 목록이 아니다.</strong> <code>fct_bookings</code> 테이블에 <code>guest_id</code>,
+        <code>booking_value</code>, <code>is_instant</code> 컬럼이 더 있지만 manifest엔 안 나온다 — 사용 안 하는 컬럼은
+        선언하지 않으면 그만이다. 반대로, <code>SUM(1)</code>처럼 <em>컬럼이 아닌 식</em>도 measure가 될 수 있다.
+        manifest는 "테이블의 어떤 부분에 어떤 의미를 부여할지"의 화이트리스트일 뿐이다.
+      </p>
+
+      <h3 class="serif">짝이 되는 두 번째 모델 — <code>listings_source</code></h3>
+      <p>
+        cross-model 쿼리(예: <code>group_by=['listing__country']</code>)가 가능하려면 두 번째 모델이 필요하다.
+        <code>dim_listings</code> 위에 얹는 의미 모델은 이렇게 생긴다:
+      </p>
+
+      <pre><code><span class="cm">// listings_source — dim_listings 테이블 위에 dim 3 + entity 2 (measure 없음, 순수 차원 모델)</span>
+{
+  "name": "listings_source",
+  "node_relation": { "schema_name": "mf_corpus", "alias": "dim_listings",
+                     "relation_name": "mf_corpus.dim_listings" },
+  "dimensions": [
+    { "name": "country",    "type": "categorical" },
+    { "name": "is_lux",     "type": "categorical" },
+    { "name": "created_at", "type": "time", "type_params": { "time_granularity": "day" } }
+  ],
+  "entities": [
+    { "name": "listing", "type": "primary", "expr": "listing_id" },
+    { "name": "user",    "type": "foreign", "expr": "user_id" }
+  ]
+}</code></pre>
+
+      <p>
+        측정값(measure)이 없어도 의미 모델이 될 수 있다 — 이런 모델은 차원만 공급하는 "lookup" 역할.
+        핵심은 <code>entities[listing]</code>의 <code>type: "primary"</code>: <code>bookings_source</code>의
+        foreign entity와 이름·표현식이 매칭돼 자동 JOIN 키가 된다.
+      </p>
+
+      <h3 class="serif">자동으로 풀리는 쿼리 — 의미층의 가치 한 장면</h3>
+      <p>
+        두 모델이 manifest에 같이 들어 있을 때, 사용자가 다음 쿼리를 보내면:
+      </p>
+
+      <pre><code><span class="cm">// 사용자 입력 (MetricFlowQueryRequest)</span>
+{ "metric_names": ["bookings"],
+  "group_by_names": ["listing__country", "metric_time__day"] }</code></pre>
+
+      <p>
+        엔진은 manifest를 보고 다음 SQL을 만들어낸다 (개념적으로):
+      </p>
+
+      <pre><code><span class="cm">-- 의미 그래프가 자동으로 풀어준 JOIN</span>
+SELECT
+  l.country               AS listing__country,
+  DATE_TRUNC('day', b.ds) AS metric_time__day,
+  SUM(1)                  AS bookings
+FROM mf_corpus.fct_bookings  b
+JOIN mf_corpus.dim_listings l
+  ON b.listing_id = l.listing_id   <span class="cm">-- entity 매칭으로 자동 도출</span>
+GROUP BY 1, 2;</code></pre>
+
+      <p>
+        사용자가 직접 쓰지 않은 것: <code>FROM</code>, <code>JOIN ... ON</code>, <code>SUM(1)</code>,
+        <code>DATE_TRUNC('day', ...)</code>, alias 이름. 이걸 manifest에서 풀어주는 게 의미층 엔진의 일이다.
+        <code>listing__country</code>의 dunder 표기는 "listing entity를 따라가서 country dimension"이라는 의미.
+        의미 그래프(§7)가 이 경로를 찾는다.
+      </p>
+
+      <h3 class="serif">자주 헷갈리는 부분 — 네 가지 질문</h3>
+
+      <details class="opt"><summary>Q1. <code>entity.expr</code>는 컬럼명 외에 뭐가 들어갈 수 있나? 그냥 <code>column</code>이라고 안 하는 이유는?</summary>
+      <div class="opt-body">
+        <p>
+          <code>expr</code>은 컬럼명이 아니라 <strong>SQL 식(expression)</strong>이다. 가장 흔한 케이스는 컬럼명 한 단어
+          (<code>expr: listing_id</code>)지만, 식이 들어가는 케이스도 있다:
+        </p>
+        <ul>
+          <li><strong>복합 키</strong> — <code>expr: "CONCAT(account_id, '_', region_id)"</code>처럼 여러 컬럼을 합쳐 한 entity를 만든다.</li>
+          <li><strong>COALESCE</strong> — <code>expr: "COALESCE(user_id, anonymous_id)"</code>로 NULL을 흡수.</li>
+          <li><strong>cast / 정규화</strong> — <code>expr: "LOWER(email)"</code>같이 표면적 다양성을 한 entity로 모은다.</li>
+          <li><strong>생략(Optional)</strong> — Pydantic 정의가 <code>expr: Optional[str] = None</code>. 생략하면 <code>name</code>이 컬럼명으로 쓰인다. 즉 <code>{ "name": "booking" }</code>만 적으면 <code>booking</code>이라는 컬럼을 가리키게 된다.</li>
+        </ul>
+        <p>
+          그래서 <code>column</code>이 아니라 <code>expr</code>이다. 만약 <code>column</code>이었다면 "컬럼명 문자열만 가능"이라는
+          제약이 박혔을 텐데, 실제 데이터엔 식이 필요한 케이스가 흔하다. <strong>"이 entity를 SQL에서 어떻게 뽑아낼지"</strong>의
+          식이 정확한 의미.
+        </p>
+        <div class="refs">
+          <span>python_oracle/upstream/metricflow_semantic_interfaces/implementations/elements/entity.py:23</span>
+          <span>modules/core/.../domain/manifest/model/element/Entity.kt</span>
+        </div>
+      </div></details>
+
+      <details class="opt"><summary>Q2. <code>measure.expr</code>는 <code>"1"</code>이나 컬럼명 말고 어떤 식이 들어가나?</summary>
+      <div class="opt-body">
+        <p>
+          <code>measure.expr</code>도 마찬가지로 임의의 SQL 식이다. 핵심은 <code>agg</code>가 식 위에 어떻게 감싸지는가 — 식은
+          <em>집계 함수의 인자</em> 자리에 들어간다 (<code>{agg}({expr})</code> 패턴). 코퍼스의 <code>bookings_source</code>
+          모델에서 실제로 쓰인 패턴들:
+        </p>
+        <table class="facts">
+          <thead><tr><th><code>expr</code></th><th><code>agg</code></th><th>결과 SQL</th><th>역할</th></tr></thead>
+          <tbody>
+            <tr><td><code>"1"</code></td><td>sum</td><td><code>SUM(1)</code></td><td>row 개수 = booking 개수</td></tr>
+            <tr><td><code>booking_value</code></td><td>sum / max / min / average / median / percentile</td><td><code>SUM(booking_value)</code> 등</td><td>금액 컬럼 위의 여러 통계</td></tr>
+            <tr><td><code>guest_id</code></td><td>count_distinct</td><td><code>COUNT(DISTINCT guest_id)</code></td><td>고유 guest 수</td></tr>
+            <tr><td><code>is_instant</code></td><td>sum_boolean</td><td><code>SUM(CASE WHEN is_instant THEN 1 ELSE 0 END)</code></td><td>boolean 컬럼 → 카운트 (transform 단계가 펼침)</td></tr>
+            <tr><td><code>referrer_id</code></td><td>count</td><td><code>COUNT(referrer_id)</code></td><td>NULL 아닌 referrer 수</td></tr>
+            <tr><td>(생략)</td><td>sum</td><td><code>SUM(booking_value)</code></td><td>measure의 <code>name</code>이 그대로 컬럼명으로 쓰임</td></tr>
+          </tbody>
+        </table>
+        <p>
+          더 복잡한 식도 가능하다: <code>expr: "CASE WHEN status='completed' THEN booking_value ELSE 0 END"</code>처럼
+          조건부 합계, <code>expr: "price * quantity"</code> 같은 산술. <strong>"집계 전에 어떤 식을 평가할지"</strong>의
+          자유도다. 그래서 measure.expr도 컬럼명이 아니라 식.
+        </p>
+        <p>
+          또 변환 단계의 <code>ConvertCountRules</code>가 <code>agg: count</code> + <code>expr</code> 생략을
+          <code>SUM(1)</code>으로, <code>ConvertMedianRules</code>가 <code>agg: median</code>을 percentile 0.5로
+          바꾸는 등 — 사용자가 쓴 짧은 표현이 canonical 표현으로 펴진다 (§5).
+        </p>
+        <div class="refs">
+          <span>python_oracle/upstream/metricflow_semantic_interfaces/implementations/elements/measure.py:35</span>
+          <span>python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml</span>
+          <span>modules/core/.../domain/manifest/model/element/Measure.kt</span>
+          <span>modules/core/.../domain/manifest/transformation/rules/ConvertCountRules.kt</span>
+        </div>
+      </div></details>
+
+      <details class="opt"><summary>Q3. <code>agg_time_dimension</code>은 정확히 무슨 역할인가?</summary>
+      <div class="opt-body">
+        <p>
+          한 measure가 "<strong>어느 time dimension을 기준으로 시간 위에 잘리는지</strong>"를 가리키는 필드. 한 semantic model에 시간
+          차원이 여러 개 있을 수 있고 (booking 시각 <code>ds</code>, 결제 시각 <code>paid_at</code> 등), 각 measure는
+          그중 하나를 "내 시간 축"으로 선언한다.
+        </p>
+        <p>코퍼스 예 — <code>bookings_source</code>:</p>
+        <pre><code>defaults:
+  agg_time_dimension: ds          <span class="cm"># 이 모델의 default time axis</span>
+
+measures:
+  - name: bookings
+    agg: sum
+    expr: "1"                     <span class="cm"># default ds 따라간다</span>
+
+  - name: booking_payments
+    agg: sum
+    expr: booking_value
+    agg_time_dimension: paid_at   <span class="cm"># 결제 기준으로 잘림 — override</span></code></pre>
+        <p>
+          <code>booking_payments</code>를 <code>metric_time__day</code>로 group-by하면, 엔진은
+          <code>fct_bookings.paid_at</code>을 day 단위로 자른다 — <code>ds</code>가 아니라. 이게 같은 모델에서 두 종류의 시간
+          axis가 공존하는 패턴.
+        </p>
+        <p><strong>구체적으로 어디서 쓰이나:</strong></p>
+        <ul>
+          <li><strong>metric_time 별명 라우팅</strong> — 사용자가 <code>metric_time__day</code>로 group-by하면
+            metricflow는 이 measure의 <code>agg_time_dimension</code> 컬럼을 골라 자른다. 사용자는 모델별 컬럼 이름
+            (<code>ds</code>인지 <code>paid_at</code>인지)을 몰라도 된다.</li>
+          <li><strong>CUMULATIVE 메트릭</strong> — "최근 30일 합계" 같은 윈도우 계산은 이 컬럼을 기준 시간으로 잡고 time spine에
+            join.</li>
+          <li><strong>time spine join</strong> — 비어있는 날짜를 채울 때 이 컬럼이 spine과 매칭된다.</li>
+        </ul>
+        <p>
+          기술적으로 <code>agg_time_dimension</code>은 <strong>같은 모델 안의 time dimension 이름</strong>이어야 한다
+          (validation rule <code>AggregationTimeDimensionRule</code>이 검사). 다른 모델의 dim은 불가 — 그러면 의미가 모호해진다.
+        </p>
+
+        <h4 class="serif" style="font-size:18px;margin-top:24px">설계 평가 — <code>metric_time</code>이 단순 편의인가, 구조적 추상화인가</h4>
+
+        <p>
+          중요한 의문: <em>"그냥 time dimension으로 명시 정의된 것만 dim 목록으로 노출하면 안 되는가? 왜 <code>metric_time</code>이라는
+          별도 추상이 필요한가?"</em> 핵심을 먼저 말하면 — <strong><code>metric_time</code>은 사용자 편의가 아니라 엔진 내부의 구조적
+          transform이다.</strong>
+        </p>
+
+        <p>코드가 그 증거다. <code>MetricTimeDimensionTransformNode</code>의 docstring:</p>
+        <pre><code><span class="cm"># python_oracle/upstream/metricflow/dataflow/nodes/metric_time_transform.py:17</span>
+"""A node transforms the input data set so that it contains the metric time
+dimension and relevant simple-metric inputs.
+
+The metric time dimension is used later to aggregate all simple-metric inputs
+in the data set."""</code></pre>
+
+        <p>
+          이 노드는 dataflow plan의 <em>모든 explain</em> 경로에 들어간다. measure의 <code>agg_time_dimension</code> 컬럼을 읽어,
+          데이터셋의 그 컬럼을 <code>metric_time</code>이라는 통합 이름으로 alias하는 게 본 역할. 즉
+          <strong>엔진 내부에선 모든 measure가 <code>metric_time</code>이라는 단일 시간 축을 공유</strong>한다 — 사용자가 그 이름을
+          쓰든 안 쓰든.
+        </p>
+
+        <p>그래서 효용을 실제로 받는 5가지 사용처:</p>
+
+        <ol>
+          <li><strong>Cross-measure 시간 정렬 (가장 큰 가치)</strong>. <code>bookings</code>(uses <code>ds</code>) +
+            <code>booking_payments</code>(uses <code>paid_at</code>)를 한 쿼리에 묻고 day 단위로 그래프를 그릴 때 — 사용자는
+            <code>metric_time__day</code> 하나만 group-by에 쓴다. 엔진이 measure마다 자기 <code>agg_time_dimension</code>을 골라
+            day로 자른다. <em>"explicit time dim만 dim 목록에 있다"면</em> 사용자가 measure마다 어느 컬럼인지 알아야 하고,
+            measure를 합칠 때 어느 측 시간을 쓸지 명시해야 한다.</li>
+          <li><strong>CUMULATIVE 메트릭의 윈도우 정의가 시간 컬럼 이름에 의존하지 않는다</strong>. <code>trailing_2_months_revenue</code>의
+            metric YAML은 <code>window: 2 month</code>만 적힌다 — 컬럼 이름 무관. 시간 축은 <code>txn_revenue</code> measure의
+            <code>agg_time_dimension</code>에서 implicit 도출. 만약 explicit time dim 모델이었다면 cumulative 정의에
+            <code>"time_dimension: ds_recv"</code>를 또 적어야 한다. metric 정의가 모델 details에 짙게 묶이는 결과.</li>
+          <li><strong>Time spine fill의 라우터</strong>. 비어있는 날짜에 0을 채워 시각화하려면 모든 measure의 시간 컬럼을 spine과
+            join해야 한다. <code>metric_time</code>이 통합된 spine 칼럼 이름이라 한 번에 join. 없으면 measure별 별도 join 로직 필요.</li>
+          <li><strong>DERIVED 메트릭의 time offset</strong> (예: month-over-month). <code>metric_time</code> 위에서 "1 month 뒤로"라는
+            논리가 깔끔. measure 컬럼 이름이 달라도 metric 정의는 추상 시간 위에서 균일.</li>
+          <li><strong>SQL 옵티마이저 — 단일 GROUP BY</strong>. plan_conversion 단계가 모든 measure를 같은 <code>metric_time</code>
+            컬럼으로 group한다 → single SELECT으로 합쳐짐. 분리된 time dim이면 measure별 sub-query를 outer join해야 한다 — 코드 + SQL
+            모두 복잡.</li>
+        </ol>
+
+        <h4 class="serif" style="font-size:18px;margin-top:24px">다른 시맨틱 레이어와의 비교</h4>
+
+        <table class="facts">
+          <thead><tr><th>시스템</th><th>time dim 처리</th><th>cumulative window</th><th>cross-measure 시간 정렬</th></tr></thead>
+          <tbody>
+            <tr>
+              <th>metricflow</th>
+              <td><code>metric_time</code> 가상 dim. 쿼리 시점 grain만 지정.</td>
+              <td>metric 정의에 window/grain_to_date (time 컬럼 implicit)</td>
+              <td>자동 — measure별 <code>agg_time_dimension</code> 라우팅</td>
+            </tr>
+            <tr>
+              <th>Cube.js</th>
+              <td>explicit <code>timeDimensions: [{ dimension: 'cube.created_at', granularity: 'day' }]</code>를 매 쿼리에 명시</td>
+              <td><code>type: rolling_window</code> measure + <code>rollingWindow: { trailing: '7 day' }</code>. measure 정의에 박힘.</td>
+              <td>수동 — cube 간 시간 축 정렬은 사용자 책임. 한 쿼리에 한 time dim.</td>
+            </tr>
+            <tr>
+              <th>LookML (Looker)</th>
+              <td><code>timeframes: [date, week, month]</code> per dim, query는 <code>view.created_date</code> 등 직접 참조</td>
+              <td><code>period_over_period</code> / <code>running_total</code> measure types</td>
+              <td>수동 — view마다 다른 시간 컬럼이면 LookML join 정의로 풀어야 함</td>
+            </tr>
+            <tr>
+              <th>Malloy</th>
+              <td>dim에 <code>timeframe: 'date'</code>, query에서 explicit dim 참조</td>
+              <td><code>turtle</code> 안에 <code>declare</code> 패턴 (덜 표준화)</td>
+              <td>수동</td>
+            </tr>
+            <tr>
+              <th>dbt-metrics (legacy, pre-metricflow)</th>
+              <td>metric에 <code>time_grains: [day, week]</code>; metricflow의 전신</td>
+              <td>비슷한 cumulative 컨셉</td>
+              <td>부분적</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          <strong>요약</strong>: 다른 주요 시맨틱 레이어는 <em>explicit dim reference</em>를 택했고, metricflow만 <code>metric_time</code>
+          추상화를 도입했다. 이건 dbt Labs가 인수한 Transform Data가 "분석가는 metric 단위로 사고하지 테이블 단위로 사고하지 않는다"는
+          가설로 설계한 결과.
+        </p>
+
+        <h4 class="serif" style="font-size:18px;margin-top:24px">우아한가? 평가</h4>
+
+        <p><strong>장점</strong>:</p>
+        <ul>
+          <li>여러 measure를 한 쿼리에 묶을 때 시간 정렬이 zero-config</li>
+          <li>Cumulative / DERIVED 메트릭 정의가 모델의 컬럼 이름에서 독립 — metric layer가 데이터 모델 변화에 robust</li>
+          <li>엔진 내부에서 단일 GROUP BY 통합 — SQL이 단순</li>
+          <li>학습 곡선 평탄: 사용자는 <code>metric_time__day</code> 하나만 알면 됨</li>
+        </ul>
+
+        <p><strong>단점</strong>:</p>
+        <ul>
+          <li>"숨겨진 매직" — 처음 보면 <code>metric_time</code>이 어디서 왔는지 헷갈림. 디버깅 시 어느 measure가 어느 시간 컬럼으로
+            라우팅됐는지 추적 필요</li>
+          <li>구현 비용 — <code>MetricTimeDimensionTransformNode</code>라는 dedicated 노드 + validation rule. dataflow plan의
+            추가 단계.</li>
+          <li>한 measure에 진짜로 두 개 의미적 시간 축이 있는 경우 (created_at AND completed_at 모두 분석 가치) — 한 쪽만 primary로
+            선언 가능. 다른 쪽은 일반 time dim으로만 노출되고 metric_time 라우팅에선 빠진다.</li>
+          <li>모델러의 책임 가중 — measure의 <code>agg_time_dimension</code>이 의미적으로 맞는지를 모델러가 정확히 알아야 함.
+            잘못 지정하면 "왜 내 cumulative 메트릭이 잘못 잘리지?" 디버깅이 길어진다.</li>
+        </ul>
+
+        <p>
+          <strong>결론</strong>: 단일 metric · 단일 dashboard라면 over-engineered다 — Cube의 explicit 방식이 더 직관적. 하지만
+          <em>여러 metric을 한 캔버스에서 동시 분석하는 메트릭 layer</em>로 보면 <code>metric_time</code>의 abstraction이 강력한
+          지렛대를 만든다. metricflow가 명시 dim보다 추상 dim을 택한 건 "metric layer로서의 정체성"을 우선한 결정이고, 트레이드오프는
+          분명히 존재하지만 설계 의도와 일관된다고 평가할 수 있다.
+        </p>
+
+        <h4 class="serif" style="font-size:18px;margin-top:24px">CUMULATIVE 메트릭의 시간 — 정의 시점 vs 쿼리 시점</h4>
+
+        <p>
+          질문 후속: <em>"cumulative 메트릭은 SQL 생성 시점에 time dimension을 입력으로 받는가, 아니면 메트릭 정의 안에 들어가
+          있어야 하는가?"</em>
+        </p>
+
+        <p>실제 corpus YAML <code>trailing_2_months_revenue</code>:</p>
+        <pre><code>metric:
+  name: trailing_2_months_revenue
+  type: cumulative
+  type_params:
+    measure: txn_revenue                <span class="cm"># time dim은 이 measure에서 implicit</span>
+    cumulative_type_params:
+      window: 2 month                   <span class="cm"># 윈도우 길이 — 메트릭 정의 시점에 고정</span>
+      period_agg: average               <span class="cm"># 윈도우 안에서의 집계 방식</span></code></pre>
+
+        <p><strong>두 가지가 분리된다</strong>:</p>
+
+        <table class="facts">
+          <thead><tr><th>요소</th><th>위치</th><th>예시</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>윈도우 길이 (얼마나 누계할지)</td>
+              <td>메트릭 정의 안 (<code>cumulative_type_params.window</code> / <code>grain_to_date</code>)</td>
+              <td><code>window: 2 month</code>, <code>grain_to_date: month</code> (MTD)</td>
+            </tr>
+            <tr>
+              <td>윈도우 안 집계 방식</td>
+              <td>메트릭 정의 안 (<code>period_agg</code>)</td>
+              <td><code>sum</code> (default), <code>average</code>, <code>last</code>, <code>first</code></td>
+            </tr>
+            <tr>
+              <td>시간 축 (어느 컬럼)</td>
+              <td>implicit — measure의 <code>agg_time_dimension</code></td>
+              <td><code>txn_revenue.agg_time_dimension = ds</code></td>
+            </tr>
+            <tr>
+              <td>출력 grain (day/week/month)</td>
+              <td>쿼리 시점 — <code>group_by: ['metric_time__day']</code></td>
+              <td>같은 metric이 day 그래프도 / month 그래프도 가능</td>
+            </tr>
+            <tr>
+              <td>시간 필터 범위</td>
+              <td>쿼리 시점 — <code>time_constraint_start/end</code></td>
+              <td><code>2024-01-01 ~ 2024-06-30</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          요약하면 <strong>"cumulative window의 의미적 정체성"은 metric 정의에 고정</strong>되어 있다 — "2개월 누계 매출"이라는
+          메트릭은 정의 시점에 "2 month"라는 의미가 박힌다. 쿼리 시점엔 <em>출력 grain</em>과 <em>날짜 범위</em>만 정한다.
+        </p>
+
+        <p>
+          왜 이 분리가 합리적인가: cumulative metric은 단순 연산이 아니라 <strong>메트릭의 정체성을 가진 도메인 개념</strong>이다.
+          "2개월 누계 매출"과 "30일 누계 매출"은 다른 메트릭이지 같은 메트릭의 두 view가 아니다. metric layer는 KPI 정의 매체라
+          KPI 정체성을 다른 메트릭으로 분리하는 게 자연스럽다.
+        </p>
+
+        <p>
+          Cube.js도 같은 패턴 — <code>rolling_window: { trailing: '7 day' }</code>가 measure 정의에 박힌다. 쿼리 시점에 7일을 14일로
+          바꿀 수 없다 (그건 다른 measure). 이 부분은 metric layer들의 공통 합의.
+        </p>
+
+        <p>
+          단, metricflow의 cumulative는 <em>time dim을 implicit</em>하게 가져가지만 Cube는 measure가 속한 cube의 time dim을 가져간다.
+          implicit-via-measure vs implicit-via-cube의 차이.
+        </p>
+
+        <div class="refs">
+          <span>modules/core/.../domain/manifest/validation/rules/AggregationTimeDimensionRule.kt</span>
+          <span>python_oracle/upstream/metricflow_semantic_interfaces/validations/agg_time_dimension.py</span>
+          <span>modules/core/.../domain/dataflow/nodes/MetricTimeDimensionTransformNode.kt</span>
+          <span>python_oracle/upstream/metricflow/dataflow/nodes/metric_time_transform.py</span>
+        </div>
+      </div></details>
+
+      <details class="opt"><summary>Q4. entity name이 project 전체에서 unique해야 하나? foreign entity가 어떤 모델의 entity인지 명시 안 하고 어떻게 매칭되나?</summary>
+      <div class="opt-body">
+        <p>
+          이게 의미층의 가장 중요한 설계 결정이다: <strong>entity name은 project 전체의 식별자</strong>다. 두 모델이
+          <code>entities[listing]</code>을 선언했으면 metricflow는 <em>같은 개념의 listing</em>을 가리킨다고 본다 — 모델 이름은
+          무관.
+        </p>
+        <p>그래서 foreign entity가 <em>어떤 모델</em>의 entity인지 명시하지 않는다. 그냥 <strong>name이 매칭되는</strong> 다른 모델의
+          PRIMARY/UNIQUE entity로 자동 JOIN된다:</p>
+        <pre><code>// bookings_source
+{ "entities": [
+  { "name": "booking", "type": "primary", "expr": "booking_id" },
+  { "name": "listing", "type": "foreign", "expr": "listing_id" }  <span class="cm">// → listings_source의 primary listing과 매칭</span>
+]}
+
+// listings_source
+{ "entities": [
+  { "name": "listing", "type": "primary", "expr": "listing_id" }  <span class="cm">// 같은 'listing' 이름 → JOIN 가능</span>
+]}</code></pre>
+        <p>
+          만약 다른 의미의 "listing"이 또 있다면 (가령 "removed_listing"), <strong>다른 이름</strong>을 줘야 한다. 같은 이름을
+          쓰면 metricflow는 둘이 같은 entity라고 보고 자동 JOIN을 시도 — 의미적으로 잘못된 결과가 나온다. validation rule
+          <code>NaturalEntityConfigurationRule</code>이 이름 타입 일관성을 검사하지만, 의미가 정말 같은지는 모델러의 책임.
+        </p>
+
+        <p><strong>네 가지 entity type의 역할:</strong></p>
+        <table class="facts">
+          <thead><tr><th>type</th><th>의미</th><th>JOIN에서의 역할</th></tr></thead>
+          <tbody>
+            <tr><td><code>PRIMARY</code></td><td>한 행 = 한 entity 인스턴스 (자연키 컬럼)</td><td>FOREIGN이 매칭되는 anchor. 한 모델에 0개 또는 1개.</td></tr>
+            <tr><td><code>UNIQUE</code></td><td>PRIMARY와 비슷하지만 nullable 가능, 보조 unique 키</td><td>PRIMARY와 동일한 anchor 역할.</td></tr>
+            <tr><td><code>FOREIGN</code></td><td>여러 행이 같은 entity 가리킬 수 있음 (참조 컬럼)</td><td>같은 이름의 PRIMARY/UNIQUE가 있는 모델로 JOIN.</td></tr>
+            <tr><td><code>NATURAL</code></td><td>SCD type-2 (같은 entity의 여러 버전)</td><td>버전이 있는 dimension 모델에 사용. validity window가 함께 정의.</td></tr>
+          </tbody>
+        </table>
+
+        <p>
+          한 모델 안에서는 entity name이 unique해야 하지만, <strong>project 전체에서 중복은 의도된 것</strong>이다 — 그게 JOIN
+          그래프를 만드는 방식이다. <code>SemanticGraphBuilder</code>가 manifest를 훑으면서 같은 이름의 entity를 하나의 노드로
+          묶고 모델 간 엣지를 그린다 (§7).
+        </p>
+
+        <h4 class="serif" style="font-size:18px;margin-top:24px">PRIMARY가 두 모델에 동시에 — 한 테이블을 쪼갠 건가?</h4>
+
+        <p>
+          후속 질문: <em>"두 SM이 똑같은 이름의 <code>primary</code> entity를 가질 수 있다는 말? 한 테이블을 두 SM으로 만든
+          경우?"</em>
+        </p>
+
+        <p>
+          답: <strong>예, 같은 이름의 PRIMARY가 두 모델에 동시에 있을 수 있다.</strong> 그리고 보통은 한 테이블을 쪼갠 게 아니라
+          <strong>다른 두 테이블이 같은 entity를 공유</strong>하는 케이스다. corpus의 <code>simple_manifest</code>가
+          정확히 그 예를 보여준다:
+        </p>
+
+        <pre><code><span class="cm"># listings_latest.yaml — listing의 메인 attribute 모음</span>
+semantic_model:
+  name: listings_latest
+  node_relation: { alias: dim_listings_latest }
+  entities:
+    - name: listing
+      type: primary               <span class="cm"># PRIMARY 선언</span>
+      expr: listing_id
+  measures:    [ listings, largest_listing, smallest_listing ]
+  dimensions:  [ ds, created_at, country, capacity_latest, is_lux_latest, ... ]
+
+<span class="cm"># lux_listing_mapping.yaml — listing → lux_listing 매핑 다리 (별도 작은 테이블)</span>
+semantic_model:
+  name: lux_listing_mapping
+  node_relation: { alias: dim_lux_listing_id_mapping }
+  entities:
+    - name: listing
+      type: primary               <span class="cm"># 같은 이름·같은 type — PRIMARY 또</span>
+      expr: listing_id
+    - name: lux_listing
+      type: foreign
+      expr: lux_listing_id</code></pre>
+
+        <p>
+          서로 다른 <em>두 물리 테이블</em>(<code>dim_listings_latest</code>와 <code>dim_lux_listing_id_mapping</code>)이 각자
+          <code>listing</code>을 primary로 선언한다. 같은 <code>listing</code> 개념을 공유하지만, 노출하는 dimension/측정값은
+          다르다. <code>listings_latest</code>는 listing의 기본 속성(country, capacity 등), <code>lux_listing_mapping</code>은
+          listing → 럭셔리 매핑 다리 역할.
+        </p>
+
+        <p><strong>왜 이런 패턴이 가치 있나:</strong></p>
+        <ul>
+          <li>한 entity의 attribute가 데이터웨어하우스에서 여러 테이블에 흩어져 있는 게 정상이다 — listing 기본 정보 테이블, 호스트
+            정보 테이블, lux 매핑 테이블, 좌표 테이블, 등등. 한 거대 테이블로 합치는 건 ETL 비용·갱신 주기 충돌·storage 비용 문제로
+            어렵다.</li>
+          <li>각 테이블을 <strong>자기 측의 의미 모델</strong>로 만들고 entity name으로 묶으면, 사용자는
+            <code>listing__country</code>(listings_latest에서) / <code>listing__lux_listing__some_field</code>(lux_listing 거쳐)
+            같은 dim을 자연스럽게 쓸 수 있다.</li>
+          <li>SemanticGraphBuilder가 <code>listing</code>이라는 단일 entity 노드를 만들고, 두 PRIMARY 모델을 그 노드에 잇는
+            엣지로 연결한다. 쿼리 시점에 어느 모델에서 dim을 가져올지를 그래프가 자동 선택.</li>
+        </ul>
+
+        <p><strong>한 테이블을 두 SM으로 쪼개는 경우는?</strong></p>
+
+        <p>
+          기술적으로 가능하지만 흔하지 않다. 같은 테이블에서 다른 의미 그룹을 분리할 때 정도 — 예컨대 한 테이블에 "raw 측정값"과
+          "비즈니스 KPI"가 같이 들어있고, raw는 엔지니어 모델·KPI는 비즈니스 모델로 분리하고 싶을 때. 보통은 measure를 한 모델에
+          몰아놓고 metric으로 분리하는 게 깔끔. 권장 패턴은 <strong>"하나의 entity 컨셉 × N개 물리 테이블 → N개 의미 모델"</strong>이지
+          "하나의 테이블 → N개 의미 모델"이 아니다.
+        </p>
+
+        <h4 class="serif" style="font-size:18px;margin-top:24px">검증 규칙은 무엇을 막나</h4>
+
+        <p>
+          그럼 metricflow는 같은 이름 PRIMARY 중복을 그냥 허용하나? 검증 규칙이 <em>의미적 일관성</em>은 검사한다:
+        </p>
+
+        <ul>
+          <li><code>NaturalEntityConfigurationRule</code> — 같은 이름 entity가 모델 간 type이 일관된지. 한 곳에선 PRIMARY인데
+            다른 곳에선 NATURAL이면 에러. (PRIMARY vs UNIQUE vs FOREIGN은 섞일 수 있지만 NATURAL은 특수)</li>
+          <li><code>DimensionConsistencyRule</code> — 같은 이름 dimension이 모델 간 type·granularity·expr이 일치하는지.</li>
+          <li><code>PrimaryEntityRule</code> — 각 모델에 primary entity가 있거나 (직접/유도) 명시되어 있는지.</li>
+        </ul>
+
+        <p>
+          중요한 것: <strong>같은 entity name이 두 PRIMARY로 등장하는 자체는 에러가 아니다</strong>. metricflow의 설계 의도. 단,
+          <em>의미가 정말 같은 entity인지</em>는 모델러의 책임 — 두 테이블의 <code>listing_id</code>가 정말 같은 universe의 ID여야
+          한다 (한 쪽은 internal ID, 다른 쪽은 marketplace ID처럼 다르면 JOIN이 잘못된 결과를 낸다).
+        </p>
+
+        <div class="refs">
+          <span>python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml</span>
+          <span>python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/lux_listing_mapping.yaml</span>
+          <span>modules/core/.../domain/semantic_graph/builder/EntityJoinSubgraphGenerator.kt</span>
+          <span>modules/core/.../domain/manifest/validation/rules/NaturalEntityConfigurationRule.kt</span>
+          <span>python_oracle/upstream/metricflow_semantic_interfaces/type_enums/entity_type.py</span>
+        </div>
+      </div></details>
+
+      <details class="opt"><summary>Q5. 멀티홉 JOIN은 제한 없이 가능한가? (몇 홉까지?)</summary>
+      <div class="opt-body">
+        <p>
+          질문 맥락: <code>lux_listing_mapping</code>이 listing → lux_listing 다리 역할이라고 했는데, 그럼 더 깊은 chain
+          (A → B → C → D ...)도 가능한가?
+        </p>
+
+        <p>
+          답: <strong>제한이 있다 — 최대 2홉(<code>MAX_JOIN_HOPS = 2</code>)으로 하드코딩</strong>. 3홉 이상의 entity-link
+          chain을 사용자가 요청하면 metricflow가 <code>FeatureNotSupportedError</code>를 던진다.
+        </p>
+
+        <pre><code><span class="cm"># python_oracle/upstream/metricflow_semantics/model/semantics/semantic_model_join_evaluator.py:16</span>
+MAX_JOIN_HOPS = 2
+
+<span class="cm"># python_oracle/upstream/metricflow/plan_conversion/node_processor.py:491</span>
+if len(desired_linkable_spec.entity_links) &gt; MAX_JOIN_HOPS:
+    raise FeatureNotSupportedError(
+        f"Multi-hop joins with more than {MAX_JOIN_HOPS} entity links not yet supported. "
+        f"Got: {desired_linkable_spec}"
+    )</code></pre>
+
+        <p>
+          Kotlin 포팅도 동일하게 <code>const val MAX_JOIN_HOPS: Int = 2</code> — Python parity. 코드 4 곳에서 이 상수를 참조:
+          path enumerator의 가지치기, trie resolver의 entity key 깊이 제한, recipe writer의 가중치 계산, plan conversion의
+          fail-fast 체크.
+        </p>
+
+        <h4 class="serif" style="font-size:18px;margin-top:24px">2홉의 의미 — corpus 실 예시</h4>
+
+        <p>
+          corpus의 <code>multi_hop_join_manifest</code>가 정확히 2홉 chain의 표준 예다. 세 모델로 구성:
+        </p>
+
+        <pre><code><span class="cm"># account_month_txns.yaml — 출발 (메트릭이 있는 fact 테이블)</span>
+semantic_model:
+  name: account_month_txns
+  node_relation: { alias: account_month_txns }
+  measures:    [ txn_count ]
+  entities:
+    - { name: account_id, type: primary }
+
+<span class="cm"># bridge_table.yaml — 중간 다리</span>
+semantic_model:
+  name: bridge_table
+  node_relation: { alias: bridge_table }
+  dimensions:  [ extra_dim ]
+  entities:
+    - { name: account_id,  type: primary }    <span class="cm"># ← account_id로 first hop</span>
+    - { name: customer_id, type: foreign }    <span class="cm"># → customer_id로 second hop</span>
+
+<span class="cm"># customer_other_data.yaml — 도착 (분석 대상 dim)</span>
+semantic_model:
+  name: customer_other_data
+  node_relation: { alias: customer_other_data }
+  dimensions:  [ country, ... ]
+  entities:
+    - { name: customer_id, type: primary }    <span class="cm"># ← customer_id의 master</span></code></pre>
+
+        <p>
+          이때 사용자가 <code>metric_names=['txn_count']</code> + <code>group_by=['account_id__customer_id__country']</code>를
+          요청하면, 엔진은 자동으로:
+        </p>
+
+        <pre><code>SELECT
+  c.country                                                 AS account_id__customer_id__country,
+  SUM(a.txn_count)                                          AS txn_count
+FROM account_month_txns a
+JOIN bridge_table          b  ON a.account_id  = b.account_id     <span class="cm">-- 1-hop</span>
+JOIN customer_other_data   c  ON b.customer_id = c.customer_id    <span class="cm">-- 2-hop</span>
+GROUP BY 1;</code></pre>
+
+        <p>
+          group-by 이름의 dunder 분절을 세면 정확히 <code>account_id · customer_id · country</code> — entity link 2개 + 마지막
+          dimension. 이게 2홉의 상한.
+        </p>
+
+        <h4 class="serif" style="font-size:18px;margin-top:24px">왜 2홉으로 제한했나</h4>
+
+        <p>코드의 에러 메시지가 <em>"not yet supported"</em>라고 적어둔 데서 알 수 있듯, 영구 제한은 아니고 보수적 디폴트다:</p>
+
+        <ul>
+          <li><strong>SQL 폭발 방지</strong>. hop마다 JOIN이 추가된다. 5홉이면 5번의 JOIN + 각 hop의 fan-out 위험. 사용자가
+            의도하지 않은 polynomial blowup이 발생할 수 있다.</li>
+          <li><strong>모호성 제거</strong>. 깊은 chain일수록 같은 entity name이 그래프 안에서 여러 경로로 도달 가능 — 어느 경로를
+            택할지 disambiguation 규칙이 복잡해진다. <code>recipe_writer_weight.py</code>의 가중치 시스템이 이걸 풀려 노력하지만,
+            깊이를 키울수록 모서리 케이스가 늘어난다.</li>
+          <li><strong>사용자 mental model</strong>. <code>listing__country</code>(1홉)은 직관적, <code>account__customer__country</code>(2홉)는
+            아직 따라간다. 3홉 이상은 그래프 토폴로지를 외워야 — 보통은 모델러가 중간 join을 한 모델로 미리 마련하는 게 더 깔끔.</li>
+          <li><strong>경로 폭발</strong>. <code>PathEnumerator</code>(W11)가 DFS로 모든 경로를 탐색 — 그래프 크기 × 깊이로 시간이
+            늘어난다. 2가 실용적 손익분기점.</li>
+        </ul>
+
+        <h4 class="serif" style="font-size:18px;margin-top:24px">다른 시맨틱 레이어와 비교</h4>
+
+        <table class="facts">
+          <thead><tr><th>시스템</th><th>JOIN 깊이 제한</th><th>JOIN 정의 방식</th></tr></thead>
+          <tbody>
+            <tr>
+              <th>metricflow</th>
+              <td><strong>2홉 하드코딩</strong> (entity-link 자동 추론)</td>
+              <td>entity name 매칭 → 자동 그래프 추론</td>
+            </tr>
+            <tr>
+              <th>Cube.js</th>
+              <td>없음 (이론상 무제한)</td>
+              <td>cube 정의에 join SQL 직접 작성 (<code>joins: { CubeB: { sql: "${A}.b_id = ${CubeB}.id", relationship: 'one_to_one' } }</code>)</td>
+            </tr>
+            <tr>
+              <th>LookML (Looker)</th>
+              <td>없음 (사실상 무제한, explore마다 명시)</td>
+              <td>explore 정의에 join chain explicit</td>
+            </tr>
+            <tr>
+              <th>Malloy</th>
+              <td>없음 (nested query 패러다임)</td>
+              <td>JOIN 대신 nested query — 깊이는 모델러가 명시</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          metricflow만 <strong>자동 그래프 추론 + 깊이 제한</strong> 조합이다. Cube/LookML은 깊이 제한이 없는 대신 모든 join을
+          모델러가 explicit하게 정의해야 한다 (모호성 zero). metricflow는 entity name으로 자동 추론하는 대신 안전 깊이를 둔 절충안.
+        </p>
+
+        <h4 class="serif" style="font-size:18px;margin-top:24px">Malloy의 nested query — 사실 JOIN을 안 쓰는 패러다임</h4>
+
+        <p>
+          위 표에서 "Malloy = nested query 패러다임"이라고 했는데 좀 단순화된 표현이다. 정확히는 Malloy(Google의 Looker
+          창립자 팀이 만든 오픈소스 SQL 대체 언어)는 <strong>JOIN을 1차 시민이 아니라 source 정의의 일부로 빼고, 분석 쿼리는
+          중첩(nested) 결과를 직접 표현</strong>한다.
+        </p>
+
+        <p>핵심 개념 셋:</p>
+
+        <ul>
+          <li><strong>Source</strong> — 테이블 + 미리 선언된 measure/dimension/join. metricflow의 semantic_model에 비슷한 자리.</li>
+          <li><strong>Nested query (turtle)</strong> — 쿼리 안에 쿼리를 박는 1차 문법. 결과가 <em>평평한 표가 아니라 계층 JSON</em>.</li>
+          <li><strong>Aggregating locality</strong> — 각 집계가 "어느 source에서 집계되는지"를 컴파일러가 자동 추적. JOIN 후 fan-out으로 SUM이
+            잘못 부풀려지는 흔한 버그가 원천 차단.</li>
+        </ul>
+
+        <p>구체 예 — "각 customer 별로, status별 주문 수"를 Malloy에서:</p>
+
+        <pre><code><span class="cm">// Malloy</span>
+source: users is table('users') extend {
+  join_many: orders on users.id = orders.user_id    <span class="cm">// JOIN은 source에 선언</span>
+  measure: user_count is count()
+}
+
+run: users -&gt; {
+  group_by: state
+  aggregate: user_count
+
+  nest: orders_breakdown is orders -&gt; {            <span class="cm">// 중첩 쿼리 — 결과가 계층</span>
+    group_by: status
+    aggregate: order_count is count()
+  }
+}</code></pre>
+
+        <p>출력은 평평한 row가 아니라 이런 모양:</p>
+
+        <pre><code>{
+  "state": "CA", "user_count": 1240,
+  "orders_breakdown": [
+    { "status": "completed",  "order_count": 8910 },
+    { "status": "cancelled",  "order_count":  430 }
+  ]
+},
+{
+  "state": "NY", "user_count": 980,
+  "orders_breakdown": [ ... ]
+}</code></pre>
+
+        <p>
+          SQL로 같은 결과를 만들려면 (1) users-orders JOIN 후 state로 GROUP BY (2) 별도 쿼리로 status별 GROUP BY (3) 두 결과를
+          애플리케이션에서 합치기 — 또는 한 쿼리에 GROUPING SETS / window function의 복잡한 조합. Malloy는 이걸 한 표현으로 푼다.
+        </p>
+
+        <p><strong>metricflow와의 차이:</strong></p>
+
+        <ul>
+          <li>metricflow: 사용자가 <code>metric_names + group_by</code>를 주면 엔진이 <em>평평한 row</em>의 SQL을 만든다. JOIN은 entity
+            name 매칭으로 자동 추론.</li>
+          <li>Malloy: 사용자가 <em>결과 모양 자체</em>를 쿼리로 기술. JOIN은 source 정의에 미리 있어, 쿼리는 "어떤 source에서 무엇을 집계할지"만
+            적는다. 결과는 계층 구조.</li>
+          <li>두 시스템 다 "사용자가 JOIN ON 절을 쓰지 않는다"는 공통점은 있지만, metricflow는 <em>그래프에서 자동 추론</em>,
+            Malloy는 <em>source 정의에서 declarative</em>.</li>
+        </ul>
+
+        <p>
+          그래서 Malloy에 "JOIN 깊이 제한"이라는 개념이 없는 건, 깊이 제한이 적용될 대상이 없기 때문에 가깝다. 분석 쿼리는 source가
+          제공하는 attribute만 쓰고, source에 join이 더 필요하면 source 정의를 확장한다. 깊이는 <em>모델러가 어디까지 source에 합쳐
+          뒀느냐</em>의 함수다.
+        </p>
+
+        <p>
+          metric layer 자체는 Malloy의 1차 관심사가 아니다 — Malloy는 SQL 대체 언어로서 분석 표현력 자체를 끌어올리는 데 무게. metricflow는
+          metric 정의·검증·다중 차원 dispatch에 집중. 같은 분석 도메인이지만 해결하려는 문제의 결이 다르다.
+        </p>
+
+        <h4 class="serif" style="font-size:18px;margin-top:24px">3홉이 필요하면 어떻게 하나</h4>
+
+        <p>실무적 해법 — <strong>중간 join을 모델 한 개로 미리 합치는 것</strong>:</p>
+
+        <ul>
+          <li>DW에서 ETL로 <code>customer_with_account_summary</code> 같은 derived 테이블을 만들고 단일 SM으로 노출 → 1홉이 됨</li>
+          <li>또는 dbt model 단에서 join한 view를 만들고 그 위에 SM 정의</li>
+        </ul>
+
+        <p>
+          즉 metricflow는 "그래프가 알아서 풀어주는 JOIN은 2홉까지, 그 이상은 데이터 모델링 단계에서 풀어달라"는 stance.
+          이건 metric layer로서 의도된 디자인 — 데이터 모델 복잡도를 SQL 시점에 떠넘기지 않는다.
+        </p>
+
+        <p>
+          참고: corpus의 <code>third_hop_table.yaml</code>은 존재한다 (3-hop 시나리오 fixture). 하지만 실제 쿼리 corpus엔
+          <code>third_hop_count</code> metric이 <code>account_id__customer_id__country</code>(2홉)까지만 group-by한다.
+          3홉을 직접 요청하는 테스트는 "이 케이스는 supported가 아님을 확인"하는 negative test다.
+        </p>
+
+        <div class="refs">
+          <span>python_oracle/upstream/metricflow_semantics/model/semantics/semantic_model_join_evaluator.py:16</span>
+          <span>python_oracle/upstream/metricflow/plan_conversion/node_processor.py:491</span>
+          <span>python_oracle/upstream/metricflow_semantics/semantic_graph/attribute_resolution/recipe_writer_weight.py:139</span>
+          <span>python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/multi_hop_join_manifest/</span>
+          <span>modules/core/.../domain/lookup/SemanticModelJoinEvaluator.kt:9</span>
+          <span>modules/core/.../domain/semantic_graph/attribute_resolution/PathEnumerator.kt:15,110</span>
+        </div>
+      </div></details>
+
+      <h3 class="serif">참조 타입: <code>@JvmInline value class</code></h3>
+      <p>
+        <code>MetricReference</code>, <code>DimensionReference</code>, <code>EntityReference</code> 등 단일 필드 ID 타입은
+        모두 <code>@JvmInline value class</code>. 무할당, 타입 안전, JSON으로 직렬화 시 그냥 문자열.
+        Python의 <code>@dataclass(frozen=True)</code> 상속 체인을 Kotlin sealed interface로 깔끔하게 옮긴다.
+      </p>
+
+      <div class="refs">
+        <span>modules/core/.../domain/manifest/model/SemanticManifest.kt</span>
+        <span>modules/core/.../domain/manifest/model/Metric.kt</span>
+        <span>modules/core/.../domain/manifest/model/SemanticModel.kt</span>
+        <span>modules/core/.../domain/manifest/model/element/{Measure,Dimension,Entity}.kt</span>
+        <span>modules/core/.../domain/manifest/model/references/*.kt</span>
+        <span>python_oracle/upstream/metricflow_semantic_interfaces/implementations/semantic_manifest.py</span>
+      </div>
+
+      <p class="note">
+        <strong>더 깊이 가려면:</strong> 에이전트에게 <em>"PydanticSemanticManifest → SemanticManifest의 70개 파일 매핑을
+        도식화해줘"</em> 또는 <em>"MetricType별로 type_params 안의 어떤 필드가 채워지는지 표로 정리해줘"</em>처럼.
+      </p>
+    </section>
+
+    <!-- ========================================================
+         §05 — 변환과 검증
+         ======================================================== -->
+    <section class="stage" id="s5">
+      <p class="stage-num">05 · TRANSFORM + VALIDATE</p>
+      <h2>변환과 검증 — manifest를 canonical하게</h2>
+      <p class="lead">
+        <strong>JSON으로 들어온 manifest는 그대로는 의미 그래프에 못 넣는다.</strong> Pydantic 시절 입력 친화적으로
+        생략 가능했던 필드를 <em>채우고</em>(transform), 의미적으로 어긋난 곳을 <em>찾는다</em>(validate).
+      </p>
+
+      <h3 class="serif">14개 변환 규칙 — 왜 필요한가</h3>
+      <p>
+        Python <code>PydanticSemanticManifestTransformRuleSet</code>이 정의한 14개 규칙을
+        <code>DefaultTransformRuleSet</code>이 그대로 옮겼다. 핵심은 "사용자가 안 쓴 표현을 명시 표현으로 푸는" 것:
+      </p>
+
+      <ul>
+        <li><strong>ConvertCountRules</strong> — <code>agg: count</code>가 <code>expr</code> 없이 들어오면 <code>COUNT(1)</code>로 채움.</li>
+        <li><strong>ConvertMedianRules</strong> — <code>agg: median</code>은 percentile 0.5의 alias로 매핑.</li>
+        <li><strong>FlattenSimpleMetricsWithMeasureInputs</strong> — <code>SIMPLE</code> 메트릭의 입력 측정값을 펼쳐 후속 단계에서 재참조 가능하게.</li>
+        <li><strong>AddInputMetricMeasuresRule</strong> — <code>DERIVED</code> 메트릭이 참조하는 내부 measure들을 <code>inputMeasures</code>로 끌어올림.</li>
+        <li><strong>FixProxyMetricsRule</strong> — measure를 alias로 노출하는 "proxy metric"을 사후 정리.</li>
+        <li><strong>RemovePluralFromWindowGranularityRule</strong> — <code>cumulative.window: "30 days"</code>를 <code>30 day</code> canonical로.</li>
+      </ul>
+
+      <p>
+        모든 규칙은 <code>SemanticManifestTransformRule</code> 인터페이스를 구현하며, 순서대로 <em>primary</em> →
+        <em>secondary</em> 두 세트로 묶여 차례로 실행된다. 출력은 같은 <code>SemanticManifest</code> 타입이지만
+        <em>canonical</em>한 형태.
+      </p>
+
+      <h3 class="serif">28개 검증 규칙 — 16개 파일에 흩어진 의미 검사</h3>
+      <p>
+        검증은 transform 이후에 실행된다 (어떤 규칙은 transform이 채워준 필드를 검사한다). 모든 규칙은
+        <code>SemanticManifestValidationRule</code>을 구현하며, 0개 이상의 <code>ValidationIssue</code>를
+        반환한다. Issue는 sealed interface로 <code>ValidationError</code> / <code>ValidationFutureError</code> /
+        <code>ValidationWarning</code> 셋 중 하나.
+      </p>
+
+      <table class="facts">
+        <thead><tr><th>대표 규칙</th><th>검사 대상</th><th>심각도</th></tr></thead>
+        <tbody>
+          <tr><th>AggregationTimeDimensionRule</th><td><code>measure.agg_time_dimension</code>이 같은 모델의 time dim을 가리키는가</td><td>ERROR</td></tr>
+          <tr><th>DimensionConsistencyRule</th><td>동명 차원이 모델 간에 타입·granularity·expr이 일치하는가</td><td>ERROR</td></tr>
+          <tr><th>CumulativeMetricRule</th><td>CUMULATIVE 메트릭의 window/grain_to_date가 valid한가</td><td>ERROR + WARNING</td></tr>
+          <tr><th>DerivedMetricRule</th><td>DERIVED가 실재 메트릭을 참조하는가, offset window가 유효한가</td><td>ERROR + WARNING</td></tr>
+          <tr><th>PrimaryEntityRule</th><td>모든 semantic model에 primary entity가 (직접/유도) 존재하는가</td><td>ERROR</td></tr>
+          <tr><th>UniqueAndValidNameRule</th><td>이름이 valid 문자만, 중복 없는가</td><td>ERROR</td></tr>
+          <tr><th>TimeSpineRule</th><td>time spine이 granularity별 1개씩, smallest grain이 dim 최저 grain 이하인가</td><td>WARNING</td></tr>
+          <tr><th>WhereFiltersAreParseable</th><td>모든 <code>WhereFilter</code> Jinja 템플릿이 파싱되는가</td><td>WARNING</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        <code>SemanticManifestValidator.withDefaultRules()</code>가 28개 전부를 묶어 한 번에 돌린다.
+        엔진의 <code>validateManifest()</code> RPC는 이 validator의 얇은 래퍼. <strong>throw가 아니라 issue 목록 반환</strong>이
+        설계 결정이다 (Phase 1a 발견): 호출자가 차단할지 무시할지 정한다.
+      </p>
+
+      <div class="refs">
+        <span>modules/core/.../domain/manifest/transformation/DefaultTransformRuleSet.kt</span>
+        <span>modules/core/.../domain/manifest/transformation/rules/</span>
+        <span>modules/core/.../domain/manifest/validation/SemanticManifestValidator.kt</span>
+        <span>modules/core/.../domain/manifest/validation/DefaultValidationRules.kt</span>
+        <span>modules/core/.../domain/manifest/validation/rules/</span>
+        <span>docs/validation-rules-inventory.md</span>
+      </div>
+
+      <p class="note">
+        <strong>더 깊이 가려면:</strong> 에이전트에게 <em>"28개 validation rule을 한 줄씩 설명하고 어떤 manifest 패턴이
+        걸리는지 예시를 만들어줘"</em> — <code>docs/validation-rules-inventory.md</code>에 이미 매트릭스가 있다.
+      </p>
+    </section>
+
+    <!-- ========================================================
+         §06 — 쿼리 파싱
+         ======================================================== -->
+    <section class="stage" id="s6">
+      <p class="stage-num">06 · QUERY PARSING</p>
+      <h2>쿼리 파싱 — 사용자 입력 → MetricFlowQuerySpec</h2>
+      <p class="lead">
+        <strong>사용자는 문자열("bookings", "listing__country__day")을 던지지만 엔진 내부는 정형 spec으로 움직인다.</strong>
+        그 간극을 메우는 게 <code>MetricFlowQueryParser</code> + <code>MetricFlowQueryResolver</code>.
+      </p>
+
+      <h3 class="serif">입력 표면</h3>
+      <pre><code><span class="cm">// modules/engine/.../application/engine/MetricFlowEngine.kt (request DTO defined alongside facade)</span>
+<span class="hl">data class</span> MetricFlowExplainRequest(
+    <span class="hl">val</span> metricNames:           List&lt;String&gt;?,
+    <span class="hl">val</span> groupByNames:          List&lt;String&gt;?,
+    <span class="hl">val</span> whereConstraints:      List&lt;String&gt;?,
+    <span class="hl">val</span> orderByNames:          List&lt;String&gt;?,
+    <span class="hl">val</span> limit:                 Int?,
+    <span class="hl">val</span> timeConstraintStart:   String?,
+    <span class="hl">val</span> timeConstraintEnd:     String?,
+    <span class="hl">val</span> savedQueryName:        String?,
+    <span class="hl">val</span> minMaxOnly:            Boolean,
+    <span class="hl">val</span> applyGroupBy:          Boolean,
+    <span class="hl">val</span> orderOutputColumnsByInputOrder: Boolean,
+    <span class="hl">val</span> dialect:               SqlEngine?,
+)</code></pre>
+
+      <h3 class="serif">출력 spec</h3>
+      <p>
+        파싱 결과는 <code>MetricFlowQuerySpec</code>. 사용자 입력의 모든 문자열이 typed spec으로 해석된 상태.
+      </p>
+      <pre><code><span class="cm">// modules/core/.../domain/spec/MetricFlowQuerySpec.kt</span>
+<span class="hl">data class</span> MetricFlowQuerySpec(
+    <span class="hl">val</span> metricSpecs:            List&lt;MetricSpec&gt;,
+    <span class="hl">val</span> dimensionSpecs:         List&lt;DimensionSpec&gt;,
+    <span class="hl">val</span> entitySpecs:            List&lt;EntitySpec&gt;,
+    <span class="hl">val</span> timeDimensionSpecs:     List&lt;TimeDimensionSpec&gt;,
+    <span class="hl">val</span> groupByMetricSpecs:     List&lt;GroupByMetricSpec&gt;,
+    <span class="hl">val</span> orderBySpecs:           List&lt;OrderBySpec&gt;,
+    <span class="hl">val</span> timeRangeConstraint:    TimeRangeConstraint?,
+    <span class="hl">val</span> limit:                  Int?,
+    <span class="hl">val</span> filterIntersection:     WhereFilterIntersection,
+    <span class="hl">val</span> filterSpecResolutionLookup: FilterSpecResolutionLookupPlaceholder?,
+    <span class="hl">val</span> minMaxOnly:             Boolean,
+    <span class="hl">val</span> applyGroupBy:           Boolean,
+    <span class="hl">val</span> inputSpecOrder:         InputSpecOrder,
+)</code></pre>
+
+      <h3 class="serif">9단계 resolveQuery 흐름</h3>
+      <p>
+        <code>MetricFlowQueryParser.parseAndValidateQuery</code>는 얇은 dispatch (naming scheme 선택 + saved query 펼치기)만
+        하고, 실제 일은 <code>MetricFlowQueryResolver.resolveQuery</code> (~520 LOC, Phase 3 W14a에서 본체 포팅)가 한다.
+      </p>
+
+      <ul class="flow">
+        <li><strong>naming scheme</strong> — 입력 문자열을 <code>DunderNamingScheme</code> / <code>MetricNamingScheme</code> /
+          <code>ObjectBuilderNamingScheme</code> 중 매칭되는 스킴으로 dispatch.</li>
+        <li><strong>resolution DAG 빌드</strong> — 쿼리 입력을 <code>QueryResolutionNode</code> 트리로 변환 (각 group-by 항목·필터·order-by가 노드).</li>
+        <li><strong>group-by item 해석</strong> — 의미 그래프 resolver(§7)에 위임해 각 dunder name을 정확한 <code>LinkableInstanceSpec</code>으로.</li>
+        <li><strong>where filter 해석</strong> — <code>WhereFilter</code>의 Jinja 템플릿을 <code>WhereFilterSpec</code>으로.</li>
+        <li><strong>metric spec 생성</strong> — 메트릭 이름이 실재하는지 검사 + dependency expand.</li>
+        <li><strong>order-by 검증</strong> — 모든 order item이 group-by 또는 metric 안에 있는지.</li>
+        <li><strong>time constraint expand</strong> — 시작·끝 문자열을 <code>TimeRangeConstraint</code>로.</li>
+        <li><strong>input order 보존</strong> — 사용자가 준 순서를 <code>InputSpecOrder</code>로 기록 (SELECT 컬럼 순서 결정).</li>
+        <li><strong>issue aggregation</strong> — 모든 resolver issue를 한 결과 객체로 묶어 반환.</li>
+      </ul>
+
+      <p>
+        실패 시에도 throw가 아니라 <code>queryResolution.hasErrors == true</code>로 반환. <code>MetricFlowEngine.explain</code>에서
+        이 깃발을 보고 <code>IllegalArgumentException</code>으로 끌어올린다.
+      </p>
+
+      <div class="refs">
+        <span>modules/core/.../domain/query/MetricFlowQueryParser.kt</span>
+        <span>modules/core/.../domain/query/MetricFlowQueryResolver.kt</span>
+        <span>modules/core/.../domain/query/filter/WhereFilterSpecFactory.kt</span>
+        <span>modules/core/.../domain/query/filter/WhereFilterTemplateRenderer.kt</span>
+        <span>modules/core/.../domain/query/naming/</span>
+        <span>python_oracle/upstream/metricflow_semantics/query/query_parser.py</span>
+        <span>python_oracle/upstream/metricflow_semantics/query/query_resolver.py</span>
+      </div>
+
+      <p class="note">
+        <strong>더 깊이 가려면:</strong> <em>"MetricFlowQueryResolver의 9단계 각각이 무엇을 하는지 코드 인용과 함께 자세히
+        설명해줘"</em> 또는 <em>"WhereFilter의 Jinja 템플릿이 어떻게 SQL bind parameter로 풀리는지 추적해줘"</em>.
+      </p>
+    </section>
+
+    <!-- ========================================================
+         §07 — 의미 그래프
+         ======================================================== -->
+    <section class="stage" id="s7">
+      <p class="stage-num">07 · SEMANTIC GRAPH</p>
+      <h2>의미 그래프 — 엔진의 핵심 무기</h2>
+      <p class="lead">
+        <strong>"이 메트릭에서 도달 가능한 group-by 항목은 무엇인가?"</strong>를 답하는 자료구조.
+        파서, dataflow 빌더, listDimensions/entitiesForMetrics 등 거의 모든 RPC가 의존한다.
+      </p>
+
+      <h3 class="serif">노드와 엣지</h3>
+      <p>
+        <code>SemanticGraph</code>는 <strong>방향성 그래프</strong>. 노드는 8종의 entity-node + 3종의 attribute-node로
+        총 <strong>11종</strong>(sealed). 엣지는 entity-link, joined-model, metric-definition 등을 표현. metric
+        노드에서 시작해 attribute 노드까지 가는 path가 곧 "그 메트릭에서 이 group-by 항목으로 가는 SQL 경로"다.
+      </p>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Example semantic graph for bookings metric">
+          <defs>
+            <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#87867F"/>
+            </marker>
+            <marker id="arr2-clay" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#D97757"/>
+            </marker>
+            <style>
+              .lane       { fill: #FAF9F5; stroke: #D1CFC5; stroke-width: 1; }
+              .lane-label { fill: #87867F; font: 500 10px ui-monospace, monospace; letter-spacing: 0.12em; }
+              .node       { fill: #FFFFFF; stroke: #D1CFC5; stroke-width: 1.5; }
+              .node-accent{ fill: rgba(227, 218, 204, 0.5); stroke: #D97757; stroke-width: 1.5; }
+              .node-olive { fill: rgba(120, 140, 93, 0.15); stroke: #788C5D; stroke-width: 1.5; }
+              .node-label { fill: #141413; font: 500 12px -apple-system, system-ui, sans-serif; }
+              .node-sub   { fill: #87867F; font: 400 10px -apple-system, system-ui, sans-serif; }
+              .edge       { stroke: #87867F; stroke-width: 1.2; fill: none; }
+              .edge-clay  { stroke: #D97757; stroke-width: 1.5; fill: none; }
+              .edge-label { fill: #3D3D3A; font: 400 10px -apple-system, system-ui, sans-serif; }
+            </style>
+          </defs>
+
+          <!-- metric -->
+          <rect class="node node-accent" x="20" y="160" width="130" height="50" rx="8"/>
+          <text class="node-label" x="85" y="180" text-anchor="middle">SimpleMetric</text>
+          <text class="node-sub"   x="85" y="196" text-anchor="middle">bookings</text>
+
+          <!-- local model -->
+          <rect class="node" x="190" y="160" width="150" height="50" rx="8"/>
+          <text class="node-label" x="265" y="180" text-anchor="middle">LocalModel</text>
+          <text class="node-sub"   x="265" y="196" text-anchor="middle">bookings_source</text>
+
+          <!-- time dim chain -->
+          <rect class="node" x="380" y="40" width="140" height="44" rx="8"/>
+          <text class="node-label" x="450" y="68" text-anchor="middle">TimeDim(ds)</text>
+
+          <rect class="node" x="540" y="40" width="100" height="44" rx="8"/>
+          <text class="node-label" x="590" y="68" text-anchor="middle">Time</text>
+
+          <rect class="node node-olive" x="660" y="20" width="200" height="40" rx="8"/>
+          <text class="node-label" x="760" y="44" text-anchor="middle">TimeAttribute(day)</text>
+
+          <rect class="node node-olive" x="660" y="70" width="200" height="40" rx="8"/>
+          <text class="node-label" x="760" y="94" text-anchor="middle">TimeAttribute(month)</text>
+
+          <!-- categorical dim -->
+          <rect class="node node-olive" x="380" y="160" width="200" height="44" rx="8"/>
+          <text class="node-label" x="480" y="186" text-anchor="middle">Categorical(country)</text>
+
+          <!-- entity -> joined model -->
+          <rect class="node" x="380" y="240" width="140" height="44" rx="8"/>
+          <text class="node-label" x="450" y="266" text-anchor="middle">Entity(listing)</text>
+
+          <rect class="node" x="560" y="240" width="160" height="44" rx="8"/>
+          <text class="node-label" x="640" y="266" text-anchor="middle">JoinedModel</text>
+          <text class="node-sub"   x="640" y="280" text-anchor="middle">listings_source</text>
+
+          <rect class="node node-olive" x="760" y="240" width="120" height="44" rx="8"/>
+          <text class="node-label" x="820" y="266" text-anchor="middle">Cat(country)</text>
+
+          <!-- metric_time -->
+          <rect class="node" x="190" y="320" width="150" height="44" rx="8"/>
+          <text class="node-label" x="265" y="346" text-anchor="middle">MetricTime</text>
+
+          <!-- arrows -->
+          <path class="edge-clay" d="M 150 185 L 190 185" marker-end="url(#arr2-clay)"/>
+          <path class="edge" d="M 280 160 L 410 84" marker-end="url(#arr2)"/>
+          <text class="edge-label" x="350" y="120">ds</text>
+          <path class="edge" d="M 520 62 L 540 62" marker-end="url(#arr2)"/>
+          <path class="edge" d="M 640 50 L 660 40" marker-end="url(#arr2)"/>
+          <path class="edge" d="M 640 75 L 660 87" marker-end="url(#arr2)"/>
+
+          <path class="edge" d="M 340 185 L 380 182" marker-end="url(#arr2)"/>
+          <text class="edge-label" x="350" y="172">country</text>
+
+          <path class="edge" d="M 295 210 L 380 250" marker-end="url(#arr2)"/>
+          <text class="edge-label" x="320" y="240">listing</text>
+          <path class="edge" d="M 520 262 L 560 262" marker-end="url(#arr2)"/>
+          <path class="edge" d="M 720 262 L 760 262" marker-end="url(#arr2)"/>
+
+          <path class="edge" d="M 270 210 L 265 318" marker-end="url(#arr2)"/>
+          <text class="edge-label" x="195" y="280">metric_time</text>
+
+          <rect class="lane" x="20" y="290" width="860" height="0" rx="6" fill="none" stroke="none"/>
+        </svg>
+        <figcaption>Figure 02 — bookings 메트릭에서 도달 가능한 attribute들. clay 엣지가 metric→model 정의 엣지.</figcaption>
+      </div>
+
+      <p>
+        예시 해설: <code>bookings</code> 메트릭은 <code>bookings_source</code> 모델에 살고, 그 모델에서
+        <code>ds</code> 시간 차원과 <code>country</code> 카테고리 차원에 직접 닿는다. <code>listing</code>
+        엔터티 링크를 따라가면 <code>listings_source</code> 모델로 JOIN하면서 그 모델의 차원에도 닿는다.
+        그래서 <code>listing__country</code>가 <em>multi-hop</em> dimension으로 surface 된다.
+      </p>
+
+      <h3 class="serif">DFS path-aware resolver (W11)</h3>
+      <p>
+        attribute resolver는 그래프에서 <em>모든 경로</em>를 DFS로 훑는다. 각 경로는 <code>AttributeRecipe</code>
+        하나로 압축 — 어떤 entity link를 거쳤고, 어떤 model에서 시작·끝났고, 어떤 dunder name을 만들었는지.
+        같은 attribute에 둘 이상의 경로가 있으면 trie의 "ambiguity-erases" 규칙으로 둘 다 폐기 (사용자가
+        모호한 이름을 쿼리할 수 없다).
+      </p>
+      <p>
+        W11 이전에는 BFS reachability만 썼는데 multi-hop 시나리오에서 join chain을 잃는 문제가 있었다.
+        path-aware DFS로 바꾸면서 corpus가 54→81 PASS로 점프.
+      </p>
+
+      <h3 class="serif">AnnotatedSpec과 GroupByItemSet</h3>
+      <ul>
+        <li><strong><code>AnnotatedSpec</code></strong> — "spec + 어디서 왔는지 + 어떤 properties를 갖는지". properties는
+          <code>LOCAL</code>, <code>JOINED</code>, <code>MULTI_HOP</code>, <code>ENTITY</code>, <code>DATE_PART</code>,
+          <code>METRIC_TIME</code>, <code>DERIVED_TIME_GRANULARITY</code> 등 메타 플래그.</li>
+        <li><strong><code>GroupByItemSet</code></strong> — 한 메트릭에 대해 도달 가능한 모든 group-by item을 trie 형태로 담는다.
+          다중 메트릭 쿼리에선 set들이 intersect 된다 (모든 메트릭에서 도달 가능해야 group-by 허용).</li>
+      </ul>
+
+      <div class="refs">
+        <span>modules/core/.../domain/semantic_graph/SemanticGraph.kt</span>
+        <span>modules/core/.../domain/semantic_graph/SemanticGraphNode.kt</span>
+        <span>modules/core/.../domain/semantic_graph/SemanticGraphEdge.kt</span>
+        <span>modules/core/.../domain/semantic_graph/SemanticGraphBuilder.kt</span>
+        <span>modules/core/.../domain/semantic_graph/attribute_resolution/SemanticGraphGroupByItemSetResolver.kt</span>
+        <span>modules/core/.../domain/semantic_graph/attribute_resolution/AttributeRecipe.kt</span>
+        <span>modules/core/.../domain/semantic_graph/attribute_resolution/AnnotatedSpec.kt</span>
+        <span>python_oracle/upstream/metricflow_semantics/semantic_graph/</span>
+      </div>
+
+      <p class="note">
+        <strong>더 깊이 가려면:</strong> <em>"SemanticGraphBuilder가 manifest를 보고 어떤 노드/엣지를 어떤 순서로 추가하는지
+        한 모델의 예제로 단계별 보여줘"</em> 또는 <em>"BFS resolver에서 DFS path-aware로 옮긴 W11의 동기와 corpus 케이스를
+        하나 짚어줘"</em>.
+      </p>
+    </section>
+
+    <!-- ========================================================
+         §08 — Dataflow Plan
+         ======================================================== -->
+    <section class="stage" id="s8">
+      <p class="stage-num">08 · DATAFLOW PLAN</p>
+      <h2>Dataflow Plan — 추상 실행 계획</h2>
+      <p class="lead">
+        <strong>의미적으로 "어떤 데이터 변환이 필요한가"를 표현하는 DAG.</strong> 23종 노드, 단일 sink,
+        부모 → 자식 방향으로 데이터 흐름.
+      </p>
+
+      <h3 class="serif">기반 추상</h3>
+      <p>
+        모든 노드는 <code>DataflowPlanNode</code>(abstract class)를 상속하며 두 가지 필수 멤버를 갖는다:
+        <code>nodeId</code>(자동 발급되는 식별자)와 <code>parentNodes</code>. 두 노드는 <em>모든 필드가 같아도
+        다른 객체면 다르다</em> — identity equality. "같은 일을 하는 노드인가"를 알고 싶으면
+        <code>functionallyIdentical()</code>를 따로 호출 (Python <code>functionally_identical</code> 포팅).
+      </p>
+
+      <pre><code><span class="cm">// modules/core/.../domain/dataflow/DataflowPlanNode.kt</span>
+<span class="hl">abstract class</span> DataflowPlanNode(parentNodes: List&lt;DataflowPlanNode&gt;) :
+    DagNode&lt;DataflowPlanNode&gt;(parentNodes) {
+
+    <span class="hl">open val</span> inputSemanticModel: SemanticModelReference? <span class="hl">get</span>() = null
+    <span class="hl">open val</span> aggregatedToElements: Set&lt;LinkableInstanceSpec&gt; <span class="hl">get</span>() = emptySet()
+
+    <span class="hl">abstract fun</span> &lt;R&gt; accept(visitor: DataflowPlanNodeVisitor&lt;R&gt;): R
+    <span class="hl">abstract fun</span> functionallyIdentical(other: DataflowPlanNode): Boolean
+    <span class="hl">abstract fun</span> withNewParents(newParents: List&lt;DataflowPlanNode&gt;): DataflowPlanNode
+}</code></pre>
+
+      <h3 class="serif">23종 노드</h3>
+
+      <div class="cards-grid">
+        <div class="card">
+          <p class="card-tag">leaf · source</p>
+          <h4>ReadSqlSourceNode</h4>
+          <p>SemanticModelDataSet을 읽는 leaf. 부모가 없다. 모든 dataflow의 시작.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">aggregate</p>
+          <h4>AggregateSimpleMetricInputsNode</h4>
+          <p>SUM/COUNT/AVG 등 단순 집계. 부모 데이터를 group-by 키로 묶고 measure 컬럼을 집계.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">compute</p>
+          <h4>ComputeMetricsNode</h4>
+          <p>RATIO/DERIVED 같이 집계된 measure들을 expr로 결합. 컬럼 alias 부여.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">join</p>
+          <h4>JoinOnEntitiesNode</h4>
+          <p>다중 모델 JOIN. entity link를 따라 left/right model을 결합.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">time-join</p>
+          <h4>JoinToTimeSpineNode</h4>
+          <p>time spine 테이블과 LEFT JOIN — 누락 날짜를 채워 dense 시계열을 만든다.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">time-window</p>
+          <h4>JoinOverTimeRangeNode</h4>
+          <p>CUMULATIVE 메트릭용. self-join으로 rolling window를 구성.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">filter</p>
+          <h4>WhereFilterNode</h4>
+          <p>WHERE 절. <code>WhereFilterSpec</code>의 SQL 식을 부모 dataset 위에 적용.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">transform</p>
+          <h4>MetricTimeDimensionTransformNode</h4>
+          <p>측정값의 <code>agg_time_dimension</code>을 <code>metric_time</code> 컬럼으로 materialise.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">sink</p>
+          <h4>WriteToResultDataTableNode</h4>
+          <p>최종 SELECT — 어떤 컬럼이 사용자에게 노출되는지 확정. 모든 plan은 sink 하나.</p>
+        </div>
+      </div>
+
+      <p>
+        나머지 14개 노드 (<code>OrderByLimitNode</code>, <code>SelectorNode</code>, <code>MinMaxNode</code>,
+        <code>ConstrainTimeRangeNode</code>, <code>CombineAggregatedOutputsNode</code>, <code>SemiAdditiveJoinNode</code>,
+        <code>JoinToCustomGranularityNode</code>, <code>OffsetCustomGranularityNode</code>,
+        <code>OffsetBaseGrainByCustomGrainNode</code>, <code>WindowReaggregationNode</code>,
+        <code>JoinConversionEventsNode</code>, <code>AddGeneratedUuidColumnNode</code>, <code>AliasSpecsNode</code>,
+        <code>WriteToResultTableNode</code>)은 dimensional 변형·multi-metric 결합·CTAS 사용 사례.
+      </p>
+
+      <h3 class="serif">DataflowPlanBuilder — 메트릭 유형별 분기</h3>
+      <p>
+        <code>DataflowPlanBuilder.buildPlan(querySpec)</code>이 진입점. 메트릭 유형별로 다른 빌드 경로를 탄다:
+      </p>
+
+      <ul class="flow">
+        <li><strong>SIMPLE</strong> — measure → MetricTimeDimensionTransform → JoinOnEntities? → Filter → Aggregate → ComputeMetrics → Order → Sink. 가장 짧은 경로.</li>
+        <li><strong>RATIO</strong> — 두 SIMPLE을 각각 build하고 ComputeMetrics에서 numerator/denominator로 묶음.</li>
+        <li><strong>DERIVED</strong> — 입력 metric들을 recursively build하고 expr로 결합 (예: <code>booking_fees / bookings</code>).</li>
+        <li><strong>CUMULATIVE</strong> — JoinOverTimeRange로 window self-join 추가 (현재 W15까지 deferred 일부).</li>
+        <li><strong>CONVERSION</strong> — JoinConversionEvents로 base/conversion measure pair (W15까지 deferred 일부).</li>
+      </ul>
+
+      <h3 class="serif">예시 plan 트리 (SIMPLE)</h3>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Example dataflow plan tree for simple bookings query">
+          <defs>
+            <marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#87867F"/>
+            </marker>
+            <style>
+              .node       { fill: #FFFFFF; stroke: #D1CFC5; stroke-width: 1.5; }
+              .node-accent{ fill: rgba(227, 218, 204, 0.5); stroke: #D97757; stroke-width: 1.5; }
+              .node-olive { fill: rgba(120, 140, 93, 0.15); stroke: #788C5D; stroke-width: 1.5; }
+              .node-label { fill: #141413; font: 500 12px -apple-system, system-ui, sans-serif; }
+              .node-sub   { fill: #87867F; font: 400 10.5px -apple-system, system-ui, sans-serif; }
+              .edge       { stroke: #87867F; stroke-width: 1.2; fill: none; }
+              .edge-label { fill: #3D3D3A; font: 400 10px -apple-system, system-ui, sans-serif; }
+            </style>
+          </defs>
+
+          <!-- leaf -->
+          <rect class="node node-olive" x="320" y="30" width="260" height="50" rx="8"/>
+          <text class="node-label" x="450" y="50" text-anchor="middle">ReadSqlSourceNode</text>
+          <text class="node-sub"   x="450" y="66" text-anchor="middle">bookings_source · src_10000</text>
+
+          <!-- metric_time -->
+          <rect class="node" x="320" y="120" width="260" height="50" rx="8"/>
+          <text class="node-label" x="450" y="140" text-anchor="middle">MetricTimeDimensionTransformNode</text>
+          <text class="node-sub"   x="450" y="156" text-anchor="middle">ds → metric_time</text>
+
+          <!-- filter -->
+          <rect class="node" x="320" y="200" width="260" height="50" rx="8"/>
+          <text class="node-label" x="450" y="220" text-anchor="middle">ConstrainTimeRangeNode</text>
+          <text class="node-sub"   x="450" y="236" text-anchor="middle">ds BETWEEN '2020-01-01' AND '2020-02-01'</text>
+
+          <!-- aggregate -->
+          <rect class="node node-accent" x="320" y="280" width="260" height="50" rx="8"/>
+          <text class="node-label" x="450" y="300" text-anchor="middle">AggregateSimpleMetricInputsNode</text>
+          <text class="node-sub"   x="450" y="316" text-anchor="middle">SUM(__bookings) BY metric_time__day</text>
+
+          <!-- write -->
+          <rect class="node node-olive" x="320" y="360" width="260" height="50" rx="8"/>
+          <text class="node-label" x="450" y="380" text-anchor="middle">WriteToResultDataTableNode</text>
+          <text class="node-sub"   x="450" y="396" text-anchor="middle">sink — final SELECT</text>
+
+          <!-- arrows -->
+          <path class="edge" d="M 450 80 L 450 118" marker-end="url(#arr3)"/>
+          <path class="edge" d="M 450 170 L 450 198" marker-end="url(#arr3)"/>
+          <path class="edge" d="M 450 250 L 450 278" marker-end="url(#arr3)"/>
+          <path class="edge" d="M 450 330 L 450 358" marker-end="url(#arr3)"/>
+        </svg>
+        <figcaption>Figure 03 — SIMPLE 메트릭 한 개에 대한 dataflow plan. olive = leaf/sink, clay accent = aggregate.</figcaption>
+      </div>
+
+      <p>
+        모든 노드는 <code>visitor.visit&lt;NodeType&gt;(node)</code>에 dispatch되는 <code>accept</code> 메서드를 갖는다.
+        <strong>23종이 23-arm visitor interface를 강제</strong>한다 — 빠뜨리면 컴파일러가 잡는다.
+      </p>
+
+      <div class="refs">
+        <span>modules/core/.../domain/dataflow/DataflowPlanNode.kt</span>
+        <span>modules/core/.../domain/dataflow/DataflowPlan.kt</span>
+        <span>modules/core/.../domain/dataflow/DataflowPlanNodeVisitor.kt</span>
+        <span>modules/core/.../domain/dataflow/nodes/ (23개 파일)</span>
+        <span>modules/core/.../domain/dataflow/builder/DataflowPlanBuilder.kt</span>
+        <span>modules/core/.../domain/dataflow/builder/SourceNodeBuilder.kt</span>
+        <span>python_oracle/upstream/metricflow/dataflow/</span>
+      </div>
+
+      <p class="note">
+        <strong>더 깊이 가려면:</strong> <em>"DERIVED 메트릭(예: booking_fees_per_booker) 한 개에 대한 dataflow plan을
+        그려줘"</em> 또는 <em>"functionallyIdentical과 identity equality가 왜 둘 다 필요한지 캐시 측면에서 설명해줘"</em>.
+      </p>
+    </section>
+
+    <!-- ========================================================
+         §09 — Plan Conversion
+         ======================================================== -->
+    <section class="stage" id="s9">
+      <p class="stage-num">09 · PLAN CONVERSION</p>
+      <h2>Plan Conversion — Dataflow → SQL Plan</h2>
+      <p class="lead">
+        <strong>Dataflow의 23종 노드를 SQL plan 트리로 옮기는 visitor.</strong> 각 dataflow 노드 한 개가
+        보통 SqlSelectStatementNode 한 개로 매핑되며, 부모 dataflow 노드는 자식 SELECT의 FROM 서브쿼리가 된다.
+      </p>
+
+      <h3 class="serif">두 계층</h3>
+      <p>
+        <code>DataflowToSqlPlanConverter</code>는 top-level이지만 일은 거의 안 한다 — 진짜 일은
+        <code>DataflowNodeToSqlSubqueryVisitor</code>가 한다 (23개 <code>visitXxxNode</code> 메서드).
+        Converter는 visitor를 만들고, sink 노드로 dispatch한 결과를 받아 <code>ConvertToSqlPlanResult</code>로
+        포장한다.
+      </p>
+
+      <pre><code><span class="cm">// modules/core/.../domain/plan_conversion/DataflowToSqlPlanConverter.kt</span>
+<span class="hl">fun</span> convertToSqlPlan(
+    sqlEngineType: SqlEngine,
+    dataflowPlanNode: DataflowPlanNode,
+    optimizationLevel: SqlOptimizationLevel,
+    sqlQueryPlanId: DagId?,
+    outputColumnOrderer: OutputColumnOrderer,
+): ConvertToSqlPlanResult {
+    <span class="hl">val</span> visitor = DataflowNodeToSqlSubqueryVisitor(...)
+    <span class="hl">val</span> root: SqlDataSet = dataflowPlanNode.accept(visitor)
+    <span class="hl">return</span> ConvertToSqlPlanResult(SqlPlan(root.sqlPlanNode), bindParameters)
+}</code></pre>
+
+      <h3 class="serif">SqlDataSet — 노드 간 caller-callee 인터페이스</h3>
+      <p>
+        각 <code>visitXxx</code>는 <code>SqlDataSet</code>을 반환한다. 이건 "이 dataflow 노드의 출력은 어떤
+        SqlPlanNode 트리(보통 SELECT)이고, 그 SELECT의 각 출력 컬럼이 어떤 <code>Instance</code>(metric/dimension/entity)에
+        대응하는가"를 묶은 record. 부모 노드의 결과를 자식이 받아 FROM으로 wrapping한다.
+      </p>
+
+      <table class="facts">
+        <tr><th>SqlDataSet.sqlPlanNode</th><td>이 노드의 SQL 출력 (보통 <code>SqlSelectStatementNode</code>)</td></tr>
+        <tr><th>SqlDataSet.instanceSet</th><td>각 컬럼의 의미적 정체 — 어떤 metric/dimension/entity spec이며, 어떤 column name으로 노출되는가</td></tr>
+        <tr><th>bindParameters</th><td>WHERE 절 등에 등장한 SQL bind parameter들 (where filter spec에서 누적)</td></tr>
+      </table>
+
+      <h3 class="serif">예: AggregateSimpleMetricInputsNode → SqlSelectStatement</h3>
+      <ul class="flow">
+        <li>부모 dataflow 노드의 <code>SqlDataSet</code>을 받아 자기 FROM 절로 사용.</li>
+        <li>group-by 키로 SELECT 절에 dimension 컬럼 추가.</li>
+        <li>각 measure에 대해 <code>SUM(...)</code> / <code>COUNT(...)</code> / <code>PERCENTILE_CONT(...)</code> 등 expr 생성.</li>
+        <li><code>GROUP BY</code> 절 추가.</li>
+        <li>출력 컬럼별 <code>Instance</code>를 갱신해 자식 노드가 받을 데이터셋 구성.</li>
+      </ul>
+
+      <p>
+        매 SELECT마다 alias를 자동 발급(<code>subq_3</code>, <code>subq_4</code>, …). <code>SequentialIdGenerator</code>가
+        thread-local 카운터로 작동하며, 쿼리 시작 시 0으로 리셋한다 (corpus 비교에서 alias가 결정적이도록).
+      </p>
+
+      <h3 class="serif">최적화 — column pruner</h3>
+      <p>
+        Convert 후 즉시 <code>SqlOptimizerPipeline</code>이 실행되어 4가지 rewrite가 일어난다:
+      </p>
+      <ul>
+        <li><strong>SqlColumnPrunerOptimizer</strong> — 사용되지 않는 SELECT 컬럼을 제거.</li>
+        <li><strong>SqlTableAliasSimplifier</strong> — 한 번만 쓰이는 alias를 본체로 inline.</li>
+        <li><strong>SqlRewritingSubQueryReducer</strong> — 의미 없는 nested SELECT을 평탄화.</li>
+        <li><strong>CTE 변환</strong> (level O5 이상) — 같은 서브쿼리를 CTE로 끌어올림.</li>
+      </ul>
+
+      <div class="refs">
+        <span>modules/core/.../domain/plan_conversion/DataflowToSqlPlanConverter.kt</span>
+        <span>modules/core/.../domain/plan_conversion/to_sql_plan/DataflowNodeToSqlSubqueryVisitor.kt</span>
+        <span>modules/core/.../domain/plan_conversion/to_sql_plan/OutputColumnOrderer.kt</span>
+        <span>modules/core/.../domain/plan_conversion/helpers/SqlExpressionBuilder.kt</span>
+        <span>modules/core/.../domain/plan_conversion/helpers/SqlJoinBuilder.kt</span>
+        <span>modules/core/.../domain/sql/optimizer/SqlPlanOptimizerPipeline.kt</span>
+        <span>modules/core/.../domain/sql/optimizer/column_pruning/SqlColumnPrunerOptimizer.kt</span>
+        <span>python_oracle/upstream/metricflow/plan_conversion/to_sql_plan/dataflow_to_sql.py</span>
+      </div>
+
+      <p class="note">
+        <strong>더 깊이 가려면:</strong> <em>"visitAggregateSimpleMetricInputsNode 본체를 한 줄씩 해설해줘 — 어떤 expr이
+        만들어지고 instance set이 어떻게 갱신되는지"</em>.
+      </p>
+    </section>
+
+    <!-- ========================================================
+         §10 — SQL Plan과 렌더링
+         ======================================================== -->
+    <section class="stage" id="s10">
+      <p class="stage-num">10 · SQL PLAN + RENDER</p>
+      <h2>SQL Plan과 렌더링 — 마지막 변환</h2>
+      <p class="lead">
+        <strong>SQL plan은 SELECT/JOIN/WHERE 트리의 추상 표현이다.</strong> 5개 plan-node + 24개 expression-node로
+        모든 SQL을 그려낸다. 렌더러는 그 트리를 문자열로 떨군다.
+      </p>
+
+      <h3 class="serif">두 가지 sealed 계층</h3>
+      <p>
+        <code>SqlPlanNode</code>는 abstract class(노드)다. 5개 변종 (모듈 <code>domain/sql/plan/nodes</code>):
+      </p>
+      <ul>
+        <li><strong>SqlSelectStatementNode</strong> — SELECT … FROM … JOIN … WHERE … GROUP BY … ORDER BY … LIMIT</li>
+        <li><strong>SqlTableNode</strong> — FROM 절의 base 테이블</li>
+        <li><strong>SqlCteNode</strong> — WITH 절</li>
+        <li><strong>SqlCreateTableAsNode</strong> — CTAS</li>
+        <li><strong>SqlSelectTextNode</strong> — 직접 작성된 raw SQL (테스트/fallback)</li>
+      </ul>
+
+      <p>
+        <code>SqlExpressionNode</code>는 abstract class(식)다. <strong>24개 변종</strong> — 컬럼 참조부터 함수, 산술,
+        case-when까지:
+      </p>
+
+      <table class="facts">
+        <thead><tr><th>식 종류</th><th>예</th></tr></thead>
+        <tbody>
+          <tr><th>참조</th><td><code>SqlColumnReferenceExpression</code>, <code>SqlColumnAliasReferenceExpression</code></td></tr>
+          <tr><th>리터럴</th><td><code>SqlStringLiteralExpression</code>, <code>SqlIntegerExpression</code>, <code>SqlNullExpression</code>, <code>SqlStringExpression</code></td></tr>
+          <tr><th>산술·비교</th><td><code>SqlArithmeticExpression</code>, <code>SqlComparisonExpression</code>, <code>SqlLogicalExpression</code>, <code>SqlBetweenExpression</code>, <code>SqlIsNullExpression</code></td></tr>
+          <tr><th>집계·창</th><td><code>SqlAggregateFunctionExpression</code>, <code>SqlPercentileExpression</code>, <code>SqlWindowFunctionExpression</code>, <code>SqlRatioComputationExpression</code></td></tr>
+          <tr><th>시간</th><td><code>SqlDateTruncExpression</code>, <code>SqlExtractExpression</code>, <code>SqlAddTimeExpression</code>, <code>SqlSubtractTimeIntervalExpression</code>, <code>SqlCastToTimestampExpression</code></td></tr>
+          <tr><th>일반</th><td><code>SqlFunctionExpression</code>, <code>SqlCaseExpression</code>, <code>SqlGenerateUuidExpression</code></td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="serif">렌더링 — DefaultSqlPlanRenderer + 8 dialect</h3>
+      <p>
+        <code>SqlPlanRenderer</code> 인터페이스 → <code>DefaultSqlPlanRenderer</code>(ANSI SQL-ish 기준)
+        → 8개 dialect 서브클래스 (Trino, BigQuery, Snowflake, Databricks, Redshift, DuckDB, Postgres, Default).
+        각 dialect는 정말 작은 override만 갖는다 — 보통 <strong>expr renderer만 swap</strong>한다.
+      </p>
+
+      <pre><code><span class="cm">// modules/render-bigquery/.../BigQuerySqlPlanRenderer.kt</span>
+<span class="hl">open class</span> BigQuerySqlPlanRenderer : DefaultSqlPlanRenderer() {
+    <span class="hl">override val</span> exprRenderer: SqlExpressionRenderer
+        <span class="hl">get</span>() = EXPR_RENDERER
+
+    <span class="hl">companion object</span> {
+        <span class="hl">val</span> EXPR_RENDERER: SqlExpressionRenderer = BigQuerySqlExpressionRenderer()
+    }
+}</code></pre>
+
+      <h3 class="serif">dialect별 차이 — 8개 비교</h3>
+
+      <div class="cards-grid">
+        <div class="card">
+          <p class="card-tag">trino</p>
+          <h4>Trino</h4>
+          <p><code>NANOSECOND</code>·<code>MICROSECOND</code> granularity 차단. ANSI에 가장 가까운 출력.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">bigquery</p>
+          <h4>BigQuery</h4>
+          <p><code>DATETIME_TRUNC(ds, day)</code>처럼 <em>인수 순서가 거꾸로</em>. <code>`backtick`</code> identifier 옵션.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">snowflake</p>
+          <h4>Snowflake</h4>
+          <p>모든 granularity 지원. 거의 ANSI와 동일.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">databricks</p>
+          <h4>Databricks</h4>
+          <p>NANOSECOND 차단. Spark SQL 호환 함수.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">redshift</p>
+          <h4>Redshift</h4>
+          <p>NANOSECOND 차단. <code>DATEADD</code> 함수 시그니처가 표준과 미묘하게 다름.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">duckdb</p>
+          <h4>DuckDB</h4>
+          <p><code>DATE_TRUNC('day', ds)</code> 표준. 테스트의 기본 dialect.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">postgres</p>
+          <h4>Postgres</h4>
+          <p>NANOSECOND 차단. <code>MAKE_INTERVAL</code> 등 일부 함수 override.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">default</p>
+          <h4>Default</h4>
+          <p>위 7개 어느 것도 아닐 때 fallback. <code>DefaultSqlPlanRenderer</code> 자체.</p>
+        </div>
+      </div>
+
+      <p>
+        같은 SQL plan을 dialect별로 다르게 렌더한 예 (<code>explain__simple__bookings_by_metric_time__all_dialects</code>):
+      </p>
+
+      <pre><code><span class="cm">-- DuckDB</span>
+SELECT
+  metric_time__day
+  , SUM(__bookings) AS bookings
+FROM (
+  <span class="cm">-- ...</span>
+  SELECT
+    <span class="hl">DATE_TRUNC('day', ds)</span> AS metric_time__day
+    , 1 AS __bookings
+  FROM mf_corpus.fct_bookings bookings_source_src_10000
+) subq_3
+GROUP BY metric_time__day
+
+<span class="cm">-- BigQuery (같은 plan, 다른 expr)</span>
+    <span class="hl">DATETIME_TRUNC(ds, day)</span> AS metric_time__day</code></pre>
+
+      <div class="refs">
+        <span>modules/core/.../domain/sql/plan/SqlPlanNode.kt</span>
+        <span>modules/core/.../domain/sql/plan/nodes/ (5개 plan-node)</span>
+        <span>modules/core/.../domain/sql/plan/expr/ (24개 expr-node)</span>
+        <span>modules/core/.../domain/sql/render/DefaultSqlPlanRenderer.kt</span>
+        <span>modules/core/.../domain/sql/render/DefaultSqlExpressionRenderer.kt</span>
+        <span>modules/core/.../domain/sql/render/SqlEngine.kt</span>
+        <span>modules/render-{trino,bigquery,snowflake,databricks,redshift,duckdb,postgres}/</span>
+        <span>python_oracle/upstream/metricflow/sql/render/</span>
+      </div>
+
+      <p class="note">
+        <strong>더 깊이 가려면:</strong> <em>"각 dialect renderer가 override하는 메서드를 표로 정리해줘"</em> 또는
+        <em>"SqlColumnPrunerOptimizer가 위 예제에서 어떤 컬럼을 제거했는지 before/after를 보여줘"</em>.
+      </p>
+    </section>
+
+    <!-- ========================================================
+         §11 — 엔진 facade
+         ======================================================== -->
+    <section class="stage" id="s11">
+      <p class="stage-num">11 · ENGINE FACADE</p>
+      <h2>엔진 facade — 모든 것을 모으다</h2>
+      <p class="lead">
+        <strong><code>MetricFlowEngine</code>는 8개 RPC를 노출하는 thin facade다.</strong>
+        SemanticManifest 하나를 받아 모든 lookup·graph를 갖춘다. SQL 실행은 외부, 의도된 누락.
+      </p>
+
+      <h3 class="serif">8개 RPC</h3>
+      <table class="facts">
+        <thead><tr><th>메서드</th><th>책임</th><th>SQL 생성?</th></tr></thead>
+        <tbody>
+          <tr><th>validateManifest()</th><td>28개 규칙 실행, issues 반환 (throw 안 함)</td><td>—</td></tr>
+          <tr><th>listMetrics(includeDimensions)</th><td>모든 metric을 dunder name 정렬로</td><td>—</td></tr>
+          <tr><th>listDimensions(metricNames?, orderBy)</th><td>metric 필터 있으면 graph DFS, 없으면 manifest iterate</td><td>—</td></tr>
+          <tr><th>entitiesForMetrics(metricNames)</th><td>주어진 metric들에서 도달 가능한 entity</td><td>—</td></tr>
+          <tr><th>listGroupBys(metricNames?, ...)</th><td>dimensions + entities 합집합</td><td>—</td></tr>
+          <tr><th>listSavedQueries()</th><td>manifest의 saved query 그대로</td><td>—</td></tr>
+          <tr><th>explain(request)</th><td>전체 파이프라인 실행 — <code>MetricFlowExplainResult.sql</code> 반환</td><td><strong>예</strong></td></tr>
+          <tr><th>explainGetDimensionValues(request)</th><td>dimension 값 조회용 SQL 생성 — metric 컬럼 pruning</td><td><strong>예</strong></td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="serif">explain의 4단계 (코드 발췌)</h3>
+      <pre><code><span class="cm">// modules/engine/.../MetricFlowEngine.kt — explain()</span>
+<span class="cm">// Step 1: parse + validate</span>
+<span class="hl">val</span> parser = MetricFlowQueryParser(semanticManifestLookup, semanticManifestGraphLookup)
+<span class="hl">val</span> queryResolution = parser.parseAndValidateQuery(...)
+<span class="hl">if</span> (queryResolution.hasErrors) <span class="hl">throw</span> IllegalArgumentException(...)
+<span class="hl">val</span> querySpec = queryResolution.checkedQuerySpec!!
+
+<span class="cm">// Step 2-4: build → convert → render</span>
+<span class="hl">val</span> sql = explainPipeline.renderSql(
+    querySpec = querySpec,
+    dialect   = request.dialect ?: SqlEngine.DUCKDB,
+    outputSelectionSpecs = null,
+)
+
+<span class="hl">return</span> MetricFlowExplainResult(sql, querySpec, queriedSemanticModels, outputSqlTable = null)</code></pre>
+
+      <p>
+        실제 step 2-4는 <code>ExplainPipeline</code>(엔진 모듈 안의 internal class)이 lazy로 wiring한다 —
+        <code>SemanticModelToDataSetConverter</code>, <code>SourceNodeBuilder</code>, <code>DataflowPlanBuilder</code>,
+        <code>DataflowToSqlPlanConverter</code>를 한 번 만들어 재사용. Python <code>MetricFlowEngine.__init__</code>의
+        eager 구축을 Kotlin lazy로 옮긴 형태.
+      </p>
+
+      <h3 class="serif">두 가지 사용 모드</h3>
+      <div class="cards-grid">
+        <div class="card">
+          <p class="card-tag">library</p>
+          <h4>JVM 라이브러리</h4>
+          <p>의존성에 <code>metricflow-core</code> + <code>metricflow-render-&lt;dialect&gt;</code> 추가, <code>MetricFlowEngine</code>를
+            new로 직접 만들고 호출. gRPC 의존성 없음.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">grpc</p>
+          <h4>gRPC 서버</h4>
+          <p><code>metricflow-engine</code> 모듈의 <code>MetricFlowGrpcServer</code>가 8개 RPC를 wire-protocol로 노출.
+            기본 포트 10110. 클라이언트는 어떤 언어든 가능.</p>
+        </div>
+      </div>
+
+      <p>
+        오류 매핑: <code>NotImplementedError</code> → UNIMPLEMENTED, <code>SerializationException</code> /
+        <code>IllegalArgumentException</code> → INVALID_ARGUMENT, 그 외 → INTERNAL. 모두 facade와 gRPC adapter에 매핑 코드.
+      </p>
+
+      <h3 class="serif">왜 SQL 실행을 안 하는가</h3>
+      <p>
+        Python <code>MetricFlowEngine.query()</code>는 SqlClient의 <code>execute()</code>를 호출해 결과 DataFrame을
+        돌려준다. Kotlin 포팅이 이것을 의도적으로 뺀 이유:
+      </p>
+      <ul>
+        <li><strong>관심사 분리</strong> — 의미층 엔진의 책임은 SQL을 만드는 것까지. 실행은 어차피 외부 DB 연결, 인증, 모니터링, retry, 캐싱이 얽힌다.</li>
+        <li><strong>monomer 도메인</strong> — 운영 환경에서는 별도의 SQL 실행 인프라가 있고 거기에 SQL을 넘기는 게 자연스럽다.</li>
+        <li><strong>테스트 가능성</strong> — 실행 결과를 비교하지 않고 SQL 문자열을 비교하면 dialect 7개 × corpus 112개를 byte-동등으로 검증 가능.</li>
+      </ul>
+
+      <div class="refs">
+        <span>modules/engine/.../application/engine/MetricFlowEngine.kt</span>
+        <span>modules/engine/.../application/engine/ExplainPipeline.kt</span>
+        <span>modules/engine/.../application/engine/EngineModels.kt</span>
+        <span>modules/engine/.../application/engine/MetricFlowGrpcServer.kt</span>
+        <span>modules/engine/.../application/engine/MetricFlowSqlEngineService.kt</span>
+        <span>docs/PUBLIC_API.md</span>
+        <span>python_oracle/upstream/metricflow/engine/metricflow_engine.py</span>
+      </div>
+
+      <p class="note">
+        <strong>더 깊이 가려면:</strong> <em>"MetricFlowEngine의 8개 RPC 각각이 어떤 corpus 케이스로 검증되는지 매핑해줘"</em>
+        또는 <em>"ExplainPipeline.renderSql의 lazy wiring이 Python __init__과 비교해 어떻게 다른지"</em>.
+      </p>
+    </section>
+
+    <!-- ========================================================
+         §12 — 실제 쿼리 따라가기
+         ======================================================== -->
+    <section class="stage" id="s12">
+      <p class="stage-num">12 · WORKED EXAMPLE</p>
+      <h2>실제 쿼리 따라가보기</h2>
+      <p class="lead">
+        <strong><code>bookings_by_metric_time__day</code> — 가장 단순한 explain 케이스.</strong>
+        manifest 입력부터 SQL 출력까지 7단계를 코드 reference와 함께 따라간다.
+      </p>
+
+      <h3 class="serif">입력</h3>
+      <pre><code><span class="cm">// MetricFlowExplainRequest</span>
+metricNames       = ["bookings"]
+groupByNames      = ["metric_time__day"]
+dialect           = SqlEngine.DUCKDB
+limit             = null
+timeConstraintStart, End = null</code></pre>
+
+      <p>
+        manifest는 <code>simple_manifest</code> fixture — <code>bookings_source</code> 모델 + <code>bookings</code>
+        SIMPLE 메트릭. corpus에서는 <code>corpus/explain__simple__bookings_by_metric_time__all_dialects/request.json</code>.
+      </p>
+
+      <h3 class="serif">단계 1–3 (manifest load → transform → validate)</h3>
+      <ul>
+        <li><code>SemanticManifest</code> 데이터 클래스로 역직렬화 — <em>모든 28개 검증 issue가 없음을 확인</em>.</li>
+        <li>14개 transform 규칙 적용 후 <code>SIMPLE</code> 메트릭의 <code>input_measure</code>가 자동 채워짐.</li>
+        <li>SemanticManifestLookup이 한 번 만들어지고, SemanticGraph가 lazy 빌드.</li>
+      </ul>
+
+      <h3 class="serif">단계 4 (parse)</h3>
+      <p>
+        <code>MetricFlowQueryParser.parseAndValidateQuery</code> →
+        <code>MetricFlowQueryResolver.resolveQuery</code>:
+      </p>
+      <ul>
+        <li><code>"bookings"</code> → <code>MetricSpec(name="bookings")</code>.</li>
+        <li><code>"metric_time__day"</code> → DunderNamingScheme으로 dispatch → time dimension trie 매칭 →
+          <code>TimeDimensionSpec(name="metric_time", timeGranularity=DAY, entityLinks=[])</code>.</li>
+        <li>resolution issue 0개 — <code>MetricFlowQuerySpec</code> 생성.</li>
+      </ul>
+
+      <h3 class="serif">단계 5 (dataflow plan)</h3>
+      <p>
+        <code>DataflowPlanBuilder.buildPlan(querySpec)</code> — SIMPLE 분기 (§8 그림과 동일):
+      </p>
+      <ol>
+        <li><code>ReadSqlSourceNode(bookings_source)</code> — leaf.</li>
+        <li><code>MetricTimeDimensionTransformNode(ds → metric_time)</code>.</li>
+        <li><code>AggregateSimpleMetricInputsNode(SUM(__bookings), GROUP BY metric_time__day)</code>.</li>
+        <li><code>WriteToResultDataTableNode</code> — sink.</li>
+      </ol>
+
+      <h3 class="serif">단계 6 (plan conversion)</h3>
+      <p>
+        <code>DataflowToSqlPlanConverter.convertToSqlPlan(plan, SqlEngine.DUCKDB)</code>:
+      </p>
+      <ul>
+        <li>sink가 <code>accept(visitor)</code>를 호출, visitor가 부모를 재귀로 방문.</li>
+        <li>각 dataflow 노드가 <code>SqlSelectStatementNode</code>로 변환 — 부모는 FROM 절의 서브쿼리.</li>
+        <li><code>SqlColumnPrunerOptimizer</code>가 미사용 컬럼 제거 — <code>bookings_source</code>의 다른 measure들은 select에서 빠진다.</li>
+        <li><code>SqlTableAliasSimplifier</code>가 1회 alias를 inline (subq_1, subq_2가 사라짐).</li>
+        <li>결과 <code>SqlPlan(sqlPlanNode = SqlSelectStatementNode(...))</code>.</li>
+      </ul>
+
+      <h3 class="serif">단계 7 (render → SQL string)</h3>
+      <p>
+        <code>DuckDbSqlPlanRenderer().renderSqlPlan(sqlPlan)</code>:
+      </p>
+
+      <pre><code><span class="cm">-- expected/duckdb.sql (corpus와 byte-동등)</span>
+-- Aggregate Inputs for Simple Metrics
+-- Compute Metrics via Expressions
+-- Write to DataTable
+SELECT
+  metric_time__day
+  , SUM(__bookings) AS bookings
+FROM (
+  -- Read Elements From Semantic Model 'bookings_source'
+  -- Metric Time Dimension 'ds'
+  -- Select: ['__bookings', 'metric_time__day']
+  -- Select: ['__bookings', 'metric_time__day']
+  SELECT
+    DATE_TRUNC('day', ds) AS metric_time__day
+    , 1 AS __bookings
+  FROM mf_corpus_2026_05_11_static.fct_bookings bookings_source_src_10000
+) subq_3
+GROUP BY
+  metric_time__day</code></pre>
+
+      <p>
+        주석은 SqlSelectStatementNode의 <code>description</code>이 dialect renderer의 prefix-comment 단계에서 직접 쏟아낸다.
+        <code>subq_3</code> alias는 <code>SequentialIdGenerator</code>의 3번째 발급 — 결정적이므로 corpus가 byte-매치된다.
+      </p>
+
+      <h3 class="serif">같은 입력, BigQuery로 dialect만 바꾸면</h3>
+      <p>
+        <code>DATE_TRUNC('day', ds)</code> 한 줄만 <code>DATETIME_TRUNC(ds, day)</code>로 바뀐다. 나머지는 동일.
+        이게 dialect 분리의 가치 — plan은 dialect-agnostic, 차이는 expr renderer 한 곳에 응축.
+      </p>
+
+      <div class="refs">
+        <span>corpus/explain__simple__bookings_by_metric_time__all_dialects/</span>
+        <span>corpus/explain__simple__bookings_by_metric_time__all_dialects/expected/{duckdb,bigquery,...}.sql</span>
+        <span>modules/internal-tests/diff-runner/ (이 케이스를 7개 dialect로 실행)</span>
+      </div>
+
+      <p class="note">
+        <strong>더 깊이 가려면:</strong> <em>"이 쿼리에서 DERIVED 메트릭으로 바꾸면 어느 단계에서 무엇이 추가되는지 보여줘"</em>
+        또는 <em>"같은 plan을 Trino로 렌더하면 어떤 expression renderer 메서드가 호출되는지 trace"</em>.
+      </p>
+    </section>
+
+    <!-- ========================================================
+         §13 — 차등 테스트
+         ======================================================== -->
+    <section class="stage" id="s13">
+      <p class="stage-num">13 · DIFFERENTIAL TESTING</p>
+      <h2>차등 테스트로 정답 보장</h2>
+      <p class="lead">
+        <strong>Python oracle을 정답으로, 같은 112개 입력에 대해 byte-동등을 강제한다.</strong>
+        "테스트 통과"가 아니라 "Python과 같은 SQL을 만드는가"가 합격 기준.
+      </p>
+
+      <h3 class="serif">corpus 구조</h3>
+      <p>
+        <code>corpus/&lt;case-name&gt;/</code> 하나마다:
+      </p>
+      <ul>
+        <li><code>request.json</code> — manifest + MetricFlowExplainRequest를 한 파일에.</li>
+        <li><code>meta.json</code> — subcommand, dialect, fixture name 등 메타.</li>
+        <li><code>expected/&lt;dialect&gt;.sql</code> 또는 <code>expected.json</code> — Python이 생성한 정답.</li>
+      </ul>
+
+      <p>
+        총 <strong>112 케이스 × 평균 ~3 dialect = 298 SQL/JSON expected</strong>. 8개 subcommand
+        (explain, explain_get_dimension_values, list_metrics, list_dimensions, entities_for_metrics,
+        list_group_bys, list_saved_queries, validate_manifest) 전부 커버.
+      </p>
+
+      <h3 class="serif">diff-runner</h3>
+      <p>
+        <code>modules/internal-tests/diff-runner</code> — Gradle <code>:internal-tests:diff-runner:run</code>로 실행.
+        각 케이스에 대해:
+      </p>
+      <ol>
+        <li>request.json을 <code>SemanticManifest</code> + <code>MetricFlowExplainRequest</code>로 역직렬화.</li>
+        <li>Kotlin <code>MetricFlowEngine</code>을 in-process로 호출.</li>
+        <li>출력 SQL을 <code>SqlNormalizer</code>의 3가지 규칙(line endings, trailing whitespace, blank lines)으로 정규화.</li>
+        <li>expected 파일과 byte-동등 비교.</li>
+        <li>실패 시 첫 mismatch의 line + column + JSON path까지 보고.</li>
+      </ol>
+
+      <p>
+        JSON 출력은 더 까다롭다 — Python <code>json.dumps</code>와 Kotlin <code>kotlinx-serialization</code>은
+        insertion order가 다를 수 있으므로, <strong>키를 알파벳 정렬</strong>하고 <strong>식별 키로 리스트도
+        정렬</strong>한 다음 비교. 식별 키 매핑은 <code>CaseRunner.LIST_KEYS_WITH_SORT_KEY</code>에 하드코딩.
+      </p>
+
+      <h3 class="serif">SQL normalizer</h3>
+      <p>
+        <code>harness/sql_norm/</code>에 <strong>의미 보존 normalizer 규칙</strong>을 마크다운으로 한 건씩 등록.
+        각 규칙은 "왜 의미 보존이고 어떤 케이스에서 필요한가"를 적는다. 신규 규칙은 3건 이상의 케이스에서
+        필요해야 추가 (1건만 적용되는 ad-hoc 규칙 금지 — PROGRESS.md 정책 A).
+      </p>
+
+      <h3 class="serif">현재 상태</h3>
+      <p>
+        Phase 3 W15에서 <strong>corpus 112/0/0/0 (PASS/FAIL/UNIMPLEMENTED/ERROR)</strong> 달성.
+        Phase 5에서 모듈 30개 → 10개로 통합 후에도 그대로 유지. 새 모듈/리팩토링의 자기검증 안전망 역할.
+      </p>
+
+      <div class="refs">
+        <span>modules/internal-tests/diff-runner/README.md</span>
+        <span>modules/internal-tests/diff-runner/src/main/kotlin/.../CaseRunner.kt</span>
+        <span>modules/internal-tests/diff-runner/src/main/kotlin/.../SqlNormalizer.kt</span>
+        <span>harness/sql_norm/</span>
+        <span>harness/run_oracle.py (Python oracle CLI)</span>
+        <span>harness/extract_corpus.py</span>
+        <span>corpus/INDEX.md</span>
+      </div>
+
+      <p class="note">
+        <strong>더 깊이 가려면:</strong> <em>"corpus 112 케이스를 subcommand × dialect 매트릭스로 정리해줘"</em> 또는
+        <em>"sql_norm 규칙 하나를 골라 의미 보존성을 증명해줘"</em>.
+      </p>
+    </section>
+
+    <!-- ========================================================
+         §14 — 다음에 어디로
+         ======================================================== -->
+    <section class="stage" id="s14">
+      <p class="stage-num">14 · NEXT</p>
+      <h2>다음에 어디로 — 깊이 들어갈 곳들</h2>
+      <p class="lead">
+        <strong>이 문서는 표면적인 7단계 지도다.</strong> 각 단계 안에는 다시 5–10개의 sub-system이 있다.
+        목적별 학습 sequence와 에이전트에게 던질 만한 질문들을 모았다.
+      </p>
+
+      <h3 class="serif">학습 sequence 추천</h3>
+      <ol>
+        <li><strong>도메인 어휘부터</strong> — <code>docs/domain-glossary-kotlin.md</code> 통독. 200+ term이 Python과 Kotlin이름 매핑으로 정리되어 있다.</li>
+        <li><strong>한 모듈 깊이 읽기</strong> — <code>domain.manifest.model</code>이 가장 leaf. KDoc + Python 참조 모두 가장 잘 정리됨.</li>
+        <li><strong>한 쿼리 trace</strong> — §12를 한 번 더, 이번엔 자기 manifest로. <code>SemanticGraphBuilder</code>가 어떤 노드를 추가하는지 디버거 + IDE 함께.</li>
+        <li><strong>DataflowPlanBuilder 본체</strong> — Phase 3 W14b/c/W15에서 본체 포팅 완료. SIMPLE → DERIVED → RATIO → CUMULATIVE → CONVERSION 순서로 읽기.</li>
+        <li><strong>SQL optimizer</strong> — <code>SqlColumnPrunerOptimizer</code>가 가장 임팩트 크다. Before/after를 corpus 케이스로 비교.</li>
+      </ol>
+
+      <h3 class="serif">에이전트에게 던질 만한 질문들</h3>
+      <div class="cards-grid">
+        <div class="card">
+          <p class="card-tag">개념</p>
+          <h4>"의미층이 왜 이렇게 복잡한가?"</h4>
+          <p>multi-hop join, conversion metric, time spine, semi-additive measure — 각 케이스가 어떤 실 분석 시나리오에서 나오는지.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">매핑</p>
+          <h4>"Python file X가 Kotlin 어디로?"</h4>
+          <p><code>docs/module-mapping.md</code>가 477개 파일을 매핑. 모듈 단위 매핑 + 개별 파일 매핑.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">트레이스</p>
+          <h4>"corpus 케이스 X의 SQL이 어떻게 만들어지나?"</h4>
+          <p>request.json 입력부터 expected SQL까지 각 단계의 IR 한 줄씩.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">설계</p>
+          <h4>"왜 abstract class를 sealed가 아닌가?"</h4>
+          <p><code>DataflowPlanNode.kt</code> KDoc에 답이 있다 — sealed는 sibling sub-package를 못 가져서 visitor 패턴으로 닫힘 강제.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">테스트</p>
+          <h4>"corpus 케이스를 새로 추가하려면?"</h4>
+          <p><code>harness/extract_corpus.py</code>로 Python oracle을 한 번 더 돌려 expected SQL을 캡처.</p>
+        </div>
+        <div class="card">
+          <p class="card-tag">개선</p>
+          <h4>"upstream metricflow 0.211.0이 나오면 어떻게 sync?"</h4>
+          <p><code>FEASIBILITY.md</code> §3 "마이너 릴리즈 단위 sync mission". diff 부분만 골라 wave별 mission.</p>
+        </div>
+      </div>
+
+      <h3 class="serif">Python source 깊이 읽기 가이드</h3>
+      <p>
+        Kotlin 코드에 막힐 때 Python을 oracle로 참조하는 건 합법이고 권장된다.
+        <code>python_oracle/upstream/</code>는 read-only지만 grep/AST 분석은 자유.
+      </p>
+      <ul>
+        <li><strong><code>python_oracle/upstream/README.md</code></strong> — metricflow 팀의 자체 문서.</li>
+        <li><strong><code>python_oracle/upstream/TENETS.md</code></strong> — 설계 원칙. "왜 이런 추상화인지" 가장 권위적 답.</li>
+        <li><strong><code>python_oracle/upstream/GLOSSARY.md</code></strong> — 의외로 짧다 (~13줄, persistence-source만 정의). 진짜 도메인 어휘는 코드와 Kotlin 측 <code>docs/domain-glossary-kotlin.md</code>가 풍부.</li>
+        <li><strong><code>python_oracle/upstream/tests_metricflow/snapshots/</code></strong> — 2,854 SQL snapshot. corpus의 일부. 직접 열어보면 metricflow가 어떤 SQL을 만드는지 한눈에.</li>
+      </ul>
+
+      <h3 class="serif">개방된 작업</h3>
+      <p>
+        Phase 5a (internal visibility sweep), Phase 5b (gRPC를 별도 모듈로 분리), Phase 6 (Maven publish + BOM + Dokka)이
+        남아있다. PROGRESS.md "Next" 섹션에 우선순위.
+      </p>
+
+      <details class="opt">
+        <summary>왜 학습 가독성을 일등 시민으로 두었나</summary>
+        <div class="opt-body">
+          <p>CLAUDE.md "학습 가독성 정책" — 이 프로젝트는 "돌아가는 코드"뿐 아니라 "읽히는 코드"를 만든다.
+          모듈마다 README, 핵심 도메인 타입에 KDoc, sealed type으로 sum 명확화, Python 도메인 어휘 보존.</p>
+          <p>이 문서가 그 정책의 산출물 중 하나. 같은 토대 위에서 더 좁은 주제로 follow-up 문서를 쌓을 수 있다 —
+          "DataflowPlanBuilder 상세", "SemanticGraph DFS", "Dialect renderer 차이" 등.</p>
+        </div>
+      </details>
+
+      <details class="opt">
+        <summary>왜 SQL 실행을 포팅하지 않았나</summary>
+        <div class="opt-body">
+          <p>실행은 환경 의존적이다 — JDBC URL, 인증, 커넥션 풀, 모니터링, retry, 캐싱, 사용자 권한이 모두 외부 시스템 책임.
+          엔진은 SQL 문자열을 결정적으로 만드는 데 집중하고, 그 SQL을 누가 어떻게 실행할지는 호출자가 결정.</p>
+          <p>부산물로 테스트 가능성이 폭발적으로 좋아진다 — 실행 결과 (DataFrame)를 비교하지 않고 SQL 문자열을 비교하면
+          정답 확정·corpus 관리·dialect 비교 모두 결정적이다.</p>
+        </div>
+      </details>
+
+      <details class="opt">
+        <summary>왜 metricflow 0.210.0에 핀했나</summary>
+        <div class="opt-body">
+          <p>0.210.0 (2026-04-28) — 가장 최근 안정 릴리즈, Apache-2.0, 풀 표면이 명확. 0.210.0 변경:
+          <code>dbt_semantic_interfaces</code> → <code>metricflow_semantic_interfaces</code> 패키지명, <code>MetricFlowEngine.get_measures_for_metrics</code>
+          제거. 우리 영향은 없음.</p>
+          <p>장기 유지보수 부담은 mark된 위험 — 마이너 릴리즈 단위 sync mission이 정답.</p>
+        </div>
+      </details>
+
+      <div class="refs">
+        <span>docs/domain-glossary-kotlin.md</span>
+        <span>docs/module-mapping.md</span>
+        <span>docs/data-model-mapping.md</span>
+        <span>docs/validation-rules-inventory.md</span>
+        <span>docs/PUBLIC_API.md</span>
+        <span>FEASIBILITY.md</span>
+        <span>CLAUDE.md</span>
+        <span>PROGRESS.md</span>
+        <span>python_oracle/upstream/TENETS.md</span>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="doc-footer">
+      <p>관련 / 영향 받는 영역</p>
+      <div class="refs" style="margin-top: 6px;">
+        <span>CLAUDE.md (mission)</span>
+        <span>FEASIBILITY.md (5-phase plan)</span>
+        <span>PROGRESS.md (per-wave tracking)</span>
+        <span>docs/PUBLIC_API.md</span>
+        <span>docs/scope.md</span>
+        <span>docs/dependency-dag.md</span>
+        <span>docs/module-mapping.md</span>
+        <span>docs/data-model-mapping.md</span>
+        <span>docs/domain-glossary-kotlin.md</span>
+        <span>docs/validation-rules-inventory.md</span>
+        <span>modules/core/README.md</span>
+        <span>modules/engine/README.md</span>
+        <span>modules/internal-tests/diff-runner/README.md</span>
+      </div>
+    </footer>
+
+  </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,586 @@
+{
+  "metrics": [
+    {
+      "name": "bookings",
+      "type": "simple",
+      "description": null,
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "booking_count",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "booking_count",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "bookings_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/derived_metrics_manifest/manifest.yaml",
+        "file_slice": {
+          "filename": "manifest.yaml",
+          "content": "name: bookings\ntype: simple\ntype_params:\n  measure: booking_count\n",
+          "start_line_number": 29,
+          "end_line_number": 33
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking__ds",
+          "qualified_name": "booking__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/derived_metrics_manifest/manifest.yaml",
+            "file_slice": {
+              "filename": "manifest.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 23,
+              "end_line_number": 26
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__day",
+          "qualified_name": "metric_time__day",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "bookings_source"
+      ]
+    },
+    {
+      "name": "metric_level_0_index_0",
+      "type": "derived",
+      "description": "Derived metric for testing optimizations for duplicate measures in a query.",
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": "bookings",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": [
+          {
+            "name": "bookings",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        ],
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "booking_count",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/derived_metrics_manifest/manifest.yaml",
+        "file_slice": {
+          "filename": "manifest.yaml",
+          "content": "name: \"metric_level_0_index_0\"\ndescription: Derived metric for testing optimizations for duplicate measures in a\n  query.\ntype: derived\ntype_params:\n  expr: bookings\n  metrics:\n  - name: bookings\n",
+          "start_line_number": 36,
+          "end_line_number": 42
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking__ds",
+          "qualified_name": "booking__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/derived_metrics_manifest/manifest.yaml",
+            "file_slice": {
+              "filename": "manifest.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 23,
+              "end_line_number": 26
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__day",
+          "qualified_name": "metric_time__day",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "bookings_source"
+      ]
+    },
+    {
+      "name": "metric_level_0_index_1",
+      "type": "derived",
+      "description": "Derived metric for testing optimizations for duplicate measures in a query.",
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": "bookings",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": [
+          {
+            "name": "bookings",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        ],
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "booking_count",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/derived_metrics_manifest/manifest.yaml",
+        "file_slice": {
+          "filename": "manifest.yaml",
+          "content": "name: \"metric_level_0_index_1\"\ndescription: Derived metric for testing optimizations for duplicate measures in a\n  query.\ntype: derived\ntype_params:\n  expr: bookings\n  metrics:\n  - name: bookings\n",
+          "start_line_number": 45,
+          "end_line_number": 52
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking__ds",
+          "qualified_name": "booking__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/derived_metrics_manifest/manifest.yaml",
+            "file_slice": {
+              "filename": "manifest.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 23,
+              "end_line_number": 26
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__day",
+          "qualified_name": "metric_time__day",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "bookings_source"
+      ]
+    },
+    {
+      "name": "metric_level_0_index_2",
+      "type": "derived",
+      "description": "Derived metric for testing optimizations for duplicate measures in a query.",
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": "bookings",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": [
+          {
+            "name": "bookings",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        ],
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "booking_count",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/derived_metrics_manifest/manifest.yaml",
+        "file_slice": {
+          "filename": "manifest.yaml",
+          "content": "name: \"metric_level_0_index_2\"\ndescription: Derived metric for testing optimizations for duplicate measures in a\n  query.\ntype: derived\ntype_params:\n  expr: bookings\n  metrics:\n  - name: bookings\n",
+          "start_line_number": 55,
+          "end_line_number": 63
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking__ds",
+          "qualified_name": "booking__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/derived_metrics_manifest/manifest.yaml",
+            "file_slice": {
+              "filename": "manifest.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 23,
+              "end_line_number": 26
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__day",
+          "qualified_name": "metric_time__day",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "bookings_source"
+      ]
+    },
+    {
+      "name": "metric_level_1_index_0",
+      "type": "derived",
+      "description": "Derived metric for testing optimizations for duplicate measures in a query.",
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": "metric_level_0_index_0 + metric_level_0_index_1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": [
+          {
+            "name": "metric_level_0_index_0",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          },
+          {
+            "name": "metric_level_0_index_1",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        ],
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "booking_count",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/derived_metrics_manifest/manifest.yaml",
+        "file_slice": {
+          "filename": "manifest.yaml",
+          "content": "name: \"metric_level_1_index_0\"\ndescription: Derived metric for testing optimizations for duplicate measures in a\n  query.\ntype: derived\ntype_params:\n  expr: metric_level_0_index_0 + metric_level_0_index_1\n  metrics:\n  - name: metric_level_0_index_0\n  - name: metric_level_0_index_1\n",
+          "start_line_number": 66,
+          "end_line_number": 74
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking__ds",
+          "qualified_name": "booking__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/derived_metrics_manifest/manifest.yaml",
+            "file_slice": {
+              "filename": "manifest.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 23,
+              "end_line_number": 26
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__day",
+          "qualified_name": "metric_time__day",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "bookings_source"
+      ]
+    },
+    {
+      "name": "metric_level_1_index_1",
+      "type": "derived",
+      "description": "Derived metric for testing optimizations for duplicate measures in a query.",
+      "label": null,
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": "metric_level_0_index_0 + metric_level_0_index_1",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": [
+          {
+            "name": "metric_level_0_index_0",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          },
+          {
+            "name": "metric_level_0_index_1",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        ],
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "booking_count",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/derived_metrics_manifest/manifest.yaml",
+        "file_slice": {
+          "filename": "manifest.yaml",
+          "content": "name: \"metric_level_1_index_1\"\ndescription: Derived metric for testing optimizations for duplicate measures in a\n  query.\ntype: derived\ntype_params:\n  expr: metric_level_0_index_0 + metric_level_0_index_1\n  metrics:\n  - name: metric_level_0_index_0\n  - name: metric_level_0_index_1\n",
+          "start_line_number": 77,
+          "end_line_number": 84
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking__ds",
+          "qualified_name": "booking__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/derived_metrics_manifest/manifest.yaml",
+            "file_slice": {
+              "filename": "manifest.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 23,
+              "end_line_number": 26
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__day",
+          "qualified_name": "metric_time__day",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "bookings_source"
+      ]
+    }
+  ]
+}

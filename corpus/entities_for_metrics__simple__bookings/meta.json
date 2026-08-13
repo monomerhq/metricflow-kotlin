@@ -1,0 +1,13 @@
+{
+  "case_id": "entities_for_metrics__simple__bookings",
+  "subcommand": "entities_for_metrics",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "bookings"
+    ]
+  },
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

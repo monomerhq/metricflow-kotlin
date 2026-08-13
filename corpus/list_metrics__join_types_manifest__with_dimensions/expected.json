@@ -1,0 +1,127 @@
+{
+  "metrics": [
+    {
+      "name": "bookings",
+      "type": "simple",
+      "description": null,
+      "label": null,
+      "type_params": {
+        "measure": {
+          "name": "bookings",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "booking",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "bookings",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "bookings_source",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": {
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/join_types_manifest/bookings_source.yaml",
+        "file_slice": {
+          "filename": "bookings_source.yaml",
+          "content": "name: bookings\nexpr: booking\nagg: sum\ncreate_metric: true\n",
+          "start_line_number": 14,
+          "end_line_number": 18
+        }
+      },
+      "config": null,
+      "dimensions": [
+        {
+          "name": "ds",
+          "dunder_name": "booking__ds",
+          "qualified_name": "booking__ds",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [
+            "booking"
+          ],
+          "semantic_model_name": "bookings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/join_types_manifest/bookings_source.yaml",
+            "file_slice": {
+              "filename": "bookings_source.yaml",
+              "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
+              "start_line_number": 20,
+              "end_line_number": 24
+            }
+          }
+        },
+        {
+          "name": "country",
+          "dunder_name": "listing__country",
+          "qualified_name": "listing__country",
+          "type": "categorical",
+          "granularity": null,
+          "entity_links": [
+            "listing"
+          ],
+          "semantic_model_name": "listings_source",
+          "is_partition": false,
+          "is_metric_time": false,
+          "description": null,
+          "label": null,
+          "expr": null,
+          "metadata": {
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/join_types_manifest/listings_source.yaml",
+            "file_slice": {
+              "filename": "listings_source.yaml",
+              "content": "name: country\ntype: categorical\n",
+              "start_line_number": 11,
+              "end_line_number": 13
+            }
+          }
+        },
+        {
+          "name": "metric_time",
+          "dunder_name": "metric_time__day",
+          "qualified_name": "metric_time__day",
+          "type": "time",
+          "granularity": "day",
+          "entity_links": [],
+          "semantic_model_name": null,
+          "is_partition": false,
+          "is_metric_time": true,
+          "description": "Event time for metrics.",
+          "label": null,
+          "expr": null,
+          "metadata": null
+        }
+      ],
+      "semantic_models": [
+        "bookings_source"
+      ]
+    }
+  ]
+}

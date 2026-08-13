@@ -1,0 +1,11 @@
+{
+  "case_id": "list_metrics__simple__without_dimensions",
+  "subcommand": "list_metrics",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "include_dimensions": false
+  },
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

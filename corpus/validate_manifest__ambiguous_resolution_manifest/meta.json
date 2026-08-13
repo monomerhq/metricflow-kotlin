@@ -1,0 +1,9 @@
+{
+  "case_id": "validate_manifest__ambiguous_resolution_manifest",
+  "subcommand": "validate_manifest",
+  "manifest_id": "ambiguous_resolution_manifest",
+  "args": {},
+  "dialect_set": [],
+  "source_test": "SemanticManifestValidator on canonical YAML manifest",
+  "notes": ""
+}

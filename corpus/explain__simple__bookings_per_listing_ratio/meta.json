@@ -1,0 +1,24 @@
+{
+  "case_id": "explain__simple__bookings_per_listing_ratio",
+  "subcommand": "explain",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "bookings_per_listing"
+    ],
+    "group_by_names": [
+      "metric_time__day"
+    ]
+  },
+  "dialect_set": [
+    "Trino",
+    "BigQuery",
+    "Snowflake",
+    "Databricks",
+    "Redshift",
+    "DuckDB",
+    "Postgres"
+  ],
+  "source_test": "",
+  "notes": "Ratio with cross-semantic-model join."
+}

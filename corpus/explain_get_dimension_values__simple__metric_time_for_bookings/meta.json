@@ -1,0 +1,22 @@
+{
+  "case_id": "explain_get_dimension_values__simple__metric_time_for_bookings",
+  "subcommand": "explain_get_dimension_values",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "bookings"
+    ],
+    "get_group_by_values": "metric_time__day"
+  },
+  "dialect_set": [
+    "Trino",
+    "BigQuery",
+    "Snowflake",
+    "Databricks",
+    "Redshift",
+    "DuckDB",
+    "Postgres"
+  ],
+  "source_test": "",
+  "notes": ""
+}

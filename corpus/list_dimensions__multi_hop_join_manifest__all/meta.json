@@ -1,0 +1,9 @@
+{
+  "case_id": "list_dimensions__multi_hop_join_manifest__all",
+  "subcommand": "list_dimensions",
+  "manifest_id": "multi_hop_join_manifest",
+  "args": {},
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

@@ -1,0 +1,24 @@
+{
+  "issues": [
+    {
+      "level": "ERROR",
+      "message": "The semantic model foo contains dimensions, but it does not define a primary entity. Either add an entity with type PRIMARY or set a value for the primary_entity key.",
+      "context": {
+        "file_context": {
+          "file_name": "multiple_semantic_models_without_divider.yml",
+          "line_number": 23
+        },
+        "semantic_model": {
+          "semantic_model_name": "foo"
+        }
+      },
+      "context_str": "with semantic model `foo` in file `multiple_semantic_models_without_divider.yml` on line #23",
+      "extra_detail": null,
+      "readable": "ERROR: with semantic model `foo` in file `multiple_semantic_models_without_divider.yml` on line #23 - The semantic model foo contains dimensions, but it does not define a primary entity. Either add an entity with type PRIMARY or set a value for the primary_entity key."
+    }
+  ],
+  "error_count": 1,
+  "future_error_count": 0,
+  "warning_count": 0,
+  "has_blocking_issues": true
+}

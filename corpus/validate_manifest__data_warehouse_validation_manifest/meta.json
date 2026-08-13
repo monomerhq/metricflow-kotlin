@@ -1,0 +1,9 @@
+{
+  "case_id": "validate_manifest__data_warehouse_validation_manifest",
+  "subcommand": "validate_manifest",
+  "manifest_id": "data_warehouse_validation_manifest",
+  "args": {},
+  "dialect_set": [],
+  "source_test": "SemanticManifestValidator on canonical YAML manifest",
+  "notes": ""
+}

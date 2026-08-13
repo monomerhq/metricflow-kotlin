@@ -1,0 +1,9 @@
+{
+  "case_id": "validate_manifest__minimal_invalid_fixture",
+  "subcommand": "validate_manifest",
+  "manifest_id": "minimal_invalid_manifest",
+  "args": {},
+  "dialect_set": [],
+  "source_test": "",
+  "notes": "Expected to produce blocking validation errors."
+}

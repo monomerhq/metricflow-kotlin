@@ -1,0 +1,11 @@
+{
+  "case_id": "list_metrics__multi_hop_join_manifest__with_dimensions",
+  "subcommand": "list_metrics",
+  "manifest_id": "multi_hop_join_manifest",
+  "args": {
+    "include_dimensions": true
+  },
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

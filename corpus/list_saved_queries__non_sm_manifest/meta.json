@@ -1,0 +1,9 @@
+{
+  "case_id": "list_saved_queries__non_sm_manifest",
+  "subcommand": "list_saved_queries",
+  "manifest_id": "non_sm_manifest",
+  "args": {},
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

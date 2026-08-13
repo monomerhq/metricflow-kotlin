@@ -1,0 +1,24 @@
+{
+  "case_id": "explain__simple__views_by_listing",
+  "subcommand": "explain",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "views"
+    ],
+    "group_by_names": [
+      "listing"
+    ]
+  },
+  "dialect_set": [
+    "Trino",
+    "BigQuery",
+    "Snowflake",
+    "Databricks",
+    "Redshift",
+    "DuckDB",
+    "Postgres"
+  ],
+  "source_test": "",
+  "notes": ""
+}

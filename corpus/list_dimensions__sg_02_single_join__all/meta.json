@@ -1,0 +1,9 @@
+{
+  "case_id": "list_dimensions__sg_02_single_join__all",
+  "subcommand": "list_dimensions",
+  "manifest_id": "sg_02_single_join",
+  "args": {},
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

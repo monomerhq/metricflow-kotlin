@@ -1,0 +1,9 @@
+{
+  "case_id": "list_dimensions__join_types_manifest__all",
+  "subcommand": "list_dimensions",
+  "manifest_id": "join_types_manifest",
+  "args": {},
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

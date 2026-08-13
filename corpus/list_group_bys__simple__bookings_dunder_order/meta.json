@@ -1,0 +1,14 @@
+{
+  "case_id": "list_group_bys__simple__bookings_dunder_order",
+  "subcommand": "list_group_bys",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "bookings"
+    ],
+    "order_by": "DUNDER_NAME"
+  },
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}

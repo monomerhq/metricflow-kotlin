@@ -1,0 +1,9 @@
+{
+  "case_id": "list_saved_queries__scd_manifest",
+  "subcommand": "list_saved_queries",
+  "manifest_id": "scd_manifest",
+  "args": {},
+  "dialect_set": [],
+  "source_test": "",
+  "notes": ""
+}
