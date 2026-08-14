@@ -39,11 +39,8 @@ import cc.monomer.metricflow.domain.sql.render.SqlEngine
  * Each call to [renderSql] re-runs the chain. The wiring is **per-engine, not per-call** in
  * Python; we mirror that by caching the dataflow-plan-builder ingredients lazily.
  *
- * **Dialect selection.** As of W14b the engine doesn't yet accept a dialect argument; this
- * pipeline always renders via the **default** ANSI renderer. Per-dialect routing (Trino /
- * BigQuery / Snowflake / Databricks / Redshift / DuckDB / Postgres) is a downstream concern —
- * see [cc.monomer.metricflow.application.engine.adapter.EngineProtoAdapter] for the
- * gRPC-level dialect lookup that would feed this class once wired.
+ * **Dialect selection.** The consumer supplies a renderer registry to
+ * [MetricFlowEngine]. The pipeline never imports a concrete dialect module.
  */
 internal class ExplainPipeline(private val engine: MetricFlowEngine) {
 
@@ -181,29 +178,8 @@ internal class ExplainPipeline(private val engine: MetricFlowEngine) {
             sqlQueryPlanId = null,
             outputColumnOrderer = orderer,
         )
-        val renderer: SqlPlanRenderer = rendererFor(dialect)
+        val renderer: SqlPlanRenderer = engine.sqlPlanRendererRegistry.rendererFor(dialect)
         return renderer.renderSqlPlan(sqlPlanResult.sqlPlan).sql
-    }
-
-    /**
-     * Pick the dialect-specific renderer. Mirrors Python's
-     * `metricflow.sql.render.factory.SqlPlanRendererFactory.create_for_sql_engine`.
-     */
-    private fun rendererFor(dialect: SqlEngine): SqlPlanRenderer = when (dialect) {
-        SqlEngine.TRINO ->
-            cc.monomer.metricflow.infrastructure.sql.render.trino.TrinoSqlPlanRenderer()
-        SqlEngine.BIGQUERY ->
-            cc.monomer.metricflow.infrastructure.sql.render.bigquery.BigQuerySqlPlanRenderer()
-        SqlEngine.SNOWFLAKE ->
-            cc.monomer.metricflow.infrastructure.sql.render.snowflake.SnowflakeSqlPlanRenderer()
-        SqlEngine.DATABRICKS ->
-            cc.monomer.metricflow.infrastructure.sql.render.databricks.DatabricksSqlPlanRenderer()
-        SqlEngine.REDSHIFT ->
-            cc.monomer.metricflow.infrastructure.sql.render.redshift.RedshiftSqlPlanRenderer()
-        SqlEngine.DUCKDB ->
-            cc.monomer.metricflow.infrastructure.sql.render.duckdb.DuckDbSqlPlanRenderer()
-        SqlEngine.POSTGRES ->
-            cc.monomer.metricflow.infrastructure.sql.render.postgres.PostgresSqlPlanRenderer()
     }
 
     companion object {

@@ -45,11 +45,13 @@ module(":render-redshift")
 module(":render-duckdb")
 module(":render-postgres")
 
-// Engine facade + gRPC server. Pulls in :core plus every dialect renderer.
-// Phase-5 Step 6 (splitting the gRPC pieces into a separate `:grpc-server` artifact)
-// is deferred — `ExplainPipeline` still references each dialect-renderer class directly,
-// which would require introducing a factory abstraction (algorithm change, out of scope).
+// In-process engine facade. It depends only on :core and receives dialect renderers
+// through an explicit `SqlPlanRendererRegistry` supplied by the consumer.
 module(":engine")
+
+// Optional transport capability. This module owns protobuf/gRPC code generation,
+// the server bootstrap, and the wire adapters; library consumers do not need it.
+module(":grpc-server")
 
 // Internal-only — not publishable. The flat Gradle path avoids publishing or
 // aggregating the intermediate source-layout directory as a component.

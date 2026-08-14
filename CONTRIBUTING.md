@@ -18,8 +18,19 @@
 python3 -m unittest harness.test_manifest_loader
 ```
 
-첫 명령은 공개 모듈 테스트, Maven staging artifact, SBOM, 112개 차등 corpus를
-검증합니다. 모든 변경은 checkout 경로나 시간에 의존하지 않고 재현 가능해야 합니다.
+첫 명령은 공개 모듈 테스트, Maven staging artifact, SBOM, 112개 차등 corpus와
+Monomer 외부-DW product bundle의 Maven layout/SHA evidence를 검증합니다. 모든
+변경은 checkout 경로나 시간에 의존하지 않고 재현 가능해야 합니다.
+
+제품 번들만 확인할 때는 다음을 실행합니다.
+
+```bash
+./gradlew verifyMonomerProductBundle
+```
+
+태그 `v<version>`은 `build.gradle.kts`의 Maven version과 일치해야 합니다.
+`.github/workflows/release.yml`은 동일한 검증을 다시 수행한 뒤 bundle과 checksum,
+GitHub build-provenance attestation을 release에 업로드합니다.
 
 ## 변경 원칙
 

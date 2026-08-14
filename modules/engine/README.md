@@ -1,7 +1,9 @@
-# `:application:engine`
+# `:engine`
 
-Engine facade + gRPC server bootstrap. Composition root that wires every domain
-module together.
+Clean in-process engine facade. It plans and renders SQL in memory, but owns no
+transport, server bootstrap, logging implementation, or concrete dialect
+renderer. Consumers explicitly register the renderer artifacts they serve using
+`SqlPlanRendererRegistry`.
 
 **Python sources**
 - `metricflow/engine/metricflow_engine.py` (the `MetricFlowEngine` class)
@@ -20,12 +22,13 @@ wired through the chain — body deferrals propagate to the call site).
 |---|---|
 | `MetricFlowEngine.kt` | The 8-entry-point facade. Mirrors Python `MetricFlowEngine` (minus SQL execution). |
 | `EngineModels.kt` | Engine-facing `EngineDimension` / `EngineEntity` / `EngineMetric` / `EngineSavedQuery` DTOs. |
-| `MetricFlowSqlEngineService.kt` | gRPC service implementation — adapts the eight RPCs to the facade. |
-| `MetricFlowGrpcServer.kt` | Netty-backed gRPC server (port 10110 by default). |
-| `InProcessGrpc.kt` | Helper for in-VM gRPC clients (used by `:integration:diff-runner`). |
-| `adapter/ManifestEnvelopeAdapter.kt` | `ManifestEnvelope` (protobuf) → transformed `SemanticManifest`. |
-| `adapter/EngineProtoAdapter.kt` | Engine DTOs → protobuf messages + canonical-issue JSON. |
-| `adapter/EngineJsonSerializer.kt` | Engine DTOs → canonical JSON output (Python-oracle shape). |
+| `SqlPlanRendererRegistry.kt` | Explicit dialect-to-renderer composition seam. |
+| `MetricFlowEngine.kt` | The 8-entry-point in-process facade. |
+| `EngineModels.kt` | Engine-facing `EngineDimension` / `EngineEntity` / `EngineMetric` / `EngineSavedQuery` DTOs. |
+
+The protobuf/gRPC service, wire adapters, and in-process transport helper live
+in the optional `:grpc-server` module. Canonical JSON serialization for the
+internal corpus runner is owned by `:internal-diff-runner`.
 
 ## RPC status (post-W11)
 

@@ -16,6 +16,13 @@ dependencies {
     // model + transformer + validator + SqlEngine enum used during hydration
     // and dialect dispatch.
     implementation(project(":core"))
+    implementation(project(":render-trino"))
+    implementation(project(":render-bigquery"))
+    implementation(project(":render-snowflake"))
+    implementation(project(":render-databricks"))
+    implementation(project(":render-redshift"))
+    implementation(project(":render-duckdb"))
+    implementation(project(":render-postgres"))
     implementation(libs.bundles.grpc.runtime)
     implementation(libs.grpc.inprocess)
     implementation(libs.kotlinx.coroutines.core)

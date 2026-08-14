@@ -56,7 +56,10 @@ import cc.monomer.metricflow.domain.semantic_graph.attribute_resolution.GroupByI
  * touch the manifest (`validateManifest`, `listSavedQueries`,
  * `listMetrics(includeDimensions=false)`) don't pay graph-construction cost.
  */
-class MetricFlowEngine(val semanticManifest: SemanticManifest) {
+class MetricFlowEngine(
+    val semanticManifest: SemanticManifest,
+    val sqlPlanRendererRegistry: SqlPlanRendererRegistry,
+) {
 
     /**
      * Manifest-level indexes — sorted name-to-model maps, dimension/entity
@@ -278,7 +281,7 @@ class MetricFlowEngine(val semanticManifest: SemanticManifest) {
         val pipeline = explainPipeline
         val sql = pipeline.renderSql(
             querySpec = querySpec,
-            dialect = request.dialect ?: cc.monomer.metricflow.domain.sql.render.SqlEngine.DUCKDB,
+            dialect = request.dialect,
             outputSelectionSpecs = null,
         )
         return MetricFlowExplainResult(
@@ -377,7 +380,7 @@ class MetricFlowEngine(val semanticManifest: SemanticManifest) {
         val pipeline = explainPipeline
         val sql = pipeline.renderSql(
             querySpec = querySpec,
-            dialect = request.dialect ?: cc.monomer.metricflow.domain.sql.render.SqlEngine.DUCKDB,
+            dialect = request.dialect,
             outputSelectionSpecs = outputSelectionSpecs,
         )
         return MetricFlowExplainResult(
@@ -773,7 +776,8 @@ data class MetricFlowExplainResult(
  * The Kotlin port adds an optional [dialect] field that Python's `MetricFlowEngine` doesn't
  * carry (Python derives it from the engine's bound `SqlClient`). We surface it here because
  * the Kotlin engine has no SqlClient and the corpus diff exercises every dialect explicitly.
- * Null is treated as DUCKDB.
+ * A dialect is required so an engine consumer cannot accidentally fall back to
+ * an unsupported local renderer.
  */
 data class MetricFlowExplainRequest(
     val metricNames: List<String>?,
@@ -787,7 +791,7 @@ data class MetricFlowExplainRequest(
     val minMaxOnly: Boolean,
     val applyGroupBy: Boolean,
     val orderOutputColumnsByInputOrder: Boolean,
-    val dialect: cc.monomer.metricflow.domain.sql.render.SqlEngine?,
+    val dialect: cc.monomer.metricflow.domain.sql.render.SqlEngine,
 )
 
 /** Request payload for [MetricFlowEngine.explainGetDimensionValues]. */
@@ -797,5 +801,5 @@ data class ExplainGetDimensionValuesRequest(
     val timeConstraintStart: String?,
     val timeConstraintEnd: String?,
     val minMaxOnly: Boolean,
-    val dialect: cc.monomer.metricflow.domain.sql.render.SqlEngine?,
+    val dialect: cc.monomer.metricflow.domain.sql.render.SqlEngine,
 )

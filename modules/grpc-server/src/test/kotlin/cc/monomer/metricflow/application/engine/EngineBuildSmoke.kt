@@ -25,7 +25,7 @@ class EngineBuildSmoke {
 
     @Test
     fun `list saved queries on an empty manifest is invalid`() {
-        InProcessEngine.start().use { engine ->
+        InProcessEngine.start(DefaultSqlPlanRendererRegistry.create()).use { engine ->
             runBlocking {
                 val request = ListSavedQueriesRequest.newBuilder()
                     .setManifest(ManifestEnvelope.getDefaultInstance())
@@ -71,7 +71,7 @@ class EngineBuildSmoke {
 
     @Test
     fun `render_sql with malformed manifest is INVALID_ARGUMENT, with valid manifest is UNIMPLEMENTED`() {
-        InProcessEngine.start().use { engine ->
+        InProcessEngine.start(DefaultSqlPlanRendererRegistry.create()).use { engine ->
             runBlocking {
                 val envelope = ManifestEnvelope.newBuilder()
                     .setProjectConfigurationJson("{")

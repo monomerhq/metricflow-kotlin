@@ -23,9 +23,17 @@ dependencies {
 ```kotlin
 import cc.monomer.metricflow.application.engine.MetricFlowEngine
 import cc.monomer.metricflow.application.engine.MetricFlowExplainRequest
+import cc.monomer.metricflow.application.engine.SqlPlanRendererRegistration
+import cc.monomer.metricflow.application.engine.SqlPlanRendererRegistry
 import cc.monomer.metricflow.domain.sql.render.SqlEngine
+import cc.monomer.metricflow.infrastructure.sql.render.trino.TrinoSqlPlanRenderer
 
-val engine = MetricFlowEngine(semanticManifest)
+val engine = MetricFlowEngine(
+    semanticManifest = semanticManifest,
+    sqlPlanRendererRegistry = SqlPlanRendererRegistry.of(
+        SqlPlanRendererRegistration(SqlEngine.TRINO, TrinoSqlPlanRenderer()),
+    ),
+)
 
 // What dimensions / metrics does this manifest expose?
 val metrics = engine.listMetrics(includeDimensions = true)
@@ -58,20 +66,20 @@ The full public API surface is documented in [`docs/PUBLIC_API.md`](docs/PUBLIC_
 The published namespace is `cc.monomer.metricflow`; there is no compatibility
 artifact for the former private package.
 
-The artifacts are not yet published to a public Maven repository. Until the
-first release, `VERSION` coordinates are available only from the local staging
-repository produced by the verification command below.
+The first public release is version `0.2.0`. The tag-driven release workflow
+publishes the immutable product bundle and its signed build provenance; local
+verification produces the same Maven repository layout before a tag is created.
 
 ---
 
 ## Modules
 
-Phase 5 (May 2026) consolidated the 33 Phase-3 modules down to 10 — **9 publishable
+Phase 5 consolidated the 33 Phase-3 modules down to 11 — **10 publishable
 artifacts + 1 internal-only**:
 
 | Module | Maven coordinate | Description |
 |---|---|---|
-| `core` | `metricflow-core` | Manifest model + validation + specs + dataflow plan + SQL plan + default ANSI renderer + engine facade. **The library.** |
+| `core` | `metricflow-core` | Manifest model + validation + specs + dataflow plan + SQL plan + default ANSI renderer. |
 | `render-trino` | `metricflow-render-trino` | Trino dialect renderer |
 | `render-bigquery` | `metricflow-render-bigquery` | BigQuery dialect renderer |
 | `render-snowflake` | `metricflow-render-snowflake` | Snowflake dialect renderer |
@@ -79,10 +87,30 @@ artifacts + 1 internal-only**:
 | `render-redshift` | `metricflow-render-redshift` | Redshift dialect renderer |
 | `render-duckdb` | `metricflow-render-duckdb` | DuckDB dialect renderer |
 | `render-postgres` | `metricflow-render-postgres` | Postgres dialect renderer |
-| `engine` | `metricflow-engine` | Engine facade + optional gRPC server. **Phase-5 note:** the gRPC pieces have not yet been split into a separate `:grpc-server` artifact — the engine facade (`MetricFlowEngine`) currently lives here alongside the server bootstrap. Consumers using the library-only mode should ignore the gRPC classes. |
+| `engine` | `metricflow-engine` | Clean in-process engine facade. Requires an explicit `SqlPlanRendererRegistry`; no gRPC, Netty, logback, or dialect renderer is transitive. |
+| `grpc-server` | `metricflow-grpc-server` | Optional protobuf/gRPC server and wire adapters. Includes the complete public renderer set, including DuckDB. |
 | `internal-tests/diff-runner` | (not published) | Differential test runner that compares Kotlin output against the Python oracle for the entire 112-case corpus |
 
-`:core` carries no gRPC/Netty/protobuf dependencies; it is pure Kotlin + kotlinx-serialization.
+`:core` and `:engine` carry no gRPC/Netty/protobuf dependencies; `:engine` is pure in-process
+planning and rendering orchestration. Consumers choose only the renderer modules they serve.
+
+## Monomer product bundle
+
+Monomer consumes a deterministic product bundle containing `metricflow-core`,
+`metricflow-engine`, and the six external-DW renderers: BigQuery, Databricks,
+Postgres, Redshift, Snowflake, and Trino. DuckDB and the optional gRPC server
+remain available in this public repository but are intentionally excluded from
+the product bundle.
+
+```bash
+./gradlew verifyMonomerProductBundle
+# build/bundles/metricflow-monomer-product-0.2.0.zip
+```
+
+The archive contains a Maven repository layout, `SHA256SUMS`, Apache-2.0 license
+and attribution files, a CycloneDX SBOM, dependency evidence, and provenance
+inputs. A release tag also uploads the archive checksum and GitHub build
+provenance attestation.
 
 ---
 

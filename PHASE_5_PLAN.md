@@ -2,6 +2,21 @@
 
 이 문서는 W12-W14 wave가 끝나고 corpus 100% PASS (또는 명시 quarantine으로 honest 완료) 상태에 도달한 뒤, **라이브러리답게 컨슈머 친화 구조로 재정리**하기 위한 새 에이전트용 인수인계다. 컨텍스트 0에서 받아 진행 가능하도록 자기완결형으로 작성됨.
 
+## 현재 확정 상태 (2026-08-14)
+
+Phase 5의 구조 정리와 초기 배포 경로가 완료됐다. `:engine`은 순수
+in-process facade이며 gRPC/Netty/logback와 구체 renderer를 의존하지 않는다.
+renderer는 `SqlPlanRendererRegistry`에 컨슈머가 명시적으로 등록한다.
+protobuf/gRPC 서버와 wire adapter는 선택 모듈 `:grpc-server`로 분리됐다.
+
+`./gradlew verifyMonomerProductBundle`는 `metricflow-core`, `metricflow-engine`과
+BigQuery/Databricks/Postgres/Redshift/Snowflake/Trino renderer만 포함하는
+결정적 Maven zip을 생성한다. DuckDB renderer와 `metricflow-grpc-server`는
+public repository에는 남지만 Monomer product bundle에는 포함하지 않는다.
+archive에는 Maven layout, SHA-256 manifest, CycloneDX/dependency/license/provenance
+evidence가 포함되고, `.github/workflows/release.yml`의 version tag가 immutable
+bundle과 GitHub provenance attestation을 업로드한다.
+
 ## 0. 이 문서를 받은 너에게
 
 먼저 읽기 (이 순서):
@@ -369,7 +384,7 @@ val sql = engine.renderSql(...)
 - `./gradlew build` 그린
 - diff-runner 결과 = baseline (회귀 없음)
 - `find . -name "*.kt" | xargs grep -l "^internal " | wc -l` 증가
-- maven publish 시 8 publishable + 1 internal-only
+- maven publish 시 10 publishable + 1 internal-only; Monomer product bundle은 8 artifact
 
 ## 5. 절대 하지 말 것
 
@@ -390,11 +405,11 @@ val sql = engine.renderSql(...)
 5. **`internal` 가시성 적용** — PUBLIC_API.md 외 타입 대부분 internal
 6. **`:core` 모듈이 gRPC/Netty 의존 안 함** — 라이브러리 모드 가능
 7. **`grpc-server` 모듈이 옵션 dependency** — 컨슈머가 선택
-8. **8개 dialect renderer는 각자 별도 JAR** — 컨슈머가 선택
+8. **dialect renderer는 각자 별도 JAR** — 컨슈머가 선택하고 product bundle은 외부 DW 6개만 포함
 9. **`:integration:diff-runner` → `:internal-tests:diff-runner` 이전** — publishable 아님
 10. **루트 `README.md`이 컨슈머 시점**으로 재작성
 11. **Hexagonal 용어 (`:domain`, `:infrastructure`, `:application`) Gradle path에서 제거**
-12. **PROGRESS.md에 "Phase 5 done" 표기 + Phase 6 (있다면) 명시**
+12. **PROGRESS.md에 "Phase 5 done" 표기 + 배포/릴리스 경로를 명시**
 
 ## 7. 단계별 commit 패턴
 
@@ -438,7 +453,7 @@ Phase 5는 **알고리즘 작업이 아니라 패키징 작업**이라 mission s
 
 **총 ~1.5M 토큰** (4-7 mission cycle 또는 직접 + 검증 cycle).
 
-## 10. 후속 작업 가능성 (Phase 6+)
+## 10. 후속 작업 가능성
 
 Phase 5 끝나도 추가 작업 가능:
 - `test-fixtures/` 모듈: 컨슈머가 자기 테스트 작성할 때 쓸 fixture builder
@@ -446,7 +461,7 @@ Phase 5 끝나도 추가 작업 가능:
 - Examples 추가: `examples/` 폴더에 단계별 query → SQL 예제
 - KDoc → Dokka로 publish용 문서 생성
 - CHANGELOG.md
-- Maven Central publish 설정
+- Maven Central publish 설정 및 signing/central-sync 운영 연결
 
 이건 Phase 5 acceptance에 포함 안 시킴. Phase 5는 구조만.
 

@@ -145,7 +145,7 @@ class CaseRunner {
             )
         }
         val manifest = loadManifest(request)
-        val engine = MetricFlowEngine(manifest)
+        val engine = MetricFlowEngine(manifest, CorpusSqlPlanRendererRegistry.create())
         val perDialect = mutableListOf<Pair<String, Boolean>>()
         var firstMismatchDetail: String? = null
         for (sqlFile in dialectFiles) {
@@ -271,7 +271,7 @@ class CaseRunner {
                 .validate(manifest)
             return EngineJsonSerializer.validationResultsToJson(results)
         }
-        val engine = MetricFlowEngine(manifest)
+        val engine = MetricFlowEngine(manifest, CorpusSqlPlanRendererRegistry.create())
         return when (case.subcommand) {
             "validate_manifest" -> EngineJsonSerializer.validationResultsToJson(engine.validateManifest())
             "list_saved_queries" -> EngineJsonSerializer.savedQueriesListToJson(engine.listSavedQueries())
@@ -331,7 +331,7 @@ class CaseRunner {
     private fun dispatchExplain(
         case: CorpusCase,
         engine: MetricFlowEngine,
-        dialect: cc.monomer.metricflow.domain.sql.render.SqlEngine?,
+        dialect: cc.monomer.metricflow.domain.sql.render.SqlEngine,
     ): JsonElement {
         val metricNames = case.args["metric_names"]?.jsonArray?.map { it.jsonPrimitive.content }
         val groupByNames = case.args["group_by_names"]?.jsonArray?.map { it.jsonPrimitive.content }
@@ -367,7 +367,7 @@ class CaseRunner {
     private fun dispatchExplainGetDimensionValues(
         case: CorpusCase,
         engine: MetricFlowEngine,
-        dialect: cc.monomer.metricflow.domain.sql.render.SqlEngine?,
+        dialect: cc.monomer.metricflow.domain.sql.render.SqlEngine,
     ): JsonElement {
         val metricNames = case.args["metric_names"]?.jsonArray?.map { it.jsonPrimitive.content }
             ?: emptyList()
