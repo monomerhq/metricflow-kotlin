@@ -211,16 +211,39 @@ val prepareMonomerProductBundle = tasks.register("prepareMonomerProductBundle") 
         bundleManifestAsset.parentFile.mkdirs()
         bundleManifestAsset.writeText(jsonText(marker), StandardCharsets.UTF_8)
 
-        val workspaceSbom = rootProject.layout.buildDirectory.file("reports/cyclonedx/bom.json").get().asFile
-        check(workspaceSbom.isFile) { "CycloneDX SBOM was not generated at ${workspaceSbom.absolutePath}" }
-        // CycloneDX's generated timestamp is useful for an interactive report but
-        // would make an otherwise content-addressed product bundle change on every
-        // build. The source revision in provenance-input.json is the stable build
-        // identity for this release evidence.
-        val deterministicSbom = workspaceSbom.readText(StandardCharsets.UTF_8)
-            .replace(Regex("(?m)^\\s*\\\"timestamp\\\"\\s*:\\s*\\\"[^\\\"]+\\\",\\s*\\n"), "")
+        val productSbom = mapOf(
+            "bomFormat" to "CycloneDX",
+            "specVersion" to "1.6",
+            "version" to 1,
+            "metadata" to mapOf(
+                "component" to mapOf(
+                    "type" to "application",
+                    "group" to project.group.toString(),
+                    "name" to monomerProductBundleName,
+                    "version" to project.version.toString(),
+                    "bom-ref" to monomerProductBundleName,
+                ),
+            ),
+            "components" to productArtifacts.map { artifact ->
+                mapOf(
+                    "type" to "library",
+                    "bom-ref" to artifact.coordinate,
+                    "group" to project.group.toString(),
+                    // Monomer binds this identity to the full Maven coordinate.
+                    "name" to artifact.coordinate,
+                    "version" to project.version.toString(),
+                    "purl" to "pkg:maven/${project.group}/${artifact.artifactId}@${project.version}",
+                    "hashes" to listOf(
+                        mapOf(
+                            "alg" to "SHA-256",
+                            "content" to artifact.sha256.removePrefix("sha256:"),
+                        ),
+                    ),
+                )
+            },
+        )
         File(releaseAssetsRoot, "$monomerProductBundleName.sbom.cyclonedx.json").writeText(
-            deterministicSbom,
+            jsonText(productSbom),
             StandardCharsets.UTF_8,
         )
 
@@ -430,6 +453,73 @@ tasks.register("verifyMonomerProductBundle") {
         )
         check(staticEvidenceFiles.all { File(releaseAssetsRoot, it).isFile }) {
             "Product release evidence is incomplete"
+        }
+        val sbomFile = File(releaseAssetsRoot, "$monomerProductBundleName.sbom.cyclonedx.json")
+        val sbom = JsonSlurper().parse(sbomFile) as? Map<*, *>
+            ?: error("Product SBOM must be a JSON object")
+        check(sbom.keys == setOf("bomFormat", "specVersion", "version", "metadata", "components")) {
+            "Product SBOM shape changed: ${sbom.keys}"
+        }
+        check(sbom["bomFormat"] == "CycloneDX") { "Product SBOM must be CycloneDX" }
+        check(sbom["specVersion"] == "1.6") { "Product SBOM must use CycloneDX 1.6" }
+        check(sbom["version"] == 1) { "Product SBOM version must be 1" }
+        val sbomMetadata = sbom["metadata"] as? Map<*, *>
+            ?: error("Product SBOM metadata must be an object")
+        check(sbomMetadata.keys == setOf("component")) {
+            "Product SBOM metadata shape changed: ${sbomMetadata.keys}"
+        }
+        val sbomMetadataComponent = sbomMetadata["component"] as? Map<*, *>
+            ?: error("Product SBOM metadata component must be an object")
+        check(sbomMetadataComponent.keys == setOf("type", "group", "name", "version", "bom-ref")) {
+            "Product SBOM metadata component shape changed: ${sbomMetadataComponent.keys}"
+        }
+        check(sbomMetadataComponent["type"] == "application")
+        check(sbomMetadataComponent["group"] == project.group.toString())
+        check(sbomMetadataComponent["name"] == monomerProductBundleName)
+        check(sbomMetadataComponent["version"] == project.version.toString())
+        check(sbomMetadataComponent["bom-ref"] == monomerProductBundleName)
+        val sbomComponents = sbom["components"] as? List<*>
+            ?: error("Product SBOM components must be an array")
+        check(sbomComponents.size == expectedArtifacts.size) {
+            "Product SBOM must contain exactly ${expectedArtifacts.size} components"
+        }
+        val expectedSbomArtifacts = expectedArtifacts.associateBy { artifact -> artifact["coordinate"] }
+        val actualSbomArtifacts = mutableMapOf<String, String>()
+        sbomComponents.forEach { rawComponent ->
+            val component = rawComponent as? Map<*, *>
+                ?: error("Product SBOM component must be an object")
+            check(component.keys == setOf("type", "bom-ref", "group", "name", "version", "purl", "hashes")) {
+                "Product SBOM component shape changed: ${component.keys}"
+            }
+            check(component["type"] == "library")
+            val coordinate = component["name"] as? String
+                ?: error("Product SBOM component name must be a full Maven coordinate")
+            check(coordinate in expectedSbomArtifacts) {
+                "Product SBOM contains an unexpected component: $coordinate"
+            }
+            check(actualSbomArtifacts.put(coordinate, coordinate) == null) {
+                "Product SBOM contains a duplicate component: $coordinate"
+            }
+            val expectedArtifact = expectedSbomArtifacts.getValue(coordinate)
+            check(component["bom-ref"] == coordinate)
+            check(component["group"] == project.group.toString())
+            check(component["version"] == project.version.toString())
+            val artifactId = expectedArtifact.getValue("coordinate").split(":")[1]
+            check(component["purl"] == "pkg:maven/${project.group}/$artifactId@${project.version}")
+            val hashes = component["hashes"] as? List<*>
+                ?: error("Product SBOM hashes must be an array")
+            check(hashes.size == 1) { "Product SBOM components must have one SHA-256 hash" }
+            val hash = hashes.single() as? Map<*, *>
+                ?: error("Product SBOM hash must be an object")
+            check(hash.keys == setOf("alg", "content"))
+            check(hash["alg"] == "SHA-256")
+            val expectedDigest = expectedArtifact.getValue("sha256").removePrefix("sha256:")
+            check(hash["content"] == expectedDigest) {
+                "Product SBOM digest mismatch for $coordinate"
+            }
+        }
+        check(actualSbomArtifacts.keys == expectedSbomArtifacts.keys) {
+            "Product SBOM artifact set does not match the product JAR set"
         }
         releaseAssetsRoot.mkdirs()
         File(releaseAssetsRoot, "${archive.name}.sha256").writeText(
