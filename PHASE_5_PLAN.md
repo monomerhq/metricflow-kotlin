@@ -13,9 +13,11 @@ protobuf/gRPC 서버와 wire adapter는 선택 모듈 `:grpc-server`로 분리�
 BigQuery/Databricks/Postgres/Redshift/Snowflake/Trino renderer만 포함하는
 결정적 Maven zip을 생성한다. DuckDB renderer와 `metricflow-grpc-server`는
 public repository에는 남지만 Monomer product bundle에는 포함하지 않는다.
-archive에는 Maven layout, SHA-256 manifest, CycloneDX/dependency/license/provenance
-evidence가 포함되고, `.github/workflows/release.yml`의 version tag가 immutable
-bundle과 GitHub provenance attestation을 업로드한다.
+archive에는 `maven-repository/` 단일 root와 `.monomer-metricflow-manifest.json`이
+포함된다. marker는 source/primary-JAR digest와 canonical artifact-set identity를
+고정한다. CycloneDX/dependency/license/provenance evidence와 ZIP checksum은
+별도 release asset이며, `.github/workflows/release.yml`은 pinned
+`actions/attest`의 Sigstore JSON bundle과 attestation URL reference도 업로드한다.
 
 ## 0. 이 문서를 받은 너에게
 
@@ -384,7 +386,8 @@ val sql = engine.renderSql(...)
 - `./gradlew build` 그린
 - diff-runner 결과 = baseline (회귀 없음)
 - `find . -name "*.kt" | xargs grep -l "^internal " | wc -l` 증가
-- maven publish 시 10 publishable + 1 internal-only; Monomer product bundle은 8 artifact
+- maven publish 시 10 publishable + 1 internal-only; Monomer product bundle은 8 artifact를
+  `maven-repository/` 단일 ZIP root 아래에 담는다.
 
 ## 5. 절대 하지 말 것
 

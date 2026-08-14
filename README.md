@@ -107,10 +107,17 @@ the product bundle.
 # build/bundles/metricflow-monomer-product-0.2.0.zip
 ```
 
-The archive contains a Maven repository layout, `SHA256SUMS`, Apache-2.0 license
-and attribution files, a CycloneDX SBOM, dependency evidence, and provenance
-inputs. A release tag also uploads the archive checksum and GitHub build
-provenance attestation.
+The ZIP has exactly one root, `maven-repository/`, and contains the eight Maven
+modules plus `maven-repository/.monomer-metricflow-manifest.json`. The marker pins
+the source commit, exact primary-JAR digests, product allowlist, and the canonical
+artifact-set digest; DuckDB, gRPC server, and internal modules are absent.
+
+The build writes SBOM, dependency/license, provenance-input, manifest, and ZIP
+checksum files to `build/release-assets/`; these are separate GitHub Release
+assets and are intentionally not additional ZIP roots. The tag workflow uses the
+pinned `actions/attest` step (`id: attest`) and uploads its Sigstore JSON bundle
+as `<bundle>.attestation.json` plus an addressable reference asset containing
+`steps.attest.outputs.attestation-url` and the release-download URL.
 
 ---
 

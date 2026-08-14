@@ -5,12 +5,15 @@
  */
 
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.security.MessageDigest
+import java.util.TreeMap
 import javax.xml.parsers.DocumentBuilderFactory
 import org.gradle.api.tasks.bundling.Zip
+import java.util.zip.ZipFile
 
 plugins {
     id("org.cyclonedx.bom") version "3.3.0"
@@ -75,10 +78,33 @@ val monomerProductArtifactIds = listOf(
     "metricflow-render-snowflake",
     "metricflow-render-trino",
 )
+val monomerProductExcludedModules = listOf("internal-diff-runner", "metricflow-render-duckdb")
+val metricFlowSourceUri = "https://github.com/monomerhq/metricflow-kotlin"
+val monomerProductBundleName = "metricflow-monomer-product-${project.version}"
 
-fun sha256Hex(file: File): String = MessageDigest.getInstance("SHA-256")
-    .digest(file.readBytes())
+fun sha256Hex(bytes: ByteArray): String = MessageDigest.getInstance("SHA-256")
+    .digest(bytes)
     .joinToString(separator = "") { byte -> "%02x".format(byte) }
+
+fun sha256Hex(file: File): String = sha256Hex(file.readBytes())
+
+fun sha256Digest(file: File): String = "sha256:${sha256Hex(file)}"
+
+fun canonicalValue(value: Any?): Any? = when (value) {
+    is Map<*, *> -> TreeMap<String, Any?>().apply {
+        value.forEach { (key, nestedValue) ->
+            require(key is String) { "Canonical JSON object keys must be strings" }
+            put(key, canonicalValue(nestedValue))
+        }
+    }
+    is Iterable<*> -> value.map(::canonicalValue)
+    else -> value
+}
+
+fun canonicalJson(value: Any): String = JsonOutput.toJson(canonicalValue(value))
+
+fun canonicalSha256(value: Any): String = "sha256:" +
+    sha256Hex(canonicalJson(value).toByteArray(StandardCharsets.UTF_8))
 
 fun gitRevision(): String {
     val process = ProcessBuilder("git", "-C", rootProject.projectDir.absolutePath, "rev-parse", "HEAD")
@@ -91,25 +117,32 @@ fun gitRevision(): String {
 
 fun jsonText(value: Any): String = JsonOutput.prettyPrint(JsonOutput.toJson(value)) + "\n"
 
-val monomerProductBundleRoot = layout.buildDirectory.dir("monomer-product-bundle")
+val monomerProductRepositoryRoot = layout.buildDirectory.dir("monomer-product-bundle/maven-repository")
+val monomerProductReleaseAssetsRoot = layout.buildDirectory.dir("release-assets")
+
+data class ProductArtifact(
+    val artifactId: String,
+    val coordinate: String,
+    val relativePath: String,
+    val sha256: String,
+)
 
 val prepareMonomerProductBundle = tasks.register("prepareMonomerProductBundle") {
     group = "distribution"
-    description = "Assembles the exact Maven repository and evidence inputs shipped to Monomer."
+    description = "Assembles the exact Maven repository and separate release evidence inputs shipped to Monomer."
     dependsOn("verifyPublicArtifact")
 
     doLast {
-        val bundleRoot = monomerProductBundleRoot.get().asFile
-        check(bundleRoot.absolutePath.startsWith(layout.buildDirectory.get().asFile.absolutePath)) {
-            "Product bundle output must stay under the build directory"
+        val buildRoot = layout.buildDirectory.get().asFile
+        val repositoryRoot = monomerProductRepositoryRoot.get().asFile
+        val releaseAssetsRoot = monomerProductReleaseAssetsRoot.get().asFile
+        listOf(repositoryRoot, releaseAssetsRoot).forEach { outputRoot ->
+            check(outputRoot.absolutePath.startsWith(buildRoot.absolutePath)) {
+                "Product release output must stay under the build directory"
+            }
+            outputRoot.deleteRecursively()
         }
-        bundleRoot.deleteRecursively()
-        val repositoryRoot = File(bundleRoot, "repository")
-        val evidenceRoot = File(bundleRoot, "evidence")
-        val legalRoot = File(bundleRoot, "legal")
         repositoryRoot.mkdirs()
-        evidenceRoot.mkdirs()
-        legalRoot.mkdirs()
 
         val stagingRoot = layout.buildDirectory.dir("maven-staging").get().asFile
         val expectedGroupPath = "cc/monomer/metricflow"
@@ -124,8 +157,59 @@ val prepareMonomerProductBundle = tasks.register("prepareMonomerProductBundle") 
             )
         }
 
-        rootProject.file("LICENSE").copyTo(File(legalRoot, "LICENSE"), overwrite = true)
-        rootProject.file("NOTICE").copyTo(File(legalRoot, "NOTICE"), overwrite = true)
+        val sourceRevision = gitRevision()
+        val productArtifacts = monomerProductArtifactIds.sorted().map { artifactId ->
+            val versionDirectory = File(repositoryRoot, "$expectedGroupPath/$artifactId/${project.version}")
+            val jar = File(versionDirectory, "$artifactId-${project.version}.jar")
+            check(jar.isFile) { "Missing primary JAR for $artifactId" }
+            ProductArtifact(
+                artifactId = artifactId,
+                coordinate = "${project.group}:$artifactId:${project.version}",
+                relativePath = "$expectedGroupPath/$artifactId/${project.version}/${jar.name}",
+                sha256 = sha256Digest(jar),
+            )
+        }
+        val markerArtifacts = productArtifacts.map { artifact ->
+            mapOf(
+                "coordinate" to artifact.coordinate,
+                "relativePath" to artifact.relativePath,
+                "sha256" to artifact.sha256,
+            )
+        }
+        val artifactSetIdentity = mapOf(
+            "schemaVersion" to 1,
+            "version" to project.version.toString(),
+            "source" to mapOf(
+                "uri" to metricFlowSourceUri,
+                "commit" to sourceRevision,
+            ),
+            "artifacts" to productArtifacts.map { artifact ->
+                mapOf(
+                    "coordinate" to artifact.coordinate,
+                    "sha256" to artifact.sha256,
+                )
+            },
+        )
+        val artifactSetDigest = canonicalSha256(artifactSetIdentity)
+        val marker = mapOf(
+            "kind" to "cc.monomer.metricflow.maven-repository",
+            "schemaVersion" to 1,
+            "version" to project.version.toString(),
+            "artifactSetDigest" to artifactSetDigest,
+            "source" to mapOf(
+                "uri" to metricFlowSourceUri,
+                "commit" to sourceRevision,
+            ),
+            "repositoryRoot" to "maven-repository",
+            "productModuleAllowlist" to monomerProductArtifactIds.sorted(),
+            "excludedModules" to monomerProductExcludedModules,
+            "artifacts" to markerArtifacts,
+        )
+        val markerFile = File(repositoryRoot, ".monomer-metricflow-manifest.json")
+        markerFile.writeText(jsonText(marker), StandardCharsets.UTF_8)
+        val bundleManifestAsset = File(releaseAssetsRoot, "$monomerProductBundleName.manifest.json")
+        bundleManifestAsset.parentFile.mkdirs()
+        bundleManifestAsset.writeText(jsonText(marker), StandardCharsets.UTF_8)
 
         val workspaceSbom = rootProject.layout.buildDirectory.file("reports/cyclonedx/bom.json").get().asFile
         check(workspaceSbom.isFile) { "CycloneDX SBOM was not generated at ${workspaceSbom.absolutePath}" }
@@ -135,16 +219,15 @@ val prepareMonomerProductBundle = tasks.register("prepareMonomerProductBundle") 
         // identity for this release evidence.
         val deterministicSbom = workspaceSbom.readText(StandardCharsets.UTF_8)
             .replace(Regex("(?m)^\\s*\\\"timestamp\\\"\\s*:\\s*\\\"[^\\\"]+\\\",\\s*\\n"), "")
-        File(evidenceRoot, "workspace-sbom.cyclonedx.json").writeText(
+        File(releaseAssetsRoot, "$monomerProductBundleName.sbom.cyclonedx.json").writeText(
             deterministicSbom,
             StandardCharsets.UTF_8,
         )
 
-        val dependencyEvidence = monomerProductArtifactIds.sorted().map { artifactId ->
-            val artifactDirectory = File(repositoryRoot, "$expectedGroupPath/$artifactId")
-            val versionDirectory = File(artifactDirectory, project.version.toString())
-            val pom = File(versionDirectory, "$artifactId-${project.version}.pom")
-            check(pom.isFile) { "Missing POM for $artifactId" }
+        val dependencyEvidence = productArtifacts.map { artifact ->
+            val versionDirectory = File(repositoryRoot, artifact.relativePath).parentFile
+            val pom = File(versionDirectory, "${artifact.artifactId}-${project.version}.pom")
+            check(pom.isFile) { "Missing POM for ${artifact.artifactId}" }
             val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(pom)
             val dependencies = (0 until document.getElementsByTagName("dependency").length).map { index ->
                 val element = document.getElementsByTagName("dependency").item(index) as org.w3c.dom.Element
@@ -158,13 +241,14 @@ val prepareMonomerProductBundle = tasks.register("prepareMonomerProductBundle") 
                 )
             }
             mapOf(
-                "artifactId" to artifactId,
-                "pom" to "$expectedGroupPath/$artifactId/${project.version}/${pom.name}",
+                "artifactId" to artifact.artifactId,
+                "coordinate" to artifact.coordinate,
+                "pom" to "maven-repository/${artifact.relativePath.substringBeforeLast("/")}/${pom.name}",
                 "sha256" to sha256Hex(pom),
                 "dependencies" to dependencies,
             )
         }
-        File(evidenceRoot, "dependency-evidence.json").writeText(
+        File(releaseAssetsRoot, "$monomerProductBundleName.dependency-evidence.json").writeText(
             jsonText(
                 mapOf(
                     "schema" to "monomer.metricflow/dependency-evidence/v1",
@@ -173,25 +257,27 @@ val prepareMonomerProductBundle = tasks.register("prepareMonomerProductBundle") 
             ),
             StandardCharsets.UTF_8,
         )
-        File(evidenceRoot, "licenses.json").writeText(
+        File(releaseAssetsRoot, "$monomerProductBundleName.license-evidence.json").writeText(
             jsonText(
                 mapOf(
                     "schema" to "monomer.metricflow/license-evidence/v1",
                     "license" to "Apache-2.0",
-                    "attributionFiles" to listOf("legal/LICENSE", "legal/NOTICE"),
+                    "attributionFiles" to listOf(
+                        mapOf("path" to "LICENSE", "sha256" to sha256Digest(rootProject.file("LICENSE"))),
+                        mapOf("path" to "NOTICE", "sha256" to sha256Digest(rootProject.file("NOTICE"))),
+                    ),
                     "artifacts" to monomerProductArtifactIds.sorted(),
                 ),
             ),
             StandardCharsets.UTF_8,
         )
 
-        val sourceRevision = gitRevision()
-        File(evidenceRoot, "provenance-input.json").writeText(
+        File(releaseAssetsRoot, "$monomerProductBundleName.provenance-input.json").writeText(
             jsonText(
                 mapOf(
                     "schema" to "monomer.metricflow/provenance-input/v1",
                     "source" to mapOf(
-                        "repository" to "https://github.com/monomerhq/metricflow-kotlin",
+                        "repository" to metricFlowSourceUri,
                         "revision" to sourceRevision,
                     ),
                     "build" to mapOf(
@@ -199,47 +285,20 @@ val prepareMonomerProductBundle = tasks.register("prepareMonomerProductBundle") 
                         "gradleProject" to rootProject.name,
                         "version" to project.version.toString(),
                     ),
-                    "productArtifacts" to monomerProductArtifactIds.sorted(),
-                    "attestation" to "GitHub Actions actions/attest-build-provenance adds the signed release attestation.",
-                ),
-            ),
-            StandardCharsets.UTF_8,
-        )
-
-        val bundleManifest = File(evidenceRoot, "bundle-manifest.json")
-        bundleManifest.writeText(
-            jsonText(
-                mapOf(
-                    "schema" to "monomer.metricflow/maven-bundle/v1",
-                    "groupId" to project.group.toString(),
-                    "version" to project.version.toString(),
-                    "repository" to "repository",
-                    "artifacts" to monomerProductArtifactIds.sorted(),
-                    "excludedArtifacts" to listOf("metricflow-render-duckdb", "metricflow-grpc-server"),
-                    "sha256Manifest" to "SHA256SUMS",
-                    "evidence" to listOf(
-                        "evidence/workspace-sbom.cyclonedx.json",
-                        "evidence/dependency-evidence.json",
-                        "evidence/licenses.json",
-                        "evidence/provenance-input.json",
+                    "artifactSetDigest" to artifactSetDigest,
+                    "productArtifacts" to productArtifacts.map { artifact -> artifact.coordinate },
+                    "releaseEvidence" to mapOf(
+                        "attestationAction" to "actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d",
+                        "attestationStepId" to "attest",
+                        "attestationUrlOutput" to "steps.attest.outputs.attestation-url",
+                        "attestationBundleOutput" to "steps.attest.outputs.bundle-path",
+                        "attestationAsset" to "$monomerProductBundleName.attestation.json",
+                        "attestationReferenceAsset" to "$monomerProductBundleName.attestation-reference.json",
                     ),
-                    "sourceRevision" to sourceRevision,
                 ),
             ),
             StandardCharsets.UTF_8,
         )
-
-        val filesForManifest = Files.walk(bundleRoot.toPath()).use { paths ->
-            paths.filter { Files.isRegularFile(it) }
-                .map { bundleRoot.toPath().relativize(it).toString().replace(File.separatorChar, '/') }
-                .filter { it != "SHA256SUMS" }
-                .sorted()
-                .toList()
-        }
-        val checksums = filesForManifest.joinToString(separator = "\n", postfix = "\n") { relativePath ->
-            "${sha256Hex(File(bundleRoot, relativePath))}  $relativePath"
-        }
-        File(bundleRoot, "SHA256SUMS").writeText(checksums, StandardCharsets.UTF_8)
     }
 }
 
@@ -250,7 +309,9 @@ val packageMonomerProductBundle = tasks.register<Zip>("packageMonomerProductBund
     archiveBaseName.set("metricflow-monomer-product")
     archiveVersion.set(project.version.toString())
     destinationDirectory.set(layout.buildDirectory.dir("bundles"))
-    from(monomerProductBundleRoot)
+    from(monomerProductRepositoryRoot) {
+        into("maven-repository")
+    }
     isPreserveFileTimestamps = false
     isReproducibleFileOrder = true
 }
@@ -262,30 +323,51 @@ tasks.register("verifyMonomerProductBundle") {
     doLast {
         val archive = packageMonomerProductBundle.get().archiveFile.get().asFile
         check(archive.isFile) { "Product bundle was not created: ${archive.absolutePath}" }
+        val archiveEntries = ZipFile(archive).use { zipFile ->
+            zipFile.entries().asSequence().map { entry -> entry.name }.toList()
+        }
+        check(archiveEntries.isNotEmpty()) { "Product bundle is empty" }
+        check(archiveEntries.all { entry -> entry == "maven-repository/" || entry.startsWith("maven-repository/") }) {
+            "Product bundle may contain only maven-repository/: $archiveEntries"
+        }
+        check("maven-repository/.monomer-metricflow-manifest.json" in archiveEntries) {
+            "Product bundle is missing maven-repository/.monomer-metricflow-manifest.json"
+        }
         val verificationRoot = layout.buildDirectory.dir("monomer-product-bundle-verification").get().asFile
         verificationRoot.deleteRecursively()
         copy {
             from(zipTree(archive))
             into(verificationRoot)
         }
-        val checksumsFile = File(verificationRoot, "SHA256SUMS")
-        check(checksumsFile.isFile) { "Product bundle is missing SHA256SUMS" }
-        val checksumEntries = checksumsFile.readLines(StandardCharsets.UTF_8)
-            .filter { it.isNotBlank() }
-            .map { line ->
-                val separator = line.indexOf("  ")
-                check(separator > 0) { "Malformed SHA256SUMS entry: $line" }
-                line.substring(0, separator) to line.substring(separator + 2)
-            }
-        for ((expectedDigest, relativePath) in checksumEntries) {
-            val target = File(verificationRoot, relativePath)
-            check(target.isFile) { "SHA256SUMS references missing file $relativePath" }
-            check(sha256Hex(target) == expectedDigest) { "Checksum mismatch for $relativePath" }
+        check(verificationRoot.listFiles()?.map { it.name }?.toSet() == setOf("maven-repository")) {
+            "Product bundle extraction must have exactly one root directory"
         }
+        val markerFile = File(verificationRoot, "maven-repository/.monomer-metricflow-manifest.json")
+        val marker = JsonSlurper().parse(markerFile) as? Map<*, *>
+            ?: error("Product bundle marker must be a JSON object")
+        val expectedMarkerKeys = setOf(
+            "kind",
+            "schemaVersion",
+            "version",
+            "artifactSetDigest",
+            "source",
+            "repositoryRoot",
+            "productModuleAllowlist",
+            "excludedModules",
+            "artifacts",
+        )
+        check(marker.keys == expectedMarkerKeys) { "Product bundle marker shape changed: ${marker.keys}" }
+        check(marker["kind"] == "cc.monomer.metricflow.maven-repository")
+        check(marker["schemaVersion"] == 1)
+        check(marker["version"] == project.version.toString())
+        check(marker["repositoryRoot"] == "maven-repository")
+        check(marker["productModuleAllowlist"] == monomerProductArtifactIds.sorted())
+        check(marker["excludedModules"] == monomerProductExcludedModules)
+
         val expectedRepositoryArtifacts = monomerProductArtifactIds.map {
-            "repository/cc/monomer/metricflow/$it"
+            "maven-repository/cc/monomer/metricflow/$it"
         }.toSet()
-        val actualRepositoryArtifacts = File(verificationRoot, "repository/cc/monomer/metricflow")
+        val actualRepositoryArtifacts = File(verificationRoot, "maven-repository/cc/monomer/metricflow")
             .listFiles()
             ?.filter { it.isDirectory }
             ?.map { it.relativeTo(verificationRoot).path.replace(File.separatorChar, '/') }
@@ -294,14 +376,63 @@ tasks.register("verifyMonomerProductBundle") {
         check(actualRepositoryArtifacts == expectedRepositoryArtifacts) {
             "Product repository artifacts differ. expected=$expectedRepositoryArtifacts actual=$actualRepositoryArtifacts"
         }
+
+        val markerSource = marker["source"] as? Map<*, *>
+            ?: error("Product bundle marker source must be an object")
+        check(markerSource == mapOf("uri" to metricFlowSourceUri, "commit" to gitRevision())) {
+            "Product bundle marker source does not match the verified checkout"
+        }
+        val expectedArtifacts = monomerProductArtifactIds.sorted().map { artifactId ->
+            val relativePath = "cc/monomer/metricflow/$artifactId/${project.version}/$artifactId-${project.version}.jar"
+            val jar = File(verificationRoot, "maven-repository/$relativePath")
+            check(jar.isFile) { "Product bundle is missing primary JAR $relativePath" }
+            mapOf(
+                "coordinate" to "${project.group}:$artifactId:${project.version}",
+                "relativePath" to relativePath,
+                "sha256" to sha256Digest(jar),
+            )
+        }
+        check(marker["artifacts"] == expectedArtifacts) {
+            "Product bundle marker artifact set does not match the Maven repository"
+        }
+        val expectedIdentity = mapOf(
+            "schemaVersion" to 1,
+            "version" to project.version.toString(),
+            "source" to markerSource,
+            "artifacts" to expectedArtifacts.map { artifact ->
+                mapOf(
+                    "coordinate" to artifact.getValue("coordinate"),
+                    "sha256" to artifact.getValue("sha256"),
+                )
+            },
+        )
+        check(marker["artifactSetDigest"] == canonicalSha256(expectedIdentity)) {
+            "Product bundle marker artifactSetDigest is not canonical"
+        }
         val forbiddenPaths = Files.walk(verificationRoot.toPath()).use { paths ->
             paths.filter { Files.isRegularFile(it) }
                 .map { it.toString().replace(File.separatorChar, '/') }
-                .filter { it.contains("metricflow-render-duckdb") || it.contains("metricflow-grpc-server") }
+                .filter {
+                    it.contains("metricflow-render-duckdb") ||
+                        it.contains("metricflow-grpc-server") ||
+                        it.contains("internal-diff-runner")
+                }
                 .toList()
         }
         check(forbiddenPaths.isEmpty()) { "Product bundle contains excluded artifacts: $forbiddenPaths" }
-        File(archive.parentFile, "${archive.name}.sha256").writeText(
+        val releaseAssetsRoot = monomerProductReleaseAssetsRoot.get().asFile
+        val staticEvidenceFiles = listOf(
+            "$monomerProductBundleName.manifest.json",
+            "$monomerProductBundleName.sbom.cyclonedx.json",
+            "$monomerProductBundleName.dependency-evidence.json",
+            "$monomerProductBundleName.license-evidence.json",
+            "$monomerProductBundleName.provenance-input.json",
+        )
+        check(staticEvidenceFiles.all { File(releaseAssetsRoot, it).isFile }) {
+            "Product release evidence is incomplete"
+        }
+        releaseAssetsRoot.mkdirs()
+        File(releaseAssetsRoot, "${archive.name}.sha256").writeText(
             "${sha256Hex(archive)}  ${archive.name}\n",
             StandardCharsets.UTF_8,
         )
