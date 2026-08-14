@@ -67,8 +67,10 @@ The published namespace is `cc.monomer.metricflow`; there is no compatibility
 artifact for the former private package.
 
 The first public release is version `0.2.0`. The tag-driven release workflow
-publishes the immutable product bundle and its signed build provenance; local
-verification produces the same Maven repository layout before a tag is created.
+publishes the immutable product bundle, a signed Sigstore attestation for that
+ZIP, and a separately identified materialized SLSA statement for its exact Maven
+artifact set. Local verification produces the same Maven repository layout
+before a tag is created.
 
 ---
 
@@ -118,6 +120,8 @@ assets and are intentionally not additional ZIP roots. The tag workflow uses the
 pinned `actions/attest` step (`id: attest`) and uploads its Sigstore JSON bundle
 as `<bundle>.attestation.json` plus an addressable reference asset containing
 `steps.attest.outputs.attestation-url` and the release-download URL.
+The reference marks the materialized SLSA statement as unsigned; the Sigstore
+bundle is the signed evidence for the immutable ZIP.
 
 ---
 
