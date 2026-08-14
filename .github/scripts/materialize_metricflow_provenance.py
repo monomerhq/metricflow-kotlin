@@ -141,9 +141,10 @@ def build_statement(
         "_type": STATEMENT_TYPE,
         "subject": [
             {
-                "name": archive_path.name,
-                "digest": {"sha256": archive_digest},
+                "name": artifact["coordinate"],
+                "digest": {"sha256": artifact["sha256"].split(":", 1)[1]},
             }
+            for artifact in artifacts
         ],
         "predicateType": SLSA_PROVENANCE_TYPE,
         "predicate": {
@@ -216,15 +217,29 @@ def validate_statement(
     if statement.get("predicateType") != SLSA_PROVENANCE_TYPE:
         raise ValueError("provenance is not SLSA provenance v1")
     subjects = statement.get("subject")
-    if not isinstance(subjects, list) or len(subjects) != 1:
-        raise ValueError("provenance must bind exactly one product ZIP subject")
-    subject = subjects[0]
-    if not isinstance(subject, dict) or subject.get("name") != archive_path.name:
-        raise ValueError("provenance subject does not identify the product ZIP")
-    digest = subject.get("digest", {}).get("sha256") if isinstance(subject, dict) else None
+    expected_artifacts = {
+        artifact["coordinate"]: artifact["sha256"].split(":", 1)[1]
+        for artifact in manifest_artifacts(manifest)
+    }
+    if not isinstance(subjects, list) or len(subjects) != len(expected_artifacts):
+        raise ValueError("provenance must bind exactly the product manifest artifact set")
+    actual_artifacts: dict[str, str] = {}
+    for subject in subjects:
+        if not isinstance(subject, dict):
+            raise ValueError("provenance artifact subject is malformed")
+        name = subject.get("name")
+        digest = subject.get("digest", {}).get("sha256")
+        if (
+            not isinstance(name, str)
+            or not isinstance(digest, str)
+            or name in actual_artifacts
+        ):
+            raise ValueError("provenance artifact subject set is malformed")
+        actual_artifacts[name] = digest
+    if actual_artifacts != expected_artifacts:
+        raise ValueError("provenance must bind the exact product manifest artifact set")
+
     expected_digest = sha256_file(archive_path)
-    if digest != expected_digest:
-        raise ValueError("provenance subject does not bind the exact product ZIP digest")
 
     predicate = statement.get("predicate")
     build_definition = predicate.get("buildDefinition") if isinstance(predicate, dict) else None
