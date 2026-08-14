@@ -1,11 +1,12 @@
 plugins {
     id("metricflow.kotlin-module")
+    `java-library`
 }
 
 // This artifact is deliberately transport-free. Consumers select the dialect
 // renderer modules they need and register them through SqlPlanRendererRegistry.
 dependencies {
-    implementation(project(":core"))
+    api(project(":core"))
     testImplementation(project(":render-bigquery"))
 }
 
