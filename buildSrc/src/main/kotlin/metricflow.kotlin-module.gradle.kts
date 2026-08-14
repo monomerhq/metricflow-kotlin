@@ -1,6 +1,7 @@
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.bundling.Jar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -23,6 +24,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
+}
+
+if (project.name == "engine") {
+    // The engine exposes core model and SQL types in its public API. Keep the
+    // module build focused on source dependencies while publishing that
+    // project dependency through the Java library API variant.
+    pluginManager.apply("java-library")
 }
 
 object MetricFlowDeps {
@@ -87,6 +95,19 @@ tasks.withType<Jar>().configureEach {
 
 if (project.path != ":internal-diff-runner") {
     pluginManager.apply("maven-publish")
+
+    if (project.name == "engine") {
+        afterEvaluate {
+            val implementationConfiguration = configurations.getByName("implementation")
+            val coreDependency = implementationConfiguration.dependencies
+                .filterIsInstance<ProjectDependency>()
+                .single { it.path == ":core" }
+            check(implementationConfiguration.dependencies.remove(coreDependency)) {
+                "metricflow-engine core dependency must be moved from implementation"
+            }
+            dependencies.add("api", coreDependency)
+        }
+    }
 
     extensions.configure<JavaPluginExtension> {
         withSourcesJar()

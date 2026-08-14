@@ -14,9 +14,10 @@ exact source revision and vendoring boundary.
 
 ```kotlin
 dependencies {
+    implementation("cc.monomer.metricflow:metricflow-engine:VERSION")
     implementation("cc.monomer.metricflow:metricflow-core:VERSION")
+    // Register one renderer artifact for each SQL dialect you serve.
     implementation("cc.monomer.metricflow:metricflow-render-trino:VERSION")
-    // pick whichever dialect(s) your warehouse needs
 }
 ```
 
