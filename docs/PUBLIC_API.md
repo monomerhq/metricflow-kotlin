@@ -1,4 +1,4 @@
-# Public API Surface (metricflow-core JAR)
+# Public API Surface (metricflow-core and metricflow-engine JARs)
 
 This document defines the **stable public API** that consumers of
 `metricflow-kotlin` may import. Anything not listed here is considered
@@ -16,7 +16,15 @@ This is the **entry point** consumers will use 95% of the time. Port of
 `metricflow/engine/metricflow_engine.py`.
 
 ### Class
-- `MetricFlowEngine(semanticManifest: SemanticManifest)`
+- `MetricFlowEngine(semanticManifest: SemanticManifest, sqlPlanRendererRegistry: SqlPlanRendererRegistry)`
+
+### Renderer composition
+- `SqlPlanRendererRegistry` — explicit dialect-to-renderer composition seam
+- `SqlPlanRendererRegistration`
+
+The engine does not select or package a concrete dialect. Consumers add only the
+`metricflow-render-*` modules they serve and register their renderers before
+calling `explain`.
 
 ### Methods
 - `validateManifest(): SemanticManifestValidationResults`
@@ -109,6 +117,10 @@ etc.) implement. Consumers may write their own dialect if needed.
 - `SqlEngine` (enum — moved from `:domain:sqlclient` in Phase 5 Step 3)
 - `SqlClient` (interface — render-side capabilities only, no execution methods)
 
+The optional `metricflow-grpc-server` artifact owns protobuf-generated types,
+`MetricFlowSqlEngineService`, `MetricFlowGrpcServer`, and in-process gRPC test
+helpers. It is not required for library use.
+
 ---
 
 ## 5. Time/common (`cc.monomer.metricflow.common.time`)
@@ -158,3 +170,5 @@ As of Phase 5 (Step 1), no API is yet `@Stable`-annotated. The convention is
 
 - Step 3: `cc.monomer.metricflow.domain.sqlclient.{SqlClient, SqlEngine}` were moved into `cc.monomer.metricflow.domain.sql.render.*` (package name change). The 113 LOC `:domain:sqlclient` Gradle module was absorbed into `:domain:sql:render`.
 - Step 4: `DialectSqlRenderingEngine` (from `:infrastructure:sql:render:base`) and `DefaultDialectSqlPlanRenderer` (from `:infrastructure:sql:render:default`) were absorbed into `:domain:sql:render`. Their Kotlin package names were preserved.
+- Step 6: gRPC/protobuf server code moved from `metricflow-engine` into the optional `metricflow-grpc-server` artifact. `metricflow-engine` no longer transitively includes transport, logging, or concrete renderer modules.
+- Release bundle: `verifyMonomerProductBundle` produces the eight-artifact external-DW Monomer bundle (core, engine, and six non-DuckDB renderers) under the single `maven-repository/` ZIP root with `.monomer-metricflow-manifest.json`. SBOM, dependency/license/provenance evidence, ZIP checksum, and the pinned `actions/attest` Sigstore JSON bundle are separate release assets.

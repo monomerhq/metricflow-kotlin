@@ -42,7 +42,12 @@ metricflow-kotlin 포팅 단일 진척 파일. 모든 에이전트(오케스트�
 - AST 트레이서 `docs/scripts/reach.py` (재현 가능)
 - 측정 결과: 도달 가능 60,346 LOC / 477 files; 실행 제외 89 LOC; 기타 미도달 7,231 LOC
 
-**Next**: Phase 5a (internal sweep) 또는 Phase 5b (gRPC split) 또는 Phase 6 (publishing). 사용자 우선순위 결정 대기.
+**Current**: Phase 5b/6 initial delivery is implemented on the release branch: the
+in-process engine is transport-free, gRPC is an optional module, and the Monomer
+external-DW Maven bundle is deterministic and verified. The ZIP has only the
+`maven-repository/` root; its marker fixes the canonical artifact-set identity and
+release evidence is uploaded separately. The next step is the orchestrator-owned
+producer release/tag and Monomer consumer integration.
 
 ## 진척 표
 
@@ -75,10 +80,10 @@ metricflow-kotlin 포팅 단일 진척 파일. 모든 에이전트(오케스트�
 | 3 W14b | DataflowPlanBuilder.buildPlan body (SIMPLE) + CaseRunner per-dialect SQL diff | done | 1 (이전 세션 완료) | (pending commit) | **96/4/12 corpus, explain 15/29 PASS** |
 | 3 W14c | 2 visit + DERIVED + RATIO 채움, 6 visit + CUMULATIVE + CONVERSION W15 deferred | done | 1 (pass) | (pending commit) | **108/4/0/0 corpus, UNIMPL 0!** |
 | 3 W15 | distinct-values + where-filter Jinja + 시간 spine wiring + 4 FAIL fix | done | 1 (이전 세션 완료, 직접 검증) | (pending commit) | **🎉 corpus 112/0/0/0 100% PASS 🎉** |
-| 5 | API Surface Cleanup (PHASE_5_PLAN.md Steps 0,1,3-5,7-10) | done | 1 (이전 세션 + 검증) | (pending commit) | **30 → 10 modules, hexagonal 제거, 112/0/0/0 유지** |
+| 5 | API Surface Cleanup + gRPC split + product bundle | in-progress | 1 | pending | **engine transport-free, optional grpc-server, deterministic 8-artifact external-DW bundle with single Maven root/marker; 112/0/0/0 target** |
 | 5a | Step 2: internal visibility sweep | not started | — | — | ~436 .kt 파일, docs/PUBLIC_API.md 대조 |
-| 5b | Step 6: gRPC split (engine → core + grpc-server) | not started | — | — | renderer factory 추상화 필요 |
-| 6 | Maven publish + BOM + Dokka | not started | — | — | metricflow.kotlin-module convention plugin 확장 |
+| 5b | Step 6: gRPC split (engine → core + grpc-server) | done | 1 | pending | `SqlPlanRendererRegistry` seam; engine runtime guard |
+| 6 | Maven publish + BOM + deterministic Monomer bundle | in-progress | 1 | pending | tag release workflow, separate SHA/SBOM/dependency/license/provenance/attestation assets |
 | 4 | Integration + examples | not started | — | — | |
 | 5 | (선택) cutover | n/a | — | — | 이 프로젝트 범위 밖 |
 

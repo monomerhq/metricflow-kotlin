@@ -37,13 +37,15 @@ import io.grpc.StatusException
  *   → `Status.INVALID_ARGUMENT`.
  * - Anything else propagates as `Status.INTERNAL`.
  */
-class MetricFlowSqlEngineService :
+class MetricFlowSqlEngineService(
+    private val sqlPlanRendererRegistry: SqlPlanRendererRegistry,
+) :
     MetricFlowSqlEngineGrpcKt.MetricFlowSqlEngineCoroutineImplBase() {
 
     override suspend fun renderSql(request: RenderSqlRequest): RenderSqlResponse =
         withMappedErrors("RenderSql") {
             val built = ManifestEnvelopeAdapter.build(request.manifest)
-            val engine = MetricFlowEngine(built.manifest)
+            val engine = MetricFlowEngine(built.manifest, sqlPlanRendererRegistry)
             val explainRequest = MetricFlowExplainRequest(
                 metricNames = if (request.metricNamesCount > 0) request.metricNamesList else null,
                 groupByNames = if (request.groupByNamesCount > 0) request.groupByNamesList else null,
@@ -56,10 +58,8 @@ class MetricFlowSqlEngineService :
                 minMaxOnly = request.minMaxOnly,
                 applyGroupBy = request.applyGroupBy,
                 orderOutputColumnsByInputOrder = request.orderOutputColumnsByInputOrder,
-                // gRPC contract has no dialect field today — default to DUCKDB (the ANSI-like
-                // dialect we use for the engine's first-class rendering). W14c may add a
-                // proto-level dialect field if the production caller needs per-dialect SQL.
-                dialect = null,
+                // The envelope owns the dialect for this wire request.
+                dialect = built.sqlEngine,
             )
             val result = engine.explain(explainRequest)
             RenderSqlResponse.newBuilder().setSql(result.sql).build()
@@ -68,7 +68,7 @@ class MetricFlowSqlEngineService :
     override suspend fun listMetrics(request: ListMetricsRequest): ListMetricsResponse =
         withMappedErrors("ListMetrics") {
             val built = ManifestEnvelopeAdapter.build(request.manifest)
-            val engine = MetricFlowEngine(built.manifest)
+            val engine = MetricFlowEngine(built.manifest, sqlPlanRendererRegistry)
             val metrics = engine.listMetrics(includeDimensions = request.includeDimensions)
             val responseBuilder = ListMetricsResponse.newBuilder()
             for (m in metrics) responseBuilder.addMetrics(EngineProtoAdapter.toProto(m))
@@ -78,7 +78,7 @@ class MetricFlowSqlEngineService :
     override suspend fun listDimensions(request: ListDimensionsRequest): ListDimensionsResponse =
         withMappedErrors("ListDimensions") {
             val built = ManifestEnvelopeAdapter.build(request.manifest)
-            val engine = MetricFlowEngine(built.manifest)
+            val engine = MetricFlowEngine(built.manifest, sqlPlanRendererRegistry)
             val metricNames = if (request.metricNamesCount > 0) request.metricNamesList else null
             val dims = engine.listDimensions(
                 metricNames = metricNames,
@@ -92,7 +92,7 @@ class MetricFlowSqlEngineService :
     override suspend fun entitiesForMetrics(request: EntitiesForMetricsRequest): EntitiesForMetricsResponse =
         withMappedErrors("EntitiesForMetrics") {
             val built = ManifestEnvelopeAdapter.build(request.manifest)
-            val engine = MetricFlowEngine(built.manifest)
+            val engine = MetricFlowEngine(built.manifest, sqlPlanRendererRegistry)
             val entities = engine.entitiesForMetrics(metricNames = request.metricNamesList)
             val responseBuilder = EntitiesForMetricsResponse.newBuilder()
             for (e in entities) responseBuilder.addEntities(EngineProtoAdapter.toProto(e))
@@ -102,7 +102,7 @@ class MetricFlowSqlEngineService :
     override suspend fun listGroupBys(request: ListGroupBysRequest): ListGroupBysResponse =
         withMappedErrors("ListGroupBys") {
             val built = ManifestEnvelopeAdapter.build(request.manifest)
-            val engine = MetricFlowEngine(built.manifest)
+            val engine = MetricFlowEngine(built.manifest, sqlPlanRendererRegistry)
             val metricNames = if (request.metricNamesCount > 0) request.metricNamesList else null
             val orderBy = when (request.orderBy) {
                 GroupBysOrderBy.GROUP_BYS_ORDER_BY_SEMANTIC_MODEL_NAME -> GroupByOrderByAttribute.SEMANTIC_MODEL_NAME
@@ -124,7 +124,7 @@ class MetricFlowSqlEngineService :
     override suspend fun listSavedQueries(request: ListSavedQueriesRequest): ListSavedQueriesResponse =
         withMappedErrors("ListSavedQueries") {
             val built = ManifestEnvelopeAdapter.build(request.manifest)
-            val engine = MetricFlowEngine(built.manifest)
+            val engine = MetricFlowEngine(built.manifest, sqlPlanRendererRegistry)
             val queries = engine.listSavedQueries()
             val responseBuilder = ListSavedQueriesResponse.newBuilder()
             for (q in queries) responseBuilder.addSavedQueries(EngineProtoAdapter.toProto(q))
@@ -135,14 +135,14 @@ class MetricFlowSqlEngineService :
         request: ExplainGetDimensionValuesRequest,
     ): ExplainGetDimensionValuesResponse = withMappedErrors("ExplainGetDimensionValues") {
         val built = ManifestEnvelopeAdapter.build(request.manifest)
-        val engine = MetricFlowEngine(built.manifest)
+        val engine = MetricFlowEngine(built.manifest, sqlPlanRendererRegistry)
         val dimRequest = cc.monomer.metricflow.application.engine.ExplainGetDimensionValuesRequest(
             metricNames = request.metricNamesList,
             getGroupByValues = request.getGroupByValues,
             timeConstraintStart = if (request.hasTimeConstraintStart()) request.timeConstraintStart else null,
             timeConstraintEnd = if (request.hasTimeConstraintEnd()) request.timeConstraintEnd else null,
             minMaxOnly = request.minMaxOnly,
-            dialect = null,
+            dialect = built.sqlEngine,
         )
         val result = engine.explainGetDimensionValues(dimRequest)
         ExplainGetDimensionValuesResponse.newBuilder().setSql(result.sql).build()
@@ -151,7 +151,7 @@ class MetricFlowSqlEngineService :
     override suspend fun validateManifest(request: ValidateManifestRequest): ValidateManifestResponse =
         withMappedErrors("ValidateManifest") {
             val built = ManifestEnvelopeAdapter.build(request.manifest)
-            val engine = MetricFlowEngine(built.manifest)
+            val engine = MetricFlowEngine(built.manifest, sqlPlanRendererRegistry)
             val results = engine.validateManifest()
             val responseBuilder = ValidateManifestResponse.newBuilder()
             for (issue in results.allIssues) {

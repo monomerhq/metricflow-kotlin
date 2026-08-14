@@ -4,6 +4,7 @@ import cc.monomer.metricflow.common.errors.SemanticManifestConfigurationError
 import cc.monomer.metricflow.domain.manifest.model.SemanticManifest
 import cc.monomer.metricflow.domain.manifest.model.serialization.ManifestJson
 import cc.monomer.metricflow.domain.sql.render.SqlEngine
+import cc.monomer.metricflow.infrastructure.sql.render.bigquery.BigQuerySqlPlanRenderer
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -177,11 +178,14 @@ class AtemporalQueryWithoutTimeSpineTest {
             manifestFile.readText(),
         )
         return MetricFlowEngine(
-            manifest.copy(
+            semanticManifest = manifest.copy(
                 projectConfiguration = manifest.projectConfiguration.copy(
                     timeSpineTableConfigurations = emptyList(),
                     timeSpines = emptyList(),
                 ),
+            ),
+            sqlPlanRendererRegistry = SqlPlanRendererRegistry.of(
+                SqlPlanRendererRegistration(SqlEngine.BIGQUERY, BigQuerySqlPlanRenderer()),
             ),
         )
     }

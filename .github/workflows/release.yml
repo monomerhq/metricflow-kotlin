@@ -1,0 +1,156 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out the tagged source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
+        with:
+          cache-provider: basic
+
+      - name: Verify the tag matches the Maven version
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          test "$RELEASE_TAG" = "v$(./gradlew -q printVersion)"
+
+      - name: Verify the public repository and product bundle
+        run: ./gradlew verifyPublicRepository --no-daemon
+
+      - name: Verify deterministic product bundle bytes
+        run: |
+          comparison_dir="$(mktemp -d)"
+          trap 'rm -rf "$comparison_dir"' EXIT
+          ./gradlew packageMonomerProductBundle --no-daemon --rerun-tasks
+          cp build/bundles/metricflow-monomer-product-*.zip "$comparison_dir/first.zip"
+          ./gradlew packageMonomerProductBundle --no-daemon --rerun-tasks
+          cmp "$comparison_dir/first.zip" build/bundles/metricflow-monomer-product-*.zip
+          ./gradlew verifyMonomerProductBundle --no-daemon
+
+      - name: Attest the immutable product bundle
+        id: attest
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
+        with:
+          subject-path: build/bundles/metricflow-monomer-product-*.zip
+
+      - name: Materialize addressable provenance evidence
+        id: provenance_evidence
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_REF: ${{ github.ref }}
+          SOURCE_COMMIT: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          ATTESTATION_BUNDLE_PATH: ${{ steps.attest.outputs.bundle-path }}
+          ATTESTATION_URL: ${{ steps.attest.outputs.attestation-url }}
+        run: |
+          version="$(./gradlew -q printVersion)"
+          archive="build/bundles/metricflow-monomer-product-${version}.zip"
+          archive_name="metricflow-monomer-product-${version}.zip"
+          manifest="build/release-assets/metricflow-monomer-product-${version}.manifest.json"
+          statement="build/release-assets/metricflow-monomer-product-${version}.provenance.json"
+          attestation="build/release-assets/metricflow-monomer-product-${version}.attestation.json"
+          reference="build/release-assets/metricflow-monomer-product-${version}.attestation-reference.json"
+          test -f "$archive"
+          test -s "$manifest"
+          test -s "$ATTESTATION_BUNDLE_PATH"
+          test -n "$ATTESTATION_URL"
+          python3 .github/scripts/materialize_metricflow_provenance.py \
+            --archive "$archive" \
+            --manifest "$manifest" \
+            --workflow .github/workflows/release.yml \
+            --output "$statement" \
+            --repository "https://github.com/${GITHUB_REPOSITORY}" \
+            --source-commit "$SOURCE_COMMIT" \
+            --release-ref "$RELEASE_REF" \
+            --release-tag "$RELEASE_TAG" \
+            --invocation-id "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/attempts/${RUN_ATTEMPT}" \
+            --builder-id "https://github.com/actions/runner"
+          python3 .github/scripts/materialize_metricflow_provenance.py \
+            --archive "$archive" \
+            --manifest "$manifest" \
+            --workflow .github/workflows/release.yml \
+            --validate "$statement" \
+            --repository "https://github.com/${GITHUB_REPOSITORY}" \
+            --source-commit "$SOURCE_COMMIT" \
+            --release-ref "$RELEASE_REF" \
+            --release-tag "$RELEASE_TAG" \
+            --invocation-id "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/attempts/${RUN_ATTEMPT}" \
+            --builder-id "https://github.com/actions/runner"
+          cp "$ATTESTATION_BUNDLE_PATH" "$attestation"
+          attestation_digest="sha256:$(sha256sum "$attestation" | awk '{print $1}')"
+          statement_digest="sha256:$(sha256sum "$statement" | awk '{print $1}')"
+          statement_asset_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/$(basename "$statement")"
+          release_asset_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/$(basename "$attestation")"
+          jq -n \
+            --arg schema "monomer.metricflow/attestation-reference/v1" \
+            --arg url "$ATTESTATION_URL" \
+            --arg assetUrl "$release_asset_url" \
+            --arg asset "$(basename "$attestation")" \
+            --arg digest "$attestation_digest" \
+            --arg statementUrl "$statement_asset_url" \
+            --arg statementAsset "$(basename "$statement")" \
+            --arg statementDigest "$statement_digest" \
+            --arg subject "$archive_name" \
+            '{schema:$schema, attestationUrl:$url, releaseAsset:{name:$asset,url:$assetUrl,sha256:$digest,format:"sigstore-bundle"}, materializedStatement:{name:$statementAsset,url:$statementUrl,sha256:$statementDigest,signatureStatus:"UNSIGNED_MATERIALIZED_STATEMENT"}, subject:$subject}' \
+            > "$reference"
+          test -s "$statement"
+          test -s "$reference"
+          python3 -m json.tool "$statement" >/dev/null
+          python3 -m json.tool "$reference" >/dev/null
+          echo "statement=$statement" >> "$GITHUB_OUTPUT"
+          echo "attestation=$attestation" >> "$GITHUB_OUTPUT"
+          echo "reference=$reference" >> "$GITHUB_OUTPUT"
+
+      - name: Create the GitHub release and upload immutable evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          version="$(./gradlew -q printVersion)"
+          archive="build/bundles/metricflow-monomer-product-${version}.zip"
+          evidence_root="build/release-assets"
+          gh release create "$RELEASE_TAG" \
+            "$archive" \
+            "$evidence_root/metricflow-monomer-product-${version}.zip.sha256" \
+            "$evidence_root/metricflow-monomer-product-${version}.manifest.json" \
+            "$evidence_root/metricflow-monomer-product-${version}.sbom.cyclonedx.json" \
+            "$evidence_root/metricflow-monomer-product-${version}.dependency-evidence.json" \
+            "$evidence_root/metricflow-monomer-product-${version}.license-evidence.json" \
+            "$evidence_root/metricflow-monomer-product-${version}.provenance-input.json" \
+            "${{ steps.provenance_evidence.outputs.statement }}" \
+            "LICENSE" \
+            "NOTICE" \
+            "${{ steps.provenance_evidence.outputs.attestation }}" \
+            "${{ steps.provenance_evidence.outputs.reference }}" \
+            --verify-tag \
+            --title "metricflow-kotlin ${version}" \
+            --generate-notes

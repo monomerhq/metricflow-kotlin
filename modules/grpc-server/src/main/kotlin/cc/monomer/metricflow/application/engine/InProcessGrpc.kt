@@ -31,11 +31,11 @@ class InProcessEngine private constructor(
     companion object {
         private const val SHUTDOWN_TIMEOUT_SECONDS: Long = 5
 
-        fun start(): InProcessEngine {
+        fun start(sqlPlanRendererRegistry: SqlPlanRendererRegistry): InProcessEngine {
             val serverName = InProcessServerBuilder.generateName()
             val server = InProcessServerBuilder.forName(serverName)
                 .directExecutor()
-                .addService(MetricFlowSqlEngineService())
+                .addService(MetricFlowSqlEngineService(sqlPlanRendererRegistry))
                 .build()
                 .start()
             val channel = InProcessChannelBuilder.forName(serverName)

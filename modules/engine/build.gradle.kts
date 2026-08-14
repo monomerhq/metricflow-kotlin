@@ -1,75 +1,47 @@
-import com.google.protobuf.gradle.id
-
 plugins {
     id("metricflow.kotlin-module")
-    application
-    id("com.google.protobuf")
+    `java-library`
 }
 
-// --- Source sets: pull the .proto out of repo-root protos/ -------------------
-sourceSets {
-    main {
-        proto {
-            srcDir("${rootProject.projectDir}/protos")
-        }
-    }
-}
-
-// --- Dependencies -----------------------------------------------------------
+// This artifact is deliberately transport-free. Consumers select the dialect
+// renderer modules they need and register them through SqlPlanRendererRegistry.
 dependencies {
-    // gRPC + protobuf runtime
-    implementation(libs.bundles.grpc.runtime)
-    implementation(libs.bundles.grpc.server)
-    implementation(libs.grpc.inprocess)           // for the in-process channel used by diff-runner
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.coroutines.jdk8)
-
-    // Logging
-    implementation(libs.logback.classic)
-
-    // Phase-5 consolidation: `:core` replaces every :common:* and :domain:* module.
-    // Dialect renderers remain split so consumers can pick only what they need.
-    implementation(project(":core"))
-    implementation(project(":render-trino"))
-    implementation(project(":render-bigquery"))
-    implementation(project(":render-snowflake"))
-    implementation(project(":render-databricks"))
-    implementation(project(":render-redshift"))
-    implementation(project(":render-duckdb"))
-    implementation(project(":render-postgres"))
-}
-
-// --- Proto codegen ----------------------------------------------------------
-protobuf {
-    protoc {
-        artifact = "com.google.protobuf:protoc:4.29.1"
-    }
-    plugins {
-        id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.69.0"
-        }
-        id("grpckt") {
-            artifact = "io.grpc:protoc-gen-grpc-kotlin:1.3.0:jdk8@jar"
-        }
-    }
-    generateProtoTasks {
-        all().forEach { task ->
-            task.builtins {
-                id("kotlin")
-            }
-            task.plugins {
-                id("grpc")
-                id("grpckt")
-            }
-        }
-    }
-}
-
-// --- Application plugin: server entry point ---------------------------------
-application {
-    mainClass.set("cc.monomer.metricflow.application.engine.MetricFlowGrpcServerKt")
+    api(project(":core"))
+    testImplementation(project(":render-bigquery"))
 }
 
 tasks.named<Test>("test") {
     systemProperty("metricflow.repoRoot", rootProject.projectDir.absolutePath)
+}
+
+val forbiddenLibraryRuntimeArtifacts = setOf(
+    "grpc-api",
+    "grpc-core",
+    "grpc-netty-shaded",
+    "grpc-protobuf",
+    "grpc-stub",
+    "grpc-kotlin-stub",
+    "logback-classic",
+    "metricflow-render-bigquery",
+    "metricflow-render-databricks",
+    "metricflow-render-duckdb",
+    "metricflow-render-postgres",
+    "metricflow-render-redshift",
+    "metricflow-render-snowflake",
+    "metricflow-render-trino",
+)
+
+tasks.register("verifyLibraryRuntimeClasspath") {
+    group = "verification"
+    description = "Ensures the in-process engine does not transitively include transport or dialect runtimes."
+    doLast {
+        val resolvedArtifacts = configurations.runtimeClasspath.get().resolvedConfiguration.resolvedArtifacts
+        val forbidden = resolvedArtifacts
+            .map { it.moduleVersion.id.name }
+            .filter { it in forbiddenLibraryRuntimeArtifacts }
+            .sorted()
+        check(forbidden.isEmpty()) {
+            "metricflow-engine runtime classpath contains forbidden artifacts: ${forbidden.joinToString(", ")}"
+        }
+    }
 }

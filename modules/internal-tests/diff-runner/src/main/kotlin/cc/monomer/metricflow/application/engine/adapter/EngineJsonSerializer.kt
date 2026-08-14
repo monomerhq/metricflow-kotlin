@@ -12,6 +12,13 @@ import cc.monomer.metricflow.domain.manifest.model.SemanticLayerElementConfig
 import cc.monomer.metricflow.domain.manifest.model.filter.WhereFilterIntersection
 import cc.monomer.metricflow.domain.manifest.model.serialization.ManifestJson
 import cc.monomer.metricflow.domain.manifest.validation.SemanticManifestValidationResults
+import cc.monomer.metricflow.domain.manifest.validation.FileContext
+import cc.monomer.metricflow.domain.manifest.validation.MetricContext
+import cc.monomer.metricflow.domain.manifest.validation.SavedQueryContext
+import cc.monomer.metricflow.domain.manifest.validation.SemanticModelContext
+import cc.monomer.metricflow.domain.manifest.validation.SemanticModelElementContext
+import cc.monomer.metricflow.domain.manifest.validation.ValidationContext
+import cc.monomer.metricflow.domain.manifest.validation.ValidationIssueContext
 import cc.monomer.metricflow.domain.manifest.validation.ValidationFutureError
 import cc.monomer.metricflow.domain.manifest.validation.ValidationIssue
 import kotlinx.serialization.KSerializer
@@ -25,6 +32,7 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
+import kotlinx.serialization.json.putJsonObject
 
 /**
  * Builds JSON outputs that match the Python oracle CLI's responses byte-for-byte
@@ -109,7 +117,7 @@ object EngineJsonSerializer {
         if (ctx == null) {
             put("context", JsonNull)
         } else {
-            put("context", EngineProtoAdapter.toCanonicalJson(issue)["context"] ?: JsonNull)
+            put("context", encodeContext(ctx))
         }
         put("context_str", ctx?.contextStr().orEmpty())
         put("extra_detail", issue.extraDetail?.let { JsonPrimitive(it) } ?: JsonNull)
@@ -158,6 +166,48 @@ object EngineJsonSerializer {
         putJsonArray("saved_queries") {
             for (q in queries) add(savedQueryToJson(q))
         }
+    }
+
+    private fun encodeContext(ctx: ValidationContext): JsonObject = when (ctx) {
+        is FileContext -> buildJsonObject {
+            put("file_name", ctx.fileName?.let { JsonPrimitive(it) } ?: JsonNull)
+            put("line_number", ctx.lineNumber?.let { JsonPrimitive(it) } ?: JsonNull)
+        }
+        is MetricContext -> buildJsonObject {
+            put("file_context", fileContextJson(ctx.fileContext))
+            putJsonObject("metric") {
+                put("metric_name", ctx.metric.metricName)
+            }
+        }
+        is SemanticModelContext -> buildJsonObject {
+            put("file_context", fileContextJson(ctx.fileContext))
+            putJsonObject("semantic_model") {
+                put("semantic_model_name", ctx.semanticModel.semanticModelName)
+            }
+        }
+        is SemanticModelElementContext -> buildJsonObject {
+            put("file_context", fileContextJson(ctx.fileContext))
+            putJsonObject("semantic_model_element") {
+                put("semantic_model_name", ctx.semanticModelElement.semanticModelName)
+                put("element_name", ctx.semanticModelElement.elementName)
+            }
+            put("element_type", ctx.elementType.value)
+        }
+        is SavedQueryContext -> buildJsonObject {
+            put("file_context", fileContextJson(ctx.fileContext))
+            put("element_type", ctx.elementType.value)
+            put("element_value", ctx.elementValue)
+        }
+        is ValidationIssueContext -> buildJsonObject {
+            put("file_context", fileContextJson(ctx.fileContext))
+            put("object_type", ctx.objectType)
+            put("object_name", ctx.objectName)
+        }
+    }
+
+    private fun fileContextJson(context: FileContext): JsonObject = buildJsonObject {
+        put("file_name", context.fileName?.let { JsonPrimitive(it) } ?: JsonNull)
+        put("line_number", context.lineNumber?.let { JsonPrimitive(it) } ?: JsonNull)
     }
 
     private fun <T> encodeOptional(value: T?, serializer: KSerializer<T>): JsonElement =

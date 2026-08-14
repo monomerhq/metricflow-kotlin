@@ -14,11 +14,14 @@ import org.slf4j.LoggerFactory
  * Reflection is enabled so `grpcurl` / `evans` can probe the service during
  * Phase 3 development.
  */
-class MetricFlowGrpcServer(private val port: Int) {
+class MetricFlowGrpcServer(
+    private val port: Int,
+    sqlPlanRendererRegistry: SqlPlanRendererRegistry,
+) {
 
     private val server: Server = ServerBuilder
         .forPort(port)
-        .addService(MetricFlowSqlEngineService())
+        .addService(MetricFlowSqlEngineService(sqlPlanRendererRegistry))
         .addService(ProtoReflectionService.newInstance())
         .build()
 
@@ -42,7 +45,7 @@ class MetricFlowGrpcServer(private val port: Int) {
 
 fun main() {
     val port = System.getenv("METRICFLOW_GRPC_PORT")?.toIntOrNull() ?: DEFAULT_GRPC_PORT
-    val server = MetricFlowGrpcServer(port)
+    val server = MetricFlowGrpcServer(port, DefaultSqlPlanRendererRegistry.create())
     server.start()
     server.awaitTermination()
 }
