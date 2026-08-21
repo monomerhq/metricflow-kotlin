@@ -10,6 +10,7 @@ import cc.monomer.metricflow.domain.dataflow.nodes.MetricTimeDimensionTransformN
 import cc.monomer.metricflow.domain.dataflow.nodes.ReadSqlSourceNode
 import cc.monomer.metricflow.domain.dataflow.optimizer.DataflowPlanOptimization
 import cc.monomer.metricflow.domain.manifest.model.enums.TimeGranularity
+import cc.monomer.metricflow.domain.manifest.model.references.TimeDimensionReference
 import cc.monomer.metricflow.domain.plan_conversion.DataflowToSqlPlanConverter
 import cc.monomer.metricflow.domain.plan_conversion.to_sql_plan.TypeGroupedOrderer
 import cc.monomer.metricflow.domain.plan_conversion.to_sql_plan.InputOrderPreservingTypeGroupedOrderer
@@ -21,7 +22,7 @@ import cc.monomer.metricflow.domain.sql.render.SqlPlanRenderer
 import cc.monomer.metricflow.domain.sql.render.SqlEngine
 
 /**
- * Wires the W14b explain chain: dataset construction → dataflow plan → SQL plan → SQL string.
+ * Wires the explain chain: dataset construction → dataflow plan → SQL plan → SQL string.
  *
  * Port of the construction-time wiring in
  * `metricflow.engine.metricflow_engine.MetricFlowEngine.__init__`, specifically the path that
@@ -34,7 +35,7 @@ import cc.monomer.metricflow.domain.sql.render.SqlEngine
  *   in `:domain:spec`;
  * - the [SourceNodeBuilder] needs the converter's outputs;
  * - the [DataflowPlanBuilder] needs the [SourceNodeBuilder] + the [SemanticModelToDataSetConverter]
- *   for the W14c-deferred branches.
+ *   for time-spine and metric-evaluation branches.
  *
  * Each call to [renderSql] re-runs the chain. The wiring is **per-engine, not per-call** in
  * Python; we mirror that by caching the dataflow-plan-builder ingredients lazily.
@@ -69,19 +70,20 @@ internal class ExplainPipeline(private val engine: MetricFlowEngine) {
     }
 
     private val timeSpineReadNodes: Map<TimeGranularity, ReadSqlSourceNode> by lazy {
-        // Time-spine ReadSqlSourceNode construction relies on
-        // TimeSpineSource.buildStandardTimeSpineSources + a dataset wrap. The W14b
-        // SIMPLE happy path never needs the time-spine, so we leave the map empty and
-        // rely on the builder's W14c deferral when a query asks for it. We do **not**
-        // force-evaluate `TimeSpineSource.buildStandardTimeSpineSources` here either —
-        // some manifests (e.g. `minimal_valid_manifest`) supply a time-spine with no
-        // `relation_name`, which the W1 model preserves verbatim and so the call would
-        // throw IllegalArgumentException during eager construction.
-        emptyMap()
+        // Keep this map lazy so an atemporal manifest does not build or validate any
+        // time-spine dataset until an explain pipeline is actually constructed.
+        engine.semanticManifestLookup.timeSpineSources.mapValues { (_, timeSpineSource) ->
+            ReadSqlSourceNode(dataSetConverter.buildTimeSpineSourceDataSet(timeSpineSource))
+        }
     }
 
     private val timeSpineMetricTimeNodes: Map<TimeGranularity, MetricTimeDimensionTransformNode> by lazy {
-        emptyMap()
+        engine.semanticManifestLookup.timeSpineSources.mapValues { (baseGranularity, timeSpineSource) ->
+            MetricTimeDimensionTransformNode(
+                parentNode = timeSpineReadNodes.getValue(baseGranularity),
+                aggregationTimeDimensionReference = TimeDimensionReference(timeSpineSource.baseColumn),
+            )
+        }
     }
 
     private val sourceNodeBuilder: SourceNodeBuilder by lazy {
@@ -94,7 +96,11 @@ internal class ExplainPipeline(private val engine: MetricFlowEngine) {
     }
 
     private val sourceNodeSet: SourceNodeSet by lazy {
-        sourceNodeBuilder.createFromDataSets(dataSets)
+        // MetricFlow creates semantic-model datasets before SourceNodeBuilder constructs
+        // time-spine datasets. Preserve that order because both use the shared initializer
+        // ID generator and their aliases are part of rendered SQL.
+        val semanticModelDataSets = dataSets
+        sourceNodeBuilder.createFromDataSets(semanticModelDataSets)
     }
 
     private val dataflowPlanBuilder: DataflowPlanBuilder by lazy {

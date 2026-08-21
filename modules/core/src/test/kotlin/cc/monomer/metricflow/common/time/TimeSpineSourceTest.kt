@@ -9,9 +9,12 @@ import cc.monomer.metricflow.domain.manifest.model.TimeSpineCustomGranularityCol
 import cc.monomer.metricflow.domain.manifest.model.TimeSpinePrimaryColumn
 import cc.monomer.metricflow.domain.manifest.model.TimeSpineTableConfiguration
 import cc.monomer.metricflow.domain.manifest.model.enums.TimeGranularity
+import cc.monomer.metricflow.domain.spec.TimeDimensionSpec
+import cc.monomer.metricflow.domain.spec.bind.SqlTable
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertFailsWith
 
 class TimeSpineSourceTest {
 
@@ -142,4 +145,124 @@ class TimeSpineSourceTest {
         val customs = TimeSpineSource.buildCustomTimeSpineSources(listOf(source))
         assertEquals(source, customs["fiscal_quarter"])
     }
+
+    @Test
+    fun `chooseTimeSpineSources selects the coarsest compatible standard spine`() {
+        val sources = linkedMapOf(
+            TimeGranularity.SECOND to source(TimeGranularity.SECOND, "second_spine"),
+            TimeGranularity.MINUTE to source(TimeGranularity.MINUTE, "minute_spine"),
+            TimeGranularity.DAY to source(TimeGranularity.DAY, "day_spine"),
+        )
+
+        val selected = TimeSpineSource.chooseTimeSpineSources(
+            requiredTimeSpineSpecs = sequenceOf(timeSpec(TimeGranularity.HOUR), timeSpec(TimeGranularity.DAY)),
+            timeSpineSources = sources,
+        )
+
+        assertEquals(listOf(sources.getValue(TimeGranularity.MINUTE)), selected)
+    }
+
+    @Test
+    fun `chooseTimeSpineSources adds a standard spine when custom spine cannot satisfy it`() {
+        val customSpine = source(
+            baseGranularity = TimeGranularity.MONTH,
+            tableName = "fiscal_spine",
+            customName = "fiscal_month",
+        )
+        val daySpine = source(TimeGranularity.DAY, "day_spine")
+        val sources = linkedMapOf(
+            TimeGranularity.MONTH to customSpine,
+            TimeGranularity.DAY to daySpine,
+        )
+
+        val selected = TimeSpineSource.chooseTimeSpineSources(
+            requiredTimeSpineSpecs = sequenceOf(
+                customTimeSpec("fiscal_month", TimeGranularity.MONTH),
+                timeSpec(TimeGranularity.DAY),
+            ),
+            timeSpineSources = sources,
+        )
+
+        assertEquals(listOf(daySpine, customSpine), selected)
+    }
+
+    @Test
+    fun `chooseTimeSpineSources uses a custom spine when it also satisfies standard grains`() {
+        val customSpine = source(
+            baseGranularity = TimeGranularity.DAY,
+            tableName = "fiscal_spine",
+            customName = "fiscal_month",
+        )
+        val monthSpine = source(TimeGranularity.MONTH, "month_spine")
+        val sources = linkedMapOf(
+            TimeGranularity.DAY to customSpine,
+            TimeGranularity.MONTH to monthSpine,
+        )
+
+        val selected = TimeSpineSource.chooseTimeSpineSources(
+            requiredTimeSpineSpecs = sequenceOf(
+                customTimeSpec("fiscal_month", TimeGranularity.DAY),
+                timeSpec(TimeGranularity.MONTH),
+            ),
+            timeSpineSources = sources,
+        )
+
+        assertEquals(listOf(customSpine), selected)
+    }
+
+    @Test
+    fun `chooseTimeSpineSources rejects an empty requirement`() {
+        assertFailsWith<IllegalArgumentException> {
+            TimeSpineSource.chooseTimeSpineSources(
+                requiredTimeSpineSpecs = emptySequence(),
+                timeSpineSources = emptyMap(),
+            )
+        }
+    }
+
+    @Test
+    fun `chooseTimeSpineSources reports when no configured spine is fine enough`() {
+        assertFailsWith<cc.monomer.metricflow.common.errors.SemanticManifestConfigurationError> {
+            TimeSpineSource.chooseTimeSpineSources(
+                requiredTimeSpineSpecs = sequenceOf(timeSpec(TimeGranularity.DAY)),
+                timeSpineSources = mapOf(
+                    TimeGranularity.MONTH to source(TimeGranularity.MONTH, "month_spine"),
+                ),
+            )
+        }
+    }
+
+    private fun source(
+        baseGranularity: TimeGranularity,
+        tableName: String,
+        customName: String? = null,
+    ): TimeSpineSource = TimeSpineSource(
+        sqlTable = SqlTable(schemaName = "analytics", tableName = tableName),
+        baseColumn = "ds",
+        baseGranularity = baseGranularity,
+        customGranularities = customName?.let {
+            listOf(TimeSpineCustomGranularityColumn(name = it, columnName = it))
+        } ?: emptyList(),
+    )
+
+    private fun timeSpec(granularity: TimeGranularity): TimeDimensionSpec = TimeDimensionSpec(
+        elementName = "metric_time",
+        entityLinks = emptyList(),
+        timeGranularity = ExpandedTimeGranularity.fromTimeGranularity(granularity),
+        datePart = null,
+        aggregationState = null,
+        windowFunctions = emptyList(),
+        alias = null,
+    )
+
+    private fun customTimeSpec(name: String, baseGranularity: TimeGranularity): TimeDimensionSpec =
+        TimeDimensionSpec(
+            elementName = "metric_time",
+            entityLinks = emptyList(),
+            timeGranularity = ExpandedTimeGranularity(name = name, baseGranularity = baseGranularity),
+            datePart = null,
+            aggregationState = null,
+            windowFunctions = emptyList(),
+            alias = null,
+        )
 }
