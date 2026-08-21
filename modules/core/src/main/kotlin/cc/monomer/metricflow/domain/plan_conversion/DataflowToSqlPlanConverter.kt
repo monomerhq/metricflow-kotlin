@@ -7,6 +7,7 @@ import cc.monomer.metricflow.domain.dataflow.DataflowPlanNode
 import cc.monomer.metricflow.domain.dataflow.dataset.SqlDataSet
 import cc.monomer.metricflow.domain.lookup.SemanticManifestLookup
 import cc.monomer.metricflow.domain.plan_conversion.to_sql_plan.DataflowNodeToSqlSubqueryVisitor
+import cc.monomer.metricflow.domain.plan_conversion.to_sql_plan.DataflowNodeToSqlCteVisitor
 import cc.monomer.metricflow.domain.plan_conversion.to_sql_plan.OutputColumnOrderer
 import cc.monomer.metricflow.domain.spec.ColumnAssociationResolver
 import cc.monomer.metricflow.domain.sql.optimizer.SqlGenerationOptionSet
@@ -83,10 +84,8 @@ class DataflowToSqlPlanConverter(
                 )
 
                 // The Python implementation chooses CTEs via `_get_nodes_to_convert_to_cte`.
-                // The CTE-emitting branch depends on the W10 `DataflowNodeToSqlCteVisitor`
-                // port; we always go through the subquery path for now (matching Python's
-                // `len(nodes_to_convert_to_cte) == 0` branch). `optionSet.allowCte` is honoured
-                // by the future CTE path.
+                // Preserve that choice here so common dataflow branches are shared in the SQL
+                // plan instead of being emitted repeatedly as nested subqueries.
                 val nodesToConvertToCte = if (optionSet.allowCte) {
                     getNodesToConvertToCte(dataflowPlanNode)
                 } else {
@@ -137,14 +136,13 @@ class DataflowToSqlPlanConverter(
             )
             toSqlSubqueryVisitor.getOutputDataSet(dataflowPlanNode)
         } else {
-            // The CTE path requires DataflowNodeToSqlCteVisitor (Python `dataflow_to_cte.py`),
-            // not yet ported. Today we fall back to the subquery visitor.
-            val toSqlSubqueryVisitor = DataflowNodeToSqlSubqueryVisitor(
+            val toSqlCteVisitor = DataflowNodeToSqlCteVisitor(
                 columnAssociationResolver = columnAssociationResolver,
                 semanticManifestLookup = semanticManifestLookup,
+                nodesToConvertToCte = nodesToConvertToCte,
                 outputColumnOrderer = outputColumnOrderer,
             )
-            toSqlSubqueryVisitor.getOutputDataSet(dataflowPlanNode)
+            toSqlCteVisitor.getOutputDataSetWithCtes(dataflowPlanNode)
         }
 
         var sqlNode: SqlPlanNode = dataSet.sqlNode
