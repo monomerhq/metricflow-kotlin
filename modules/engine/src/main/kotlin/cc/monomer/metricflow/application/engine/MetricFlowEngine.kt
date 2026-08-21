@@ -26,19 +26,6 @@ import cc.monomer.metricflow.domain.semantic_graph.attribute_resolution.GroupByI
  * SQL-execution methods (`query`, `get_dimension_values`) which are out of
  * scope for the Kotlin port.
  *
- * ## Wave-W10 status
- *
- * | Entry point | Status |
- * |---|---|
- * | `validateManifest` | **Done** — delegates to [SemanticManifestValidator] |
- * | `listMetrics` | **Done** — iterates manifest metrics, includes dimensions via the simple resolver |
- * | `listDimensions` | **Done** — manifest iteration; metric-filtered variant uses the W7c BFS resolver |
- * | `entitiesForMetrics` | **Done** — uses the W7c BFS resolver |
- * | `listGroupBys` | **Done** — dimensions + entities via the W7c BFS resolver |
- * | `listSavedQueries` | **Done** — iterates the manifest's `saved_queries` block |
- * | `explain` | **Deferred** — depends on `DataflowPlanBuilder.buildPlan` body (W11+) |
- * | `explainGetDimensionValues` | **Deferred** — same dependency chain as `explain` |
- *
  * ## Resolver caveats
  *
  * The W7c resolver is the **first-pass BFS reachability** variant — see
@@ -211,24 +198,16 @@ class MetricFlowEngine(
     /**
      * Render the SQL for a metric query.
      *
-     * **W14 wire-up — chain probed, body deferrals propagate.** The full chain is:
+     * The full chain is:
      *
      *   user input
-     *     → [cc.monomer.metricflow.domain.query.MetricFlowQueryParser.parseAndValidateQuery]   (W14 deferred body — query resolver)
-     *     → [cc.monomer.metricflow.domain.dataflow.builder.DataflowPlanBuilder.buildPlan]      (W14 deferred body — metric-evaluation recursion)
-     *     → [cc.monomer.metricflow.domain.plan_conversion.DataflowToSqlPlanConverter.convertToSqlPlan] (W13 partial: 15/23 visit bodies; W14 deferred: 8 visit bodies)
+     *     → [cc.monomer.metricflow.domain.query.MetricFlowQueryParser.parseAndValidateQuery]
+     *     → [cc.monomer.metricflow.domain.dataflow.builder.DataflowPlanBuilder.buildPlan]
+     *     → [cc.monomer.metricflow.domain.plan_conversion.DataflowToSqlPlanConverter.convertToSqlPlan]
      *     → dialect-specific SQL renderer
      *
-     * As of W14, the engine wiring **calls** the chain (instead of throwing immediately), so
-     * callers receive the first under-the-chain [NotImplementedError] as a concrete deferral
-     * with the missing layer named. This is the scaffolding that lets the diff-runner surface
-     * per-case UNIMPLEMENTED diagnostics. Once the layers below land their bodies, every
-     * corpus case naturally migrates from UNIMPLEMENTED → PASS / FAIL without further wiring.
-     *
-     * The chain is **not** wrapped in extra try/catch — any [NotImplementedError] raised by a
-     * subordinate layer (W14 deferred body) propagates verbatim to the call site, which the
-     * diff-runner then categorises as UNIMPLEMENTED. Other exceptions (genuine bugs) surface
-     * as ERROR.
+     * Time-dependent metric shapes use the configured manifest time spine. A missing compatible
+     * spine is a configuration error; atemporal queries continue through the same pipeline.
      */
     fun explain(request: MetricFlowExplainRequest): MetricFlowExplainResult {
         requireConfiguredTimeSpine(
@@ -263,19 +242,7 @@ class MetricFlowEngine(
                 "Query failed to resolve: ${queryResolution.inputToIssueSet.mergedIssueSet}",
             )
         }
-        val rawQuerySpec = queryResolution.checkedQuerySpec
-            ?: throw IllegalStateException("Query resolved without errors but no spec was produced")
-        // The W14a resolver doesn't yet propagate the request's time-range bounds into the spec
-        // — attach them here so the W14c builder can emit a ConstrainTimeRangeNode.
-        val timeRangeConstraint = buildTimeRangeConstraint(
-            start = parseDateTime(request.timeConstraintStart),
-            end = parseDateTime(request.timeConstraintEnd),
-        )
-        val querySpec = if (timeRangeConstraint != null) {
-            rawQuerySpec.withTimeRangeConstraint(timeRangeConstraint)
-        } else {
-            rawQuerySpec
-        }
+        val querySpec = queryResolution.checkedQuerySpec
 
         // Step 2-4: build the dataflow plan, convert to SQL plan, render.
         val pipeline = explainPipeline
@@ -283,6 +250,7 @@ class MetricFlowEngine(
             querySpec = querySpec,
             dialect = request.dialect,
             outputSelectionSpecs = null,
+            orderOutputColumnsByInputOrder = request.orderOutputColumnsByInputOrder,
         )
         return MetricFlowExplainResult(
             sql = sql,
@@ -347,17 +315,7 @@ class MetricFlowEngine(
                 "Query failed to resolve: ${queryResolution.inputToIssueSet.mergedIssueSet}",
             )
         }
-        val rawQuerySpec = queryResolution.checkedQuerySpec
-            ?: throw IllegalStateException("Query resolved without errors but no spec was produced")
-        val timeRangeConstraint = buildTimeRangeConstraint(
-            start = parseDateTime(request.timeConstraintStart),
-            end = parseDateTime(request.timeConstraintEnd),
-        )
-        val querySpec = if (timeRangeConstraint != null) {
-            rawQuerySpec.withTimeRangeConstraint(timeRangeConstraint)
-        } else {
-            rawQuerySpec
-        }
+        val querySpec = queryResolution.checkedQuerySpec
         // Mirror Python's `InvalidQueryException` for entity group-bys in DIMENSION_VALUES.
         if (querySpec.entitySpecs.isNotEmpty()) {
             throw IllegalArgumentException(
@@ -382,6 +340,7 @@ class MetricFlowEngine(
             querySpec = querySpec,
             dialect = request.dialect,
             outputSelectionSpecs = outputSelectionSpecs,
+            orderOutputColumnsByInputOrder = false,
         )
         return MetricFlowExplainResult(
             sql = sql,
@@ -408,24 +367,6 @@ class MetricFlowEngine(
                 java.time.LocalDate.parse(it).atStartOfDay()
             }
         }
-
-    /**
-     * Build a [cc.monomer.metricflow.common.time.TimeRangeConstraint] from the explain
-     * request's time-constraint bounds. Returns null when either bound is null (no constraint).
-     *
-     * Port of the inline `TimeRangeConstraint` construction in
-     * `MetricFlowEngine._build_query_spec` (Python).
-     */
-    private fun buildTimeRangeConstraint(
-        start: java.time.LocalDateTime?,
-        end: java.time.LocalDateTime?,
-    ): cc.monomer.metricflow.common.time.TimeRangeConstraint? {
-        if (start == null || end == null) return null
-        return cc.monomer.metricflow.common.time.TimeRangeConstraint(
-            startTime = start,
-            endTime = end,
-        )
-    }
 
     /**
      * Reject time-dependent requests before resolution when the manifest has no time spine.
@@ -758,10 +699,6 @@ data class GroupByListing(
  * since SQL execution is out of scope. The `queriedSemanticModels` field mirrors what
  * Python's `MetricFlowEngine.explain` exposes via `query_spec.queried_semantic_models`.
  *
- * **Wave-W14 status — unreachable in practice.** The engine's explain method throws
- * [NotImplementedError] before constructing this result. The type exists so call-site code
- * compiles and so future waves can `return MetricFlowExplainResult(...)` without changing
- * any signatures.
  */
 data class MetricFlowExplainResult(
     val sql: String,

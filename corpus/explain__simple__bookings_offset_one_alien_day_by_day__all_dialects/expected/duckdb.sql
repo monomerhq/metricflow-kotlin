@@ -1,0 +1,82 @@
+-- Compute Metrics via Expressions
+-- Write to DataTable
+SELECT
+  metric_time__day
+  , bookings AS bookings_offset_one_alien_day
+FROM (
+  -- Join to Time Spine Dataset
+  -- Select: ['__bookings', 'metric_time__day']
+  -- Select: ['__bookings', 'metric_time__day']
+  -- Aggregate Inputs for Simple Metrics
+  -- Compute Metrics via Expressions
+  SELECT
+    subq_9.ds__day__lead AS metric_time__day
+    , SUM(subq_5.__bookings) AS bookings
+  FROM (
+    -- Offset Base Granularity By Custom Granularity Period(s)
+    WITH cte_2 AS (
+      -- Read From Time Spine 'mf_time_spine'
+      -- Get Custom Granularity Bounds
+      SELECT
+        ds AS ds__day
+        , alien_day AS ds__alien_day
+        , FIRST_VALUE(ds) OVER (
+          PARTITION BY alien_day
+          ORDER BY ds
+          ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+        ) AS ds__alien_day__first_value
+        , LAST_VALUE(ds) OVER (
+          PARTITION BY alien_day
+          ORDER BY ds
+          ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+        ) AS ds__alien_day__last_value
+        , ROW_NUMBER() OVER (
+          PARTITION BY alien_day
+          ORDER BY ds
+        ) AS ds__day__row_number
+      FROM mf_corpus_2026_05_11_static.mf_time_spine time_spine_src_10006
+    )
+
+    SELECT
+      cte_2.ds__day AS ds__day
+      , CASE
+        WHEN subq_8.ds__alien_day__first_value__lead + INTERVAL (cte_2.ds__day__row_number - 1) day <= subq_8.ds__alien_day__last_value__lead
+          THEN subq_8.ds__alien_day__first_value__lead + INTERVAL (cte_2.ds__day__row_number - 1) day
+        ELSE NULL
+      END AS ds__day__lead
+    FROM cte_2
+    INNER JOIN (
+      -- Offset Custom Granularity Bounds
+      SELECT
+        ds__alien_day
+        , LEAD(ds__alien_day__first_value, 1) OVER (ORDER BY ds__alien_day) AS ds__alien_day__first_value__lead
+        , LEAD(ds__alien_day__last_value, 1) OVER (ORDER BY ds__alien_day) AS ds__alien_day__last_value__lead
+      FROM (
+        -- Get Unique Rows for Custom Granularity Bounds
+        SELECT
+          ds__alien_day
+          , ds__alien_day__first_value
+          , ds__alien_day__last_value
+        FROM cte_2
+        GROUP BY
+          ds__alien_day
+          , ds__alien_day__first_value
+          , ds__alien_day__last_value
+      ) subq_7
+    ) subq_8
+    ON
+      cte_2.ds__alien_day = subq_8.ds__alien_day
+  ) subq_9
+  INNER JOIN (
+    -- Read Elements From Semantic Model 'bookings_source'
+    -- Metric Time Dimension 'ds'
+    SELECT
+      DATE_TRUNC('day', ds) AS metric_time__day
+      , 1 AS __bookings
+    FROM mf_corpus_2026_05_11_static.fct_bookings bookings_source_src_10000
+  ) subq_5
+  ON
+    subq_9.ds__day = subq_5.metric_time__day
+  GROUP BY
+    subq_9.ds__day__lead
+) subq_17

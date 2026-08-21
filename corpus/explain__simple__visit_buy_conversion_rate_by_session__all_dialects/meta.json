@@ -1,0 +1,25 @@
+{
+  "case_id": "explain__simple__visit_buy_conversion_rate_by_session__all_dialects",
+  "subcommand": "explain",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "visit_buy_conversion_rate_by_session"
+    ],
+    "group_by_names": [
+      "visit__referrer_id",
+      "metric_time__day"
+    ]
+  },
+  "dialect_set": [
+    "Trino",
+    "BigQuery",
+    "Snowflake",
+    "Databricks",
+    "Redshift",
+    "DuckDB",
+    "Postgres"
+  ],
+  "source_test": "tests_metricflow/plan_conversion/dataflow_to_sql/test_conversion_metrics_to_sql.py::test_conversion_rate_with_constant_properties",
+  "notes": "Conversion metric with a constant-property equality constraint."
+}

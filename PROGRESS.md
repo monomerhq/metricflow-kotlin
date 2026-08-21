@@ -48,6 +48,9 @@ external-DW Maven bundle is deterministic and verified. The ZIP has only the
 `maven-repository/` root; its marker fixes the canonical artifact-set identity and
 release evidence is uploaded separately. The next step is the orchestrator-owned
 producer release/tag and Monomer consumer integration.
+**Next**: time-spine runtime parity is integrated on the public release architecture;
+rerun the 136-case oracle corpus and public artifact gates before the orchestrator-owned
+producer release/tag and Monomer consumer integration.
 
 ## 진척 표
 
@@ -81,6 +84,7 @@ producer release/tag and Monomer consumer integration.
 | 3 W14c | 2 visit + DERIVED + RATIO 채움, 6 visit + CUMULATIVE + CONVERSION W15 deferred | done | 1 (pass) | (pending commit) | **108/4/0/0 corpus, UNIMPL 0!** |
 | 3 W15 | distinct-values + where-filter Jinja + 시간 spine wiring + 4 FAIL fix | done | 1 (이전 세션 완료, 직접 검증) | (pending commit) | **🎉 corpus 112/0/0/0 100% PASS 🎉** |
 | 5 | API Surface Cleanup + gRPC split + product bundle | in-progress | 1 | pending | **engine transport-free, optional grpc-server, deterministic 8-artifact external-DW bundle with single Maven root/marker; 112/0/0/0 target** |
+| 3 TS0–TS5 | time-spine runtime parity | done | 1 | (pending commit) | 24 targeted cases 포함 **136/136 PASS**, 7 dialect parity; source selection·planner·6 SQL visitor·CTE 공유·time constraint 완료 |
 | 5a | Step 2: internal visibility sweep | not started | — | — | ~436 .kt 파일, docs/PUBLIC_API.md 대조 |
 | 5b | Step 6: gRPC split (engine → core + grpc-server) | done | 1 | pending | `SqlPlanRendererRegistry` seam; engine runtime guard |
 | 6 | Maven publish + BOM + deterministic Monomer bundle | in-progress | 1 | pending | tag release workflow, separate SHA/SBOM/dependency/license/provenance/attestation assets |

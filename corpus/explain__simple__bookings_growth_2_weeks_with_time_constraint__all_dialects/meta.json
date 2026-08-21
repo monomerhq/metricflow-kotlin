@@ -1,0 +1,26 @@
+{
+  "case_id": "explain__simple__bookings_growth_2_weeks_with_time_constraint__all_dialects",
+  "subcommand": "explain",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "bookings_growth_2_weeks"
+    ],
+    "group_by_names": [
+      "metric_time__day"
+    ],
+    "time_constraint_start": "2019-12-19",
+    "time_constraint_end": "2020-01-02"
+  },
+  "dialect_set": [
+    "Trino",
+    "BigQuery",
+    "Snowflake",
+    "Databricks",
+    "Redshift",
+    "DuckDB",
+    "Postgres"
+  ],
+  "source_test": "tests_metricflow/query_rendering/test_derived_metric_rendering.py::test_time_offset_metric_with_time_constraint",
+  "notes": "Offset input is shifted before the original requested range is applied."
+}

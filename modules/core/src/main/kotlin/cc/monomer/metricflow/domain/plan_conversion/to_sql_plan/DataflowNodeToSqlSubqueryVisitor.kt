@@ -162,6 +162,12 @@ class DataflowNodeToSqlSubqueryVisitor(
         return result
     }
 
+    fun cacheOutputDataSets(dataflowPlanNodes: List<DataflowPlanNode>) {
+        for (node in dataflowPlanNodes) {
+            getOutputDataSet(node)
+        }
+    }
+
     private fun nextUniqueTableAlias(): String =
         SequentialIdGenerator.createNextId(StaticIdPrefix.SUB_QUERY).strValue
 
@@ -1109,8 +1115,8 @@ class DataflowNodeToSqlSubqueryVisitor(
         val parentDataSet = getOutputDataSet(node.parentNode)
         val parentAlias = nextUniqueTableAlias()
         val aggInstances = parentDataSet.instancesForTimeDimensions(node.queriedAggTimeDimensionSpecs)
-        val timeSpineDataSet = makeTimeSpineDataSet(aggInstances, node.timeRangeConstraint)
         val timeSpineAlias = nextUniqueTableAlias()
+        val timeSpineDataSet = makeTimeSpineDataSet(aggInstances, node.timeRangeConstraint)
         val joinSpec = chooseInstanceForTimeSpineJoin(aggInstances).spec
         val joinDescription = SqlPlanJoinBuilder.makeCumulativeMetricTimeRangeJoinDescription(
             node = node,
@@ -1167,6 +1173,14 @@ class DataflowNodeToSqlSubqueryVisitor(
         val parentAlias = nextUniqueTableAlias()
         val timeSpineDataSet = getOutputDataSet(node.timeSpineNode)
         val timeSpineAlias = nextUniqueTableAlias()
+        if (node.timeSpineNode is OffsetCustomGranularityNode ||
+            node.timeSpineNode is OffsetBaseGrainByCustomGrainNode
+        ) {
+            // Upstream's two time-spine selectors are removed from the SQL tree but still
+            // consume their deterministic aliases after the join alias is allocated.
+            nextUniqueTableAlias()
+            nextUniqueTableAlias()
+        }
         val requestedSpecs = node.requestedAggTimeDimensionSpecs.toSet()
         val specsFromSpine = requestedSpecs + node.joinOnTimeDimensionSpec
         val parentJoinColumnName = columnAssociationResolver.resolveSpec(node.joinOnTimeDimensionSpec).columnName
@@ -1311,15 +1325,18 @@ class DataflowNodeToSqlSubqueryVisitor(
         )
         return SqlDataSet(
             instanceSet = InstanceSet.merge(
-                listOf(parentDataSet.instanceSet, InstanceSet(
-                    simpleMetricInputInstances = emptyList(),
-                    dimensionInstances = emptyList(),
-                    timeDimensionInstances = listOf(spineInstance),
-                    entityInstances = emptyList(),
-                    groupByMetricInstances = emptyList(),
-                    metricInstances = emptyList(),
-                    metadataInstances = emptyList(),
-                )),
+                listOf(
+                    InstanceSet(
+                        simpleMetricInputInstances = emptyList(),
+                        dimensionInstances = emptyList(),
+                        timeDimensionInstances = listOf(spineInstance),
+                        entityInstances = emptyList(),
+                        groupByMetricInstances = emptyList(),
+                        metricInstances = emptyList(),
+                        metadataInstances = emptyList(),
+                    ),
+                    parentDataSet.instanceSet,
+                ),
             ),
             sqlSelectNode = SqlSelectStatementNode.create(
                 description = parentDataSet.checkedSqlSelectNode.description + "\n" + node.description,
@@ -1900,7 +1917,9 @@ class DataflowNodeToSqlSubqueryVisitor(
         val uniqueCustomColumn = SqlSelectColumn.fromColumnReference(uniqueAlias, customInstance.associatedColumn.columnName)
         val offsetBoundColumns = boundColumns.mapIndexed { index, boundColumn ->
             val boundInstance = boundInstances[index]
-            val offsetSpec = boundInstance.spec.withWindowFunctions(listOf(SqlWindowFunction.LEAD))
+            val offsetSpec = boundInstance.spec.withWindowFunctions(
+                boundInstance.spec.windowFunctions + SqlWindowFunction.LEAD,
+            )
             SqlSelectColumn(
                 expr = SqlWindowFunctionExpression.create(
                     sqlFunction = SqlWindowFunction.LEAD,
@@ -1959,7 +1978,10 @@ class DataflowNodeToSqlSubqueryVisitor(
             rightSourceAlias = offsetAlias,
             joinType = SqlJoinType.INNER,
             onCondition = SqlComparisonExpression.create(
-                leftExpr = customExpr,
+                leftExpr = SqlColumnReferenceExpression.fromColumnReference(
+                    cteAlias,
+                    customInstance.associatedColumn.columnName,
+                ),
                 comparison = SqlComparison.EQUALS,
                 rightExpr = uniqueCustomColumn.referenceFrom(offsetAlias),
             ),

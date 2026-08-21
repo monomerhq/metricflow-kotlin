@@ -1,0 +1,26 @@
+{
+  "case_id": "explain__simple__bookings_all_time_with_time_constraint__all_dialects",
+  "subcommand": "explain",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "bookings_all_time"
+    ],
+    "group_by_names": [
+      "metric_time__day"
+    ],
+    "time_constraint_start": "2020-01-01",
+    "time_constraint_end": "2020-01-01"
+  },
+  "dialect_set": [
+    "Trino",
+    "BigQuery",
+    "Snowflake",
+    "Databricks",
+    "Redshift",
+    "DuckDB",
+    "Postgres"
+  ],
+  "source_test": "tests_metricflow/query_rendering/test_cumulative_metric_rendering.py::test_cumulative_metric_no_window_with_time_constraint",
+  "notes": "Unbounded cumulative source starts at all-time begin, then narrows to the requested day."
+}

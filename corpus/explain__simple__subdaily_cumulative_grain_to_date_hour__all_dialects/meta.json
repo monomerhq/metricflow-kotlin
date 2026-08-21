@@ -1,0 +1,24 @@
+{
+  "case_id": "explain__simple__subdaily_cumulative_grain_to_date_hour__all_dialects",
+  "subcommand": "explain",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "subdaily_cumulative_grain_to_date_metric"
+    ],
+    "group_by_names": [
+      "metric_time__hour"
+    ]
+  },
+  "dialect_set": [
+    "Trino",
+    "BigQuery",
+    "Snowflake",
+    "Databricks",
+    "Redshift",
+    "DuckDB",
+    "Postgres"
+  ],
+  "source_test": "tests_metricflow/query_rendering/test_granularity_date_part_rendering.py::test_subdaily_cumulative_grain_to_date_metric",
+  "notes": "Sub-daily grain-to-date cumulative metric."
+}

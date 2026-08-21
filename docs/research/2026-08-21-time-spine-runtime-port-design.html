@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="monomer:status" content="implemented" />
+<meta name="monomer:summary" content="MetricFlow 0.210.0의 time-spine runtime을 Kotlin에 정직하게 포팅하기 위한 범위, 구조, 순서, conformance gate 설계." />
+<meta name="monomer:related" content="../../CLAUDE.md, ../../PROGRESS.md, ../dependency-dag.md, ../scope.md" />
+<title>MetricFlow time-spine runtime port — parity plan</title>
+<style>
+  :root{--ivory:#FAF9F5;--paper:#FFF;--oat-soft:rgba(227,218,204,.35);--gray-150:#F0EEE6;--gray-300:#D1CFC5;--gray-500:#87867F;--gray-700:#3D3D3A;--slate:#141413;--clay:#D97757;--error:#B04A3F;--serif:"Iowan Old Style",Charter,Palatino,Georgia,serif;--sans:-apple-system,Inter,"Segoe UI",system-ui,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,monospace;--measure:680px;--border:1.5px solid var(--gray-300)}
+  *{box-sizing:border-box}html,body{margin:0}body{background:var(--ivory);color:var(--gray-700);font:16px/1.65 var(--sans);-webkit-font-smoothing:antialiased}.page{max-width:1240px;margin:auto;padding:64px 32px 150px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:64px;align-items:start}.sidebar{position:sticky;top:32px;max-height:calc(100vh - 64px);overflow:auto;font-size:14px}.sidebar h4,.eyebrow,.stage-num,.card-tag,.refs,.meta{font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em}.sidebar h4,.eyebrow,.meta{font-size:11px;color:var(--gray-500)}nav ol{list-style:none;padding:0;margin:0;border-left:2px solid var(--gray-150)}nav a{display:block;padding:7px 12px;color:var(--gray-700);text-decoration:none}.num{display:inline-block;width:29px;color:var(--gray-500);font:11px var(--mono)}.meta{margin-top:28px;line-height:1.8;text-transform:none;letter-spacing:0}.meta dt,.meta dd{display:inline;margin:0}.content{min-width:0}.content p,.content ul,.content ol,.content .lead,.content .lede{max-width:var(--measure)}h1,h2,h3,h4{font-family:var(--serif);font-weight:500;color:var(--slate);letter-spacing:-.012em}h1{font-size:48px;line-height:1.08;margin:0 0 18px}h1 em{color:var(--clay)}h2{font-size:28px;line-height:1.2;margin:0 0 12px}.lede{font:22px/1.5 var(--serif);margin:0 0 36px}.stage{margin-top:80px;scroll-margin-top:32px}.stage-num{font-size:11px;color:var(--clay);margin:0 0 6px}.lead{font-size:17.5px;line-height:1.55;color:var(--slate);margin:8px 0 20px}.tldr,.tip{background:var(--paper);border:var(--border);border-left:3px solid var(--clay);border-radius:12px;padding:18px 22px;margin:0 0 48px;max-width:var(--measure)}.tldr-label{font:500 10.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--clay);margin:0 0 8px}.tldr p:last-child,.tip p:last-child{margin-bottom:0}.note{background:var(--oat-soft);border-radius:8px;padding:14px 18px;margin:18px 0;max-width:var(--measure);font-size:14.5px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{background:var(--paper);border:var(--border);border-radius:12px;padding:20px}.card-tag{font-size:10px;color:var(--clay);margin:0 0 8px}.card h4{font-size:19px;margin:0 0 8px}.card p{font-size:14.5px;margin:0}.facts{width:100%;border-collapse:collapse;margin:20px 0}.facts th,.facts td{border-bottom:1px solid var(--gray-300);padding:12px 10px;text-align:left;vertical-align:top}.facts th{width:190px;font:12px var(--mono);color:var(--slate)}code{font:0.88em var(--mono);background:var(--gray-150);padding:1px 5px;border-radius:4px;color:var(--slate)}.flow{padding-left:22px}.flow li{margin:8px 0}.diagram{background:var(--paper);border:var(--border);border-radius:12px;padding:20px;margin:22px 0}.diagram svg{display:block;width:100%;height:auto}.diagram figcaption{margin-top:12px;font:11px var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--gray-500)}details{background:var(--paper);border:var(--border);border-radius:12px;padding:14px 18px;margin:18px 0;max-width:var(--measure)}summary{cursor:pointer;color:var(--slate)}a{color:var(--clay)}.refs{display:flex;flex-direction:column;gap:6px;font-size:11px;text-transform:none;letter-spacing:0;color:var(--gray-500)}strong{color:var(--slate)}.error{color:var(--error)}
+  @media(max-width:920px){.page{grid-template-columns:1fr;gap:38px;padding:36px 22px 100px}.sidebar{position:static;max-height:none}.cards{grid-template-columns:1fr}h1{font-size:39px}.facts th{width:130px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <aside class="sidebar">
+    <p class="eyebrow">MetricFlow Kotlin · Design</p>
+    <h4>Contents</h4>
+    <nav><ol>
+      <li><a href="#s1"><span class="num">01</span>결론</a></li>
+      <li><a href="#s2"><span class="num">02</span>현재 gap</a></li>
+      <li><a href="#s3"><span class="num">03</span>Upstream 구조</a></li>
+      <li><a href="#s4"><span class="num">04</span>목표 구조</a></li>
+      <li><a href="#s5"><span class="num">05</span>포팅 wave</a></li>
+      <li><a href="#s6"><span class="num">06</span>Conformance</a></li>
+      <li><a href="#s7"><span class="num">07</span>경계</a></li>
+      <li><a href="#s8"><span class="num">08</span>확정 범위</a></li>
+    </ol></nav>
+    <div class="meta"><dl>
+      <div><dt>status:</dt> <dd>implemented</dd></div>
+      <div><dt>updated:</dt> <dd>2026-08-21</dd></div>
+      <div><dt>upstream:</dt> <dd>MetricFlow 0.210.0</dd></div>
+      <div><dt>branch:</dt> <dd>codex/time-spine-port</dd></div>
+    </dl></div>
+  </aside>
+
+  <main class="content">
+    <header>
+      <p class="eyebrow">Python oracle parity · no product shortcuts</p>
+      <h1>Time-spine runtime —<br/><em>축약 경로를 정본 흐름으로 되돌린다</em></h1>
+      <p class="lede">이 작업은 table model 하나를 더하는 수준이 아니다. 이미 포팅된 manifest·node·renderer 위에 source 선택, metric-evaluation recipe, dataflow planning, 여섯 SQL 변환 경로를 순서대로 연결해야 한다.</p>
+      <div class="tldr">
+        <p class="tldr-label">Implementation result</p>
+        <p><strong>Option A의 TS0–TS5를 완료했다.</strong> 새 제품 개념 없이 upstream 0.210.0의 source 선택, cumulative·conversion·offset planner, 여섯 SQL 변환과 shared CTE 경계를 포팅했다. 24개 targeted case를 더한 136-case corpus가 모든 지원 dialect에서 일치하며 전체 test와 공개 artifact gate가 통과한다.</p>
+      </div>
+    </header>
+
+    <section class="stage" id="s1">
+      <p class="stage-num">01 · DECISION</p>
+      <h2>부분 patch가 아니라 upstream 실행 파이프라인을 포팅한다</h2>
+      <p class="lead">현재 축약된 <code>buildSingleMetricBranch</code>에 type별 분기를 계속 붙이면 Python의 metric-evaluation plan과 다시 갈라진다.</p>
+      <div class="cards">
+        <article class="card"><p class="card-tag">first</p><h4>표준 경로</h4><p>DAY spine, explicit join-to-spine, cumulative, conversion, standard offset를 먼저 닫아 Monomer query를 unblock한다.</p></article>
+        <article class="card"><p class="card-tag">then</p><h4>전체 parity</h4><p>custom grain, multiple spine, sub-day, nested offset와 filter 조합까지 upstream 0.210.0 의미를 보존한다.</p></article>
+        <article class="card"><p class="card-tag">never</p><h4>제품 shortcut 없음</h4><p>Monomer 전용 DAY 가정, Control SQL patch, 숨은 fallback, capability flag를 public engine에 넣지 않는다.</p></article>
+      </div>
+    </section>
+
+    <section class="stage" id="s2">
+      <p class="stage-num">02 · CURRENT GAP</p>
+      <h2>Type은 있지만 runtime wiring이 비어 있다</h2>
+      <table class="facts">
+        <tr><th>Source selection</th><td>Kotlin <code>TimeSpineSource</code>에는 upstream <code>choose_time_spine_sources</code>가 없다. compatible standard/custom source를 고르는 정본 규칙이 아직 실행되지 않는다.</td></tr>
+        <tr><th>Engine composition</th><td><code>ExplainPipeline.timeSpineReadNodes</code>와 <code>timeSpineMetricTimeNodes</code>가 명시적으로 <code>emptyMap()</code>이다.</td></tr>
+        <tr><th>Planner</th><td><code>DataflowPlanBuilder</code>는 cumulative·conversion·metric offset을 <code>NotImplementedError</code>로 종료한다. Python 2,489줄에 대응하는 Kotlin builder는 849줄의 축약 경로다.</td></tr>
+        <tr><th>SQL conversion</th><td><code>JoinOverTimeRange</code>, <code>JoinToTimeSpine</code>, <code>JoinToCustomGranularity</code>, <code>JoinConversionEvents</code>, 두 custom-offset visitor가 deferred다.</td></tr>
+        <tr><th>Already present</th><td>Manifest model, <code>TimeSpineSource</code> 기본 map, time-spine dataset converter, dataflow node family, join-expression helpers, cumulative/conversion metric-evaluation node는 이미 있다.</td></tr>
+      </table>
+      <p class="tip"><strong>PROGRESS의 “W15 time spine wiring done”은 corpus 상태를 과대해석한 기록이다.</strong> 기준선은 실제로 <code>112 PASS / 0 FAIL</code>이지만 선택된 29 explain case는 simple·derived·ratio 중심이며, 위 deferred runtime을 통과하지 않는다.</p>
+    </section>
+
+    <section class="stage" id="s3">
+      <p class="stage-num">03 · UPSTREAM MAP</p>
+      <h2>Python에서는 세 계층이 하나의 계약을 이룬다</h2>
+      <table class="facts">
+        <tr><th>TimeSpineSource</th><td>요청 time spec에 compatible한 standard source를 고르고 custom grain은 그 column을 선언한 source에 고정한다.</td></tr>
+        <tr><th>DataflowPlanBuilder</th><td>metric-evaluation plan을 방문해 cumulative·conversion·derived input recipe를 만들고, before/nested/after aggregation 위치에 적절한 spine join node를 삽입한다.</td></tr>
+        <tr><th>SQL visitor</th><td>선택된 spine dataset을 SQL source로 바꾸고 time-range, equality, conversion-event, custom-offset join expression을 렌더 가능한 SQL plan으로 낮춘다.</td></tr>
+      </table>
+      <div class="diagram">
+        <svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MetricFlow time spine source부터 SQL renderer까지의 파이프라인">
+          <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#87867F"/></marker><style>.n{fill:#fff;stroke:#D1CFC5;stroke-width:1.5}.x{fill:rgba(227,218,204,.5);stroke:#D97757;stroke-width:1.5}.e{stroke:#87867F;stroke-width:1.3;marker-end:url(#a)}.l{font:500 13px -apple-system,system-ui;fill:#141413}.s{font:11px -apple-system,system-ui;fill:#87867F}</style></defs>
+          <rect class="n" x="20" y="75" width="145" height="105" rx="8"/><text class="l" x="92" y="108" text-anchor="middle">Manifest</text><text class="s" x="92" y="136" text-anchor="middle">time_spines[]</text>
+          <line class="e" x1="165" y1="127" x2="200" y2="127"/>
+          <rect class="x" x="200" y="55" width="165" height="145" rx="8"/><text class="l" x="282" y="91" text-anchor="middle">Source selection</text><text class="s" x="282" y="119" text-anchor="middle">compatible grain</text><text class="s" x="282" y="140" text-anchor="middle">read + metric_time nodes</text>
+          <line class="e" x1="365" y1="127" x2="400" y2="127"/>
+          <rect class="n" x="400" y="55" width="165" height="145" rx="8"/><text class="l" x="482" y="91" text-anchor="middle">Evaluation + recipe</text><text class="s" x="482" y="119" text-anchor="middle">cumulative / conversion</text><text class="s" x="482" y="140" text-anchor="middle">offset placement</text>
+          <line class="e" x1="565" y1="127" x2="600" y2="127"/>
+          <rect class="x" x="600" y="55" width="145" height="145" rx="8"/><text class="l" x="672" y="91" text-anchor="middle">Dataflow → SQL</text><text class="s" x="672" y="119" text-anchor="middle">6 visitor paths</text><text class="s" x="672" y="140" text-anchor="middle">join expressions</text>
+          <line class="e" x1="745" y1="127" x2="780" y2="127"/>
+          <rect class="n" x="780" y="75" width="100" height="105" rx="8"/><text class="l" x="830" y="108" text-anchor="middle">Dialect</text><text class="s" x="830" y="136" text-anchor="middle">SQL</text>
+        </svg>
+        <figcaption>어느 한 계층만 채우면 plan은 생성돼도 SQL이 내려가지 않거나, 잘못된 spine을 고른다.</figcaption>
+      </div>
+    </section>
+
+    <section class="stage" id="s4">
+      <p class="stage-num">04 · TARGET STRUCTURE</p>
+      <h2>기존 upstream vocabulary로 수렴한다</h2>
+      <ol class="flow">
+        <li><code>ExplainPipeline</code>이 manifest에서 standard spine source를 만들고 raw read node와 metric-time transform node를 구성한다.</li>
+        <li><code>SourceNodeSet</code>이 semantic-model source와 spine source를 같은 planning input으로 제공한다.</li>
+        <li><code>DataflowPlanBuilder</code>가 이미 포팅된 <code>MetricEvaluationPlan</code> visitor와 upstream recipe 흐름을 사용한다.</li>
+        <li>cumulative·conversion·offset·join-to-spine은 기존 dataflow node로 표현한다. 새 node나 별도 planner hierarchy를 만들지 않는다.</li>
+        <li><code>DataflowNodeToSqlSubqueryVisitor</code>가 upstream 메서드를 idiomatic Kotlin으로 포팅하고 기존 <code>SqlJoinBuilder</code> helper를 재사용한다.</li>
+      </ol>
+      <p class="note">현재 simple/derived/ratio 축약 구현은 바로 삭제하지 않는다. upstream visitor 흐름이 동일 corpus를 통과한 wave에서 교체하고, dual path나 feature flag 없이 하나의 canonical builder만 남긴다.</p>
+    </section>
+
+    <section class="stage" id="s5">
+      <p class="stage-num">05 · PORT WAVES</p>
+      <h2>의존 순서대로 여섯 wave로 나눈다</h2>
+      <table class="facts">
+        <tr><th>TS0 · Oracle gate</th><td>현재 corpus에 targeted explain case를 추가한다. standard join, cumulative, conversion, offset, custom grain, multiple spine의 Python SQL을 먼저 고정한다.</td></tr>
+        <tr><th>TS1 · Sources</th><td><code>chooseTimeSpineSources</code>, engine composition의 read/metric-time node map, source selection unit test를 포팅한다. 기존 atemporal empty-spine 계약을 유지한다.</td></tr>
+        <tr><th>TS2 · Planner</th><td>metric-evaluation plan visitor, cumulative/conversion output builder, simple/derived input recipe, before/nested/after aggregation spine join을 upstream 구조로 수렴시킨다.</td></tr>
+        <tr><th>TS3 · Standard SQL</th><td>time-range join, explicit time-spine join, conversion event join과 standard <code>offsetWindow</code>/<code>offsetToGrain</code> SQL 변환을 포팅한다. 여기서 Monomer의 daily path가 열린다.</td></tr>
+        <tr><th>TS4 · Custom/full</th><td>custom granularity join, 두 custom-offset visitor, multiple/sub-day spine 선택, filter·multi-metric 조합을 닫는다.</td></tr>
+        <tr><th>TS5 · Release gate</th><td>targeted corpus 전 dialect parity, 기존 112-case regression, 전체 test, <code>verifyPublicArtifact</code>, 남은 time-spine <code>NotImplementedError</code> 0건을 확인한다.</td></tr>
+      </table>
+      <p class="tip"><strong>각 wave는 test-green commit 단위다.</strong> 하지만 public artifact를 “time-spine complete”로 선언하는 기준은 TS5다. 중간 wave를 완료 상태로 포장하지 않는다.</p>
+    </section>
+
+    <section class="stage" id="s6">
+      <p class="stage-num">06 · CONFORMANCE</p>
+      <h2>112 PASS를 유지하면서 빠진 축을 추가한다</h2>
+      <table class="facts">
+        <tr><th>Standard</th><td>simple <code>join_to_timespine</code>, MetricTime + bound, cumulative all-time/window/grain-to-date, conversion with/without window, standard offset window/to-grain.</td></tr>
+        <tr><th>Composition</th><td>nested cumulative input, derived/ratio offset, multiple metrics, query/metric filter, selected·unselected time filter, non-additive input.</td></tr>
+        <tr><th>Grain</th><td>DAY source → coarser query, multiple standard sources, sub-day source, custom grain, date part와 custom offset.</td></tr>
+        <tr><th>Dialect</th><td>Default, Trino, BigQuery, Snowflake, Databricks, Redshift, DuckDB, Postgres. SQL normalizer는 기존 의미 보존 규칙만 사용한다.</td></tr>
+        <tr><th>Negative</th><td>atemporal query + empty spine은 성공, time-dependent query + empty/incompatible spine은 명시적 configuration error.</td></tr>
+      </table>
+      <p class="note">Upstream snapshot 경로에는 이름 기준으로 cumulative 438, conversion 336, offset 549, time_spine 317, custom_granularity 400개 파일이 있다. 서로 겹치므로 합산하지 않으며, TS0에서 의미 조합을 대표하는 최소 matrix를 추출한 뒤 full snapshot family로 확대한다.</p>
+    </section>
+
+    <section class="stage" id="s7">
+      <p class="stage-num">07 · BOUNDARIES</p>
+      <h2>새 제품 개념과 실행 책임은 만들지 않는다</h2>
+      <ul class="flow">
+        <li><code>python_oracle/upstream</code>은 읽기 전용이며 기준 version은 0.210.0으로 고정한다.</li>
+        <li>엔진은 manifest → SQL까지만 소유한다. warehouse 연결·table 생성·data-quality 검사는 넣지 않는다.</li>
+        <li>Monomer의 connector, Catalog, TimeSpine 저장 모델을 public library에 역으로 노출하지 않는다.</li>
+        <li>새 lifecycle, capability registry, fallback SQL, version identity를 만들지 않는다.</li>
+        <li>upstream domain 이름과 기존 dataflow node를 유지하고, Kotlin에서 필요한 immutable collection·sealed type 표현만 사용한다.</li>
+        <li>현재 atemporal behavior와 모든 기존 public artifact test는 회귀 불가 gate다.</li>
+      </ul>
+    </section>
+
+    <section class="stage" id="s8">
+      <p class="stage-num">08 · FROZEN SCOPE</p>
+      <h2>표준 경로부터 full parity까지 같은 task에서 완료한다</h2>
+      <p class="lead"><strong>2026-08-21 사용자 결정으로 Option A를 확정했다.</strong></p>
+      <table class="facts">
+        <tr><th>확정 · Option A</th><td>TS0→TS5 전체를 진행한다. TS3에서 Monomer를 unblock하지만 task 완료와 새 public release 후보는 custom/multiple-spine까지 닫힌 TS5로 본다.</td></tr>
+        <tr><th>기각 · Option B</th><td>TS3까지만 먼저 release하고 TS4를 후속 task로 두지 않는다. Public library의 부분 포팅 상태와 이중 완료 기준을 만들지 않는다.</td></tr>
+      </table>
+      <p class="tip"><strong>현재 기술 blocker는 없다.</strong> 필요한 upstream source, node model, renderer helper, Python snapshots가 모두 로컬에 있다. 새 blocker가 확인되면 우회하지 않고 구현을 멈춰 보고한다.</p>
+      <details><summary><strong>완료 증거</strong></summary><p>기존 112 corpus를 수정하지 않고 upstream fixture/snapshot에서 24개 time-spine query를 추가했다. 최종 결과는 136 PASS / 0 FAIL / 0 UNIMPLEMENTED / 0 ERROR이며, <code>./gradlew test</code>와 <code>./gradlew verifyPublicArtifact</code>도 통과했다.</p></details>
+    </section>
+
+    <footer class="stage">
+      <p class="stage-num">SOURCE MAP</p>
+      <div class="refs">
+        <span>python_oracle/upstream/metricflow_semantics/time/time_spine_source.py</span>
+        <span>python_oracle/upstream/metricflow/dataflow/builder/dataflow_plan_builder.py</span>
+        <span>python_oracle/upstream/metricflow/plan_conversion/to_sql_plan/dataflow_to_subquery.py</span>
+        <span>modules/core/.../common/time/TimeSpineSource.kt</span>
+        <span>modules/core/.../dataflow/builder/DataflowPlanBuilder.kt</span>
+        <span>modules/core/.../plan_conversion/to_sql_plan/DataflowNodeToSqlSubqueryVisitor.kt</span>
+        <span>modules/engine/.../ExplainPipeline.kt</span>
+      </div>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

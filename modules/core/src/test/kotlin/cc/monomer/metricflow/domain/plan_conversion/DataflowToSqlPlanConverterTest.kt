@@ -11,11 +11,7 @@ import cc.monomer.metricflow.domain.plan_conversion.to_sql_plan.DataflowNodeToSq
 import cc.monomer.metricflow.domain.spec.ColumnAssociation
 import cc.monomer.metricflow.domain.spec.ColumnAssociationResolver
 import cc.monomer.metricflow.domain.spec.InstanceSpec
-import cc.monomer.metricflow.domain.spec.MetricSpec
-import cc.monomer.metricflow.domain.sql.optimizer.SqlOptimizationLevel
-import cc.monomer.metricflow.domain.sql.render.SqlEngine
 import kotlin.test.Test
-import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 
 class DataflowToSqlPlanConverterTest {
@@ -66,30 +62,6 @@ class DataflowToSqlPlanConverterTest {
             semanticManifestLookup = emptyLookup(),
             outputColumnOrderer = null,
         )
-        // W14-deferred visitors still raise NotImplementedError.
-        assertFailsWith<NotImplementedError> {
-            visitor.visitJoinOverTimeRangeNode(
-                node = cc.monomer.metricflow.domain.dataflow.nodes.JoinOverTimeRangeNode(
-                    parentNode = fakeParentNode(),
-                    queriedAggTimeDimensionSpecs = emptyList(),
-                    window = null,
-                    grainToDate = null,
-                    timeRangeConstraint = null,
-                ),
-            )
-        }
-        // Reference MetricSpec to keep the import warm and confirm spec wiring builds.
-        @Suppress("UnusedExpression") MetricSpec.fromElementName("x")
-
-        // Reference SqlEngine + SqlOptimizationLevel to keep the import graph warm.
-        @Suppress("UnusedExpression") SqlEngine.BIGQUERY
-        @Suppress("UnusedExpression") SqlOptimizationLevel.DEFAULT_LEVEL
+        assertNotNull(visitor)
     }
-
-    private fun fakeParentNode(): cc.monomer.metricflow.domain.dataflow.DataflowPlanNode =
-        cc.monomer.metricflow.domain.dataflow.nodes.ReadSqlSourceNode(
-            dataSet = object : cc.monomer.metricflow.domain.dataflow.support.SqlDataSet {
-                override val semanticModelReference: cc.monomer.metricflow.domain.manifest.model.references.SemanticModelReference? = null
-            },
-        )
 }

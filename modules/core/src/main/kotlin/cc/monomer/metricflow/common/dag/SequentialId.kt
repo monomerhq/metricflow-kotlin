@@ -24,7 +24,7 @@ object SequentialIdGenerator {
 
     private data class State(
         val defaultStartValue: Int,
-        val prefixToNextValue: Map<IdPrefix, Int>,
+        val prefixToNextValue: Map<String, Int>,
     )
 
     private val stack: ThreadLocal<ArrayDeque<State>> = ThreadLocal.withInitial {
@@ -41,8 +41,9 @@ object SequentialIdGenerator {
     /** Returns the next sequential ID under the given [idPrefix]. */
     fun createNextId(idPrefix: IdPrefix): SequentialId {
         val state = currentState()
-        val nextIndex = state.prefixToNextValue[idPrefix] ?: state.defaultStartValue
-        val newState = state.copy(prefixToNextValue = state.prefixToNextValue + (idPrefix to nextIndex + 1))
+        val prefixValue = idPrefix.strValue
+        val nextIndex = state.prefixToNextValue[prefixValue] ?: state.defaultStartValue
+        val newState = state.copy(prefixToNextValue = state.prefixToNextValue + (prefixValue to nextIndex + 1))
         replaceTop(newState)
         return SequentialId(idPrefix, nextIndex)
     }
