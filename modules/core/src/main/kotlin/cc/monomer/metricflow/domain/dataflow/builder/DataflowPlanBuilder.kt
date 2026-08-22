@@ -40,6 +40,7 @@ import cc.monomer.metricflow.domain.dataflow.support.NullFillValueMapping
 import cc.monomer.metricflow.domain.lookup.SemanticManifestLookup
 import cc.monomer.metricflow.domain.manifest.model.enums.MetricType
 import cc.monomer.metricflow.domain.manifest.model.enums.TimeGranularity
+import cc.monomer.metricflow.domain.metric_evaluation.plan.MetricEvaluationPlan
 import cc.monomer.metricflow.domain.plan_conversion.to_sql_plan.DataflowNodeToSqlSubqueryVisitor
 import cc.monomer.metricflow.domain.semantic_graph.SemanticManifestGraphLookup
 import cc.monomer.metricflow.domain.spec.ColumnAssociationResolver
@@ -127,6 +128,11 @@ class DataflowPlanBuilder(
         outputSelectionSpecs: InstanceSpecSet?,
         optimizations: Set<DataflowPlanOptimization>,
     ): DataflowPlan {
+        metricLookup.validateMetricDefinitionDependencies(
+            rootMetricReferences = querySpec.metricSpecs.map { it.reference },
+            maximumMetricLevels = MetricEvaluationPlan.MAX_METRIC_DEFINITION_RECURSION_DEPTH,
+        )
+
         val metricsOutputNode = buildQueryOutputNode(querySpec)
 
         var current = metricsOutputNode
@@ -162,7 +168,7 @@ class DataflowPlanBuilder(
      * Dispatches by metric type:
      *
      * - `SIMPLE` (single metric) → [buildSimpleMetricBranch]
-     * - `DERIVED` / `RATIO` (single metric, all inputs simple) → [buildDerivedOrRatioBranch]
+     * - `DERIVED` / `RATIO` → [buildDerivedOrRatioBranch], recursively building non-simple inputs
      *   — inputs sharing a model are merged into one aggregation; cross-model inputs combine
      *   via [CombineAggregatedOutputsNode] (Python `_build_derived_metric_output_node`).
      * - Multi-metric queries → each metric is built independently, then combined via
@@ -621,7 +627,32 @@ class DataflowPlanBuilder(
             else -> error("buildDerivedOrRatioBranch called with type=$metricType")
         }
 
-        // Resolve each input metric to its underlying SimpleMetricInput (model + agg_time_dim).
+        val inputMetrics = inputMetricSpecs.map { inputMetricSpec ->
+            metricLookup.getMetric(inputMetricSpec.reference)
+        }
+        if (inputMetrics.any { it.type != MetricType.SIMPLE }) {
+            val inputBranches = inputMetricSpecs.map { inputMetricSpec ->
+                buildSingleMetricBranch(
+                    querySpec = querySpec,
+                    metricSpec = inputMetricSpec,
+                    whereFilterSpecs = whereFilterSpecs,
+                )
+            }
+            val combinedInputs = if (inputBranches.size == 1) {
+                inputBranches.single()
+            } else {
+                CombineAggregatedOutputsNode(parentNodes = inputBranches)
+            }
+            return ComputeMetricsNode.create(
+                parentNode = combinedInputs,
+                computedMetricSpecs = listOf(metricSpec),
+                passthroughMetricSpecs = emptyList(),
+                aggregatedToElements = querySpec.linkableSpecs.asTuple.toSet(),
+                outputGroupByMetricInstances = false,
+            )
+        }
+
+        // Resolve each simple input metric to its underlying SimpleMetricInput (model + agg_time_dim).
         data class InputInfo(
             val metricSpec: MetricSpec,
             val simpleInputName: String,
@@ -629,13 +660,6 @@ class DataflowPlanBuilder(
             val aggTimeDim: String,
         )
         val inputInfos = inputMetricSpecs.map { ms ->
-            val inputMetric = metricLookup.getMetric(ms.reference)
-            if (inputMetric.type != MetricType.SIMPLE) {
-                throw NotImplementedError(
-                    "Derived/RATIO metric '${metric.name}' has a non-SIMPLE input '${ms.elementName}' " +
-                        "(${inputMetric.type}). Nested derived inputs are W15 scope.",
-                )
-            }
             val sim = manifestObjectLookup.simpleMetricNameToInput[ms.elementName]
                 ?: throw NotImplementedError(
                     "Input metric '${ms.elementName}' of '${metric.name}' has no registered " +

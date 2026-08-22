@@ -14,6 +14,7 @@ import cc.monomer.metricflow.domain.manifest.model.references.MetricReference
 import cc.monomer.metricflow.domain.manifest.model.references.SemanticModelElementReference
 import cc.monomer.metricflow.domain.manifest.validation.SemanticManifestValidationResults
 import cc.monomer.metricflow.domain.manifest.validation.SemanticManifestValidator
+import cc.monomer.metricflow.domain.metric_evaluation.plan.MetricEvaluationPlan
 import cc.monomer.metricflow.domain.semantic_graph.SemanticManifestGraphLookup
 import cc.monomer.metricflow.domain.semantic_graph.attribute_resolution.AnnotatedSpec
 import cc.monomer.metricflow.domain.semantic_graph.attribute_resolution.GroupByItemSet
@@ -84,6 +85,10 @@ class MetricFlowEngine(
      */
     fun listMetrics(includeDimensions: Boolean): List<EngineMetric> {
         val metricLookup = semanticManifestLookup.metricLookup
+        metricLookup.validateMetricDefinitionDependencies(
+            rootMetricReferences = metricLookup.metricReferences,
+            maximumMetricLevels = MetricEvaluationPlan.MAX_METRIC_DEFINITION_RECURSION_DEPTH,
+        )
         val out = mutableListOf<EngineMetric>()
         for (pydanticMetric in metricLookup.getMetrics(metricLookup.metricReferences)) {
             if (pydanticMetric.typeParams.isPrivate == true) continue
@@ -141,6 +146,7 @@ class MetricFlowEngine(
 
     /** List all entities reachable from the specified metric set. */
     fun entitiesForMetrics(metricNames: List<String>): List<EngineEntity> {
+        checkMetricNames(metricNames)
         val groupByItemSet = resolveCommonGroupByItems(
             metricNames = metricNames,
             filter = GroupByItemSetFilter.create(
@@ -169,6 +175,7 @@ class MetricFlowEngine(
             val dims = listDimensions(metricNames = null, orderBy = orderBy)
             return GroupByListing(dimensions = dims, entities = emptyList())
         }
+        checkMetricNames(metricNames)
         var withoutAnyOf = SIMPLE_DIMENSIONS_WITHOUT_ANY_PROPERTIES - ENTITY_WITH_ANY_PROPERTIES
         if (includeDerivedTimeGranularities) {
             withoutAnyOf = withoutAnyOf - setOf(GroupByItemProperty.DERIVED_TIME_GRANULARITY)
@@ -210,6 +217,7 @@ class MetricFlowEngine(
      * spine is a configuration error; atemporal queries continue through the same pipeline.
      */
     fun explain(request: MetricFlowExplainRequest): MetricFlowExplainResult {
+        checkMetricNames(request.metricNames.orEmpty())
         requireConfiguredTimeSpine(
             metricNames = request.metricNames.orEmpty(),
             groupByNames = request.groupByNames.orEmpty(),
@@ -284,6 +292,7 @@ class MetricFlowEngine(
      * `query_type == DIMENSION_VALUES` branch + `output_selection_specs`).
      */
     fun explainGetDimensionValues(request: ExplainGetDimensionValuesRequest): MetricFlowExplainResult {
+        checkMetricNames(request.metricNames)
         requireConfiguredTimeSpine(
             metricNames = request.metricNames,
             groupByNames = listOf(request.getGroupByValues),
@@ -456,10 +465,15 @@ class MetricFlowEngine(
 
     private fun checkMetricNames(metricNames: Iterable<String>) {
         val metricLookup = semanticManifestLookup.metricLookup
-        val unknown = metricNames.filter { MetricReference(it) !in metricLookup.metricReferences }
+        val requestedMetricReferences = metricNames.map(::MetricReference)
+        val unknown = requestedMetricReferences.filter { it !in metricLookup.metricReferences }
         if (unknown.isNotEmpty()) {
-            throw IllegalArgumentException("Unknown metric names: $unknown")
+            throw IllegalArgumentException("Unknown metric names: ${unknown.map { it.elementName }}")
         }
+        metricLookup.validateMetricDefinitionDependencies(
+            rootMetricReferences = requestedMetricReferences,
+            maximumMetricLevels = MetricEvaluationPlan.MAX_METRIC_DEFINITION_RECURSION_DEPTH,
+        )
     }
 
     /**

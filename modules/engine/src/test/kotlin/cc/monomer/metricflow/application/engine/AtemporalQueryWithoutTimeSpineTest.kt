@@ -44,6 +44,22 @@ class AtemporalQueryWithoutTimeSpineTest {
     }
 
     @Test
+    fun `nested derived metric renders through its derived input`() {
+        val result = engineWithoutTimeSpine().explain(
+            request(
+                metricName = "booking_value_sub_instant_add_10",
+                groupByNames = emptyList(),
+                timeConstraintStart = null,
+                timeConstraintEnd = null,
+            ),
+        )
+
+        assertContains(result.sql, "booking_value_sub_instant")
+        assertContains(result.sql, "booking_value_sub_instant_add_10")
+        assertFalse(result.sql.contains("time_spine", ignoreCase = true))
+    }
+
+    @Test
     fun `categorical grouping renders without a time spine`() {
         val result = engineWithoutTimeSpine().explain(
             request(

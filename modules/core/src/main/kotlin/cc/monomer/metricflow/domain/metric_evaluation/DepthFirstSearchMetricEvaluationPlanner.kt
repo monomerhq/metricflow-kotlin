@@ -51,6 +51,11 @@ class DepthFirstSearchMetricEvaluationPlanner(
         predicatePushdownState: PredicatePushdownState,
         filterSpecFactory: WhereFilterSpecFactory,
     ): MetricEvaluationPlan {
+        metricLookup.validateMetricDefinitionDependencies(
+            rootMetricReferences = metricSpecs.map { it.reference },
+            maximumMetricLevels = MetricEvaluationPlan.MAX_METRIC_DEFINITION_RECURSION_DEPTH,
+        )
+
         val topLevelQueryElements = metricSpecs.map { metricSpec ->
             MetricQueryElement.create(
                 metricSpec = metricSpec,

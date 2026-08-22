@@ -110,3 +110,6 @@ open class FeatureNotSupportedError(message: String) : InformativeUserError(mess
 
 /** Misconfigured semantic manifest. */
 class SemanticManifestConfigurationError(message: String) : InformativeUserError(message)
+
+/** A metric definition contains a dependency cycle or exceeds the supported dependency depth. */
+class MetricDefinitionDependencyError(message: String) : InformativeUserError(message)
