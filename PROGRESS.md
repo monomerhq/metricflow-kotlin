@@ -42,15 +42,13 @@ metricflow-kotlin 포팅 단일 진척 파일. 모든 에이전트(오케스트�
 - AST 트레이서 `docs/scripts/reach.py` (재현 가능)
 - 측정 결과: 도달 가능 60,346 LOC / 477 files; 실행 제외 89 LOC; 기타 미도달 7,231 LOC
 
-**Current**: Phase 5b/6 initial delivery is implemented on the release branch: the
-in-process engine is transport-free, gRPC is an optional module, and the Monomer
-external-DW Maven bundle is deterministic and verified. The ZIP has only the
-`maven-repository/` root; its marker fixes the canonical artifact-set identity and
-release evidence is uploaded separately. The next step is the orchestrator-owned
-producer release/tag and Monomer consumer integration.
-**Next**: time-spine runtime parity is integrated on the public release architecture;
-rerun the 136-case oracle corpus and public artifact gates before the orchestrator-owned
-producer release/tag and Monomer consumer integration.
+**Current**: Phase 5b/6 release candidate `0.2.1` is verified. The in-process engine is
+transport-free, gRPC is optional, time-spine runtime parity is complete, and metric
+dependency evaluation rejects cycles or paths deeper than 100 metric levels through the
+typed `MetricDefinitionDependencyError`. The deterministic Monomer Maven bundle and its
+separate release evidence pass the 136-case oracle and public repository gates.
+**Next**: publish/tag `0.2.1`, then pin its immutable artifact set in Monomer and map the
+typed dependency error at the Product adapter boundary.
 
 ## 진척 표
 
@@ -85,9 +83,10 @@ producer release/tag and Monomer consumer integration.
 | 3 W15 | distinct-values + where-filter Jinja + 시간 spine wiring + 4 FAIL fix | done | 1 (이전 세션 완료, 직접 검증) | (pending commit) | **🎉 corpus 112/0/0/0 100% PASS 🎉** |
 | 5 | API Surface Cleanup + gRPC split + product bundle | in-progress | 1 | pending | **engine transport-free, optional grpc-server, deterministic 8-artifact external-DW bundle with single Maven root/marker; 112/0/0/0 target** |
 | 3 TS0–TS5 | time-spine runtime parity | done | 1 | (pending commit) | 24 targeted cases 포함 **136/136 PASS**, 7 dialect parity; source selection·planner·6 SQL visitor·CTE 공유·time constraint 완료 |
+| 3 MD1 | metric dependency depth parity | done | 1 | 8129708 | root=1 기준 100단계 허용, 101단계·cycle typed rejection; 모든 metric-scoped engine entry guard |
 | 5a | Step 2: internal visibility sweep | not started | — | — | ~436 .kt 파일, docs/PUBLIC_API.md 대조 |
 | 5b | Step 6: gRPC split (engine → core + grpc-server) | done | 1 | pending | `SqlPlanRendererRegistry` seam; engine runtime guard |
-| 6 | Maven publish + BOM + deterministic Monomer bundle | in-progress | 1 | pending | tag release workflow, separate SHA/SBOM/dependency/license/provenance/attestation assets |
+| 6 | Maven publish + BOM + deterministic Monomer bundle | in-progress | 1 | f9ce382 | `0.2.1` release candidate verified; tag workflow와 Monomer immutable pin 대기 |
 | 4 | Integration + examples | not started | — | — | |
 | 5 | (선택) cutover | n/a | — | — | 이 프로젝트 범위 밖 |
 
