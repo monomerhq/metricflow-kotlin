@@ -1,5 +1,6 @@
 package cc.monomer.metricflow.domain.manifest.transformation
 
+import cc.monomer.metricflow.common.errors.MetricDefinitionDependencyError
 import cc.monomer.metricflow.domain.manifest.model.CumulativeTypeParams
 import cc.monomer.metricflow.domain.manifest.model.Metric
 import cc.monomer.metricflow.domain.manifest.model.MetricInput
@@ -230,5 +231,56 @@ class RuleUnitTests {
         val out = AddInputMetricMeasuresRule.transformModel(emptyManifest.copy(metrics = listOf(simple, derived)))
         val wrap = out.metrics.first { it.name == "wrap" }
         assertEquals(listOf(MetricInputMeasure(name = "leaf_m")), wrap.typeParams.inputMeasures)
+    }
+
+    @Test
+    fun `AddInputMetricMeasuresRule rejects dependency cycles before recursive collection`() {
+        val duplicate = Metric(
+            name = "duplicate",
+            type = MetricType.SIMPLE,
+            typeParams = MetricTypeParams(measure = MetricInputMeasure(name = "duplicate_m")),
+        )
+        val first = Metric(
+            name = "first",
+            type = MetricType.DERIVED,
+            typeParams = MetricTypeParams(metrics = listOf(MetricInput(name = "second"))),
+        )
+        val second = Metric(
+            name = "second",
+            type = MetricType.DERIVED,
+            typeParams = MetricTypeParams(metrics = listOf(MetricInput(name = "first"))),
+        )
+
+        assertThrows<MetricDefinitionDependencyError> {
+            AddInputMetricMeasuresRule.transformModel(
+                emptyManifest.copy(metrics = listOf(duplicate, duplicate, first, second)),
+            )
+        }
+    }
+
+    @Test
+    fun `AddInputMetricMeasuresRule rejects deep paths in manifests with duplicate metrics`() {
+        val metrics = mutableListOf(
+            Metric(
+                name = "level_1",
+                type = MetricType.SIMPLE,
+                typeParams = MetricTypeParams(
+                    measure = MetricInputMeasure(name = "leaf_m"),
+                    inputMeasures = listOf(MetricInputMeasure(name = "leaf_m")),
+                ),
+            ),
+        )
+        repeat(100) { index ->
+            metrics += Metric(
+                name = "level_${index + 2}",
+                type = MetricType.DERIVED,
+                typeParams = MetricTypeParams(metrics = listOf(MetricInput(name = metrics.last().name))),
+            )
+        }
+        metrics.add(0, metrics.first())
+
+        assertThrows<MetricDefinitionDependencyError> {
+            AddInputMetricMeasuresRule.transformModel(emptyManifest.copy(metrics = metrics))
+        }
     }
 }
