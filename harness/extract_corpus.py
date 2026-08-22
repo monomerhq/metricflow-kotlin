@@ -42,6 +42,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 # the venv interpreter (no ``-m``).
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+from harness.manifest_loader import _normalize_repository_paths
+
 ORACLE_CLI = ROOT / "python_oracle" / "cli.py"
 ORACLE_PY = ROOT / "python_oracle" / ".venv" / "bin" / "python"
 MANIFEST_YAML_ROOT = (
@@ -188,7 +190,7 @@ def _write_request(case_dir: pathlib.Path, request_payload: Dict[str, Any]) -> N
     The runner adds the dialect when needed. Keeping the request dialect-free
     lets one ``request.json`` cover all dialects for an explain case.
     """
-    payload = dict(request_payload)
+    payload = _normalize_repository_paths(dict(request_payload))
     payload.pop("sql_engine", None)
     (case_dir / "request.json").write_text(json.dumps(payload, indent=2, sort_keys=False))
 
@@ -607,6 +609,288 @@ SIMPLE_MANIFEST_EXPLAIN: Tuple[CorpusCase, ...] = (
 )
 
 
+# Runtime paths that require a configured time spine. These are deliberately
+# separate from the broad explain corpus: they are the acceptance matrix for
+# the upstream 0.210.0 time-spine port and must pass on every supported SQL
+# dialect before the port is considered complete.
+TIME_SPINE_RUNTIME_EXPLAIN: Tuple[CorpusCase, ...] = (
+    CorpusCase(
+        case_id="explain__simple__bookings_join_to_time_spine__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={"metric_names": ["bookings_join_to_time_spine"], "group_by_names": ["metric_time__day"]},
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_time_spine_join_rendering.py",
+        notes="Simple metric whose measure explicitly joins to the daily time spine.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__bookings_by_month_with_start_only__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={
+            "metric_names": ["bookings"],
+            "group_by_names": ["metric_time__month"],
+            "time_constraint_start": "2020-01-15",
+        },
+        dialects=DIALECTS_SQL,
+        source_test="metricflow_semantics/query/query_parser.py::_adjust_time_constraint",
+        notes="A start-only range fills the all-time end and expands the start to the month boundary.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__bookings_by_month_with_end_only__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={
+            "metric_names": ["bookings"],
+            "group_by_names": ["metric_time__month"],
+            "time_constraint_end": "2020-02-15",
+        },
+        dialects=DIALECTS_SQL,
+        source_test="metricflow_semantics/query/query_parser.py::_adjust_time_constraint",
+        notes="An end-only range fills the all-time start and expands the end to the month boundary.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__trailing_2_months_revenue__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={"metric_names": ["trailing_2_months_revenue"], "group_by_names": ["metric_time__day"]},
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_cumulative_metric_rendering.py::test_cumulative_metric",
+        notes="Cumulative metric with a two-month rolling window.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__trailing_2_months_revenue_with_time_constraint__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={
+            "metric_names": ["trailing_2_months_revenue"],
+            "group_by_names": ["metric_time__day"],
+            "time_constraint_start": "2020-01-01",
+            "time_constraint_end": "2020-01-01",
+        },
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_cumulative_metric_rendering.py::test_cumulative_metric_with_time_constraint",
+        notes="Rolling cumulative source range expands, then the requested range is restored.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__bookings_all_time__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={"metric_names": ["bookings_all_time"], "group_by_names": ["metric_time__day"]},
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_cumulative_metric_rendering.py",
+        notes="Unbounded cumulative metric.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__bookings_all_time_with_time_constraint__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={
+            "metric_names": ["bookings_all_time"],
+            "group_by_names": ["metric_time__day"],
+            "time_constraint_start": "2020-01-01",
+            "time_constraint_end": "2020-01-01",
+        },
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_cumulative_metric_rendering.py::test_cumulative_metric_no_window_with_time_constraint",
+        notes="Unbounded cumulative source starts at all-time begin, then narrows to the requested day.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__visit_buy_conversion_rate_7days__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={
+            "metric_names": ["visit_buy_conversion_rate_7days"],
+            "group_by_names": ["metric_time__day"],
+            "where_constraints": ["{{ TimeDimension('metric_time', 'day') }} = '2020-01-01'"],
+        },
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_conversion_metric_rendering.py::test_conversion_metric_with_window",
+        notes="Conversion metric with a seven-day conversion window.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__visit_buy_conversion_rate_7days_with_time_constraint__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={
+            "metric_names": ["visit_buy_conversion_rate_7days"],
+            "group_by_names": ["metric_time__day", "visit__referrer_id"],
+            "where_constraints": ["{{ Dimension('visit__referrer_id') }} = 'ref_id_01'"],
+            "time_constraint_start": "2020-01-01",
+            "time_constraint_end": "2020-01-02",
+        },
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_conversion_metric_rendering.py::test_conversion_metric_with_window_and_time_constraint",
+        notes="Conversion window with a categorical filter and bounded event range.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__visit_buy_conversion_rate_7days_with_filter_only__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={
+            "metric_names": ["visit_buy_conversion_rate_7days"],
+            "group_by_names": ["metric_time__day"],
+            "where_constraints": ["{{ Dimension('visit__referrer_id') }} = 'ref_id_01'"],
+        },
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_conversion_metric_rendering.py",
+        notes="The conversion base keeps a filter-only dimension through its first projection.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__bookings_growth_2_weeks__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={"metric_names": ["bookings_growth_2_weeks"], "group_by_names": ["metric_time__day"]},
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_derived_metric_rendering.py::test_derived_metric_with_offset_window",
+        notes="Derived metric with an offset window.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__bookings_growth_2_weeks_with_time_constraint__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={
+            "metric_names": ["bookings_growth_2_weeks"],
+            "group_by_names": ["metric_time__day"],
+            "time_constraint_start": "2019-12-19",
+            "time_constraint_end": "2020-01-02",
+        },
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_derived_metric_rendering.py::test_time_offset_metric_with_time_constraint",
+        notes="Offset input is shifted before the original requested range is applied.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__bookings_growth_since_start_of_month__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={
+            "metric_names": ["bookings_growth_since_start_of_month"],
+            "group_by_names": ["metric_time__day"],
+        },
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_derived_metric_rendering.py::test_derived_metric_with_offset_to_grain",
+        notes="Derived metric offset to the start of its month.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__bookings_custom_alien_day__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={"metric_names": ["bookings"], "group_by_names": ["metric_time__alien_day"]},
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_custom_granularity.py::test_simple_metric_with_custom_granularity",
+        notes="Custom time granularity supplied by the daily time spine.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__subdaily_join_multiple_time_spines__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={
+            "metric_names": ["subdaily_join_to_time_spine_metric"],
+            "group_by_names": ["metric_time__alien_day", "metric_time__hour"],
+        },
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_custom_granularity.py::test_multiple_time_spines_in_query_for_join_to_time_spine_metric",
+        notes="One query selecting both an hourly spine and a custom grain from the daily spine.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__subdaily_cumulative_multiple_time_spines__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={
+            "metric_names": ["subdaily_cumulative_window_metric"],
+            "group_by_names": ["metric_time__alien_day", "metric_time__hour"],
+        },
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_custom_granularity.py::test_multiple_time_spines_in_query_for_cumulative_metric",
+        notes="Sub-daily cumulative metric that requires multiple configured time spines.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__revenue_mtd_by_month__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={"metric_names": ["revenue_mtd"], "group_by_names": ["metric_time__month"]},
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_cumulative_metric_rendering.py::test_cumulative_metric_grain_to_date",
+        notes="Month-to-date cumulative metric queried above its minimum daily grain.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__trailing_2_months_revenue_by_month__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={"metric_names": ["trailing_2_months_revenue"], "group_by_names": ["metric_time__month"]},
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_cumulative_metric_rendering.py",
+        notes="Rolling cumulative metric requiring window reaggregation at month grain.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__bookings_offset_one_alien_day_by_day__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={"metric_names": ["bookings_offset_one_alien_day"], "group_by_names": ["metric_time__day"]},
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_custom_granularity.py::test_custom_offset_window",
+        notes="Custom-granularity offset window projected at the base day grain.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__bookings_offset_one_alien_day_by_alien_day__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={
+            "metric_names": ["bookings_offset_one_alien_day"],
+            "group_by_names": ["metric_time__alien_day", "booking__ds__alien_day"],
+        },
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_custom_granularity.py::test_custom_offset_window_with_only_window_grain",
+        notes="Custom offset where the queried grains match the offset grain.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__subdaily_cumulative_grain_to_date_hour__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={
+            "metric_names": ["subdaily_cumulative_grain_to_date_metric"],
+            "group_by_names": ["metric_time__hour"],
+        },
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_granularity_date_part_rendering.py::test_subdaily_cumulative_grain_to_date_metric",
+        notes="Sub-daily grain-to-date cumulative metric.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__subdaily_offset_window_hour__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={"metric_names": ["subdaily_offset_window_metric"], "group_by_names": ["metric_time__hour"]},
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_granularity_date_part_rendering.py::test_subdaily_offset_window_metric",
+        notes="Sub-daily standard offset window.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__subdaily_offset_to_grain_hour__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={
+            "metric_names": ["subdaily_offset_grain_to_date_metric"],
+            "group_by_names": ["metric_time__hour"],
+        },
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_granularity_date_part_rendering.py::test_subdaily_offset_to_grain_metric",
+        notes="Sub-daily offset-to-grain metric.",
+    ),
+    CorpusCase(
+        case_id="explain__simple__visit_buy_conversion_rate_by_session__all_dialects",
+        subcommand="explain",
+        manifest_name="simple_manifest",
+        args={
+            "metric_names": ["visit_buy_conversion_rate_by_session"],
+            "group_by_names": ["visit__referrer_id", "metric_time__day"],
+        },
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/plan_conversion/dataflow_to_sql/test_conversion_metrics_to_sql.py::test_conversion_rate_with_constant_properties",
+        notes="Conversion metric with a constant-property equality constraint.",
+    ),
+)
+
+
 # Multi-hop join manifest cases.
 MULTI_HOP_EXPLAIN: Tuple[CorpusCase, ...] = (
     CorpusCase(
@@ -887,6 +1171,7 @@ def _multi_hop_list_cases() -> Tuple[CorpusCase, ...]:
 def all_cases() -> Tuple[CorpusCase, ...]:
     return (
         SIMPLE_MANIFEST_EXPLAIN
+        + TIME_SPINE_RUNTIME_EXPLAIN
         + MULTI_HOP_EXPLAIN
         + DERIVED_METRICS_EXPLAIN
         + SIMPLE_LIST_CASES

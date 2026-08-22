@@ -3,6 +3,7 @@ package cc.monomer.metricflow.domain.plan_conversion.to_sql_plan
 import cc.monomer.metricflow.common.dag.SequentialIdGenerator
 import cc.monomer.metricflow.common.dag.StaticIdPrefix
 import cc.monomer.metricflow.common.time.TimeRangeConstraint
+import cc.monomer.metricflow.common.time.TimeSpineSource
 import cc.monomer.metricflow.domain.dataflow.DataflowPlanNode
 import cc.monomer.metricflow.domain.dataflow.DataflowPlanNodeVisitor
 import cc.monomer.metricflow.domain.dataflow.dataset.AnnotatedSqlDataSet
@@ -44,8 +45,10 @@ import cc.monomer.metricflow.domain.dataflow.support.NullFillValueMapping
 import cc.monomer.metricflow.domain.lookup.SemanticManifestLookup
 import cc.monomer.metricflow.domain.manifest.model.enums.AggregationType
 import cc.monomer.metricflow.domain.manifest.model.enums.ConversionCalculationType
+import cc.monomer.metricflow.domain.manifest.model.enums.DatePart
 import cc.monomer.metricflow.domain.manifest.model.enums.MetricType
 import cc.monomer.metricflow.domain.manifest.model.references.MetricModelReference
+import cc.monomer.metricflow.domain.manifest.model.references.SemanticModelElementReference
 import cc.monomer.metricflow.domain.plan_conversion.helpers.SelectColumnSet
 import cc.monomer.metricflow.domain.plan_conversion.helpers.SqlPlanJoinBuilder
 import cc.monomer.metricflow.domain.plan_conversion.instance_transforms.AddGroupByMetric
@@ -78,21 +81,37 @@ import cc.monomer.metricflow.domain.spec.where.WhereFilterSpec
 import cc.monomer.metricflow.domain.sql.plan.ColumnAliasRenamer
 import cc.monomer.metricflow.domain.sql.plan.SqlSelectColumn
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlBetweenExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlAddTimeExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlArithmeticExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlArithmeticOperator
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlCaseExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlColumnReference
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlColumnReferenceExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlComparison
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlComparisonExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlDateTruncExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlExpressionNode
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlExtractExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlFunction
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlFunctionExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlGenerateUuidExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlIntegerExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlLogicalExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlLogicalOperator
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlNullExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlRatioComputationExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlStringExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlStringLiteralExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlSubtractTimeIntervalExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlWindowFunction
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlWindowFunctionExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlWindowOrderByArgument
 import cc.monomer.metricflow.domain.sql.plan.nodes.SqlCreateTableAsNode
+import cc.monomer.metricflow.domain.sql.plan.nodes.SqlCteNode
 import cc.monomer.metricflow.domain.sql.plan.nodes.SqlJoinDescription
 import cc.monomer.metricflow.domain.sql.plan.nodes.SqlOrderByDescription
 import cc.monomer.metricflow.domain.sql.plan.nodes.SqlSelectStatementNode
+import cc.monomer.metricflow.domain.sql.plan.nodes.SqlTableNode
 import java.time.LocalDateTime
 
 /**
@@ -107,25 +126,13 @@ import java.time.LocalDateTime
  * and the new [SqlDataSet] is cached so multi-parent dataflow nodes don't re-emit common
  * branches.
  *
- * ## Status — W14c port (17 of 23 visit methods filled)
+ * ## Status — W15 time-spine runtime port
  *
- * W13 filled the simpler 15 visit methods (read source, projection, terminal nodes, time-range
- * constraint, aggregation, compute metrics, join-on-entities, combine, etc.). W14c added two
- * more — [visitSemiAdditiveJoinNode] (entity-key + non-additive time-dim filter join) and
- * [visitWindowReaggregationNode] (FIRST_VALUE / LAST_VALUE / AVG re-aggregation over cumulative
- * metrics).
- *
- * Remaining W15 deferrals (5 of 23 — all time-spine/custom-granularity related):
- * - `visitJoinOverTimeRangeNode` — cumulative-metric time-range join
- * - `visitJoinToTimeSpineNode` — explicit metric-time-to-spine join
- * - `visitJoinToCustomGranularityNode` — custom-grain (`fiscal_quarter`) column lookup
- * - `visitJoinConversionEventsNode` — conversion-metric CTE + window-function pipeline
- * - `visitOffsetCustomGranularityNode` / `visitOffsetBaseGrainByCustomGrainNode` — offset-by-
- *   custom-grain time-window expression building (~270 LOC Python — longest in the file)
- *
- * None of the W14c corpus cases (`tests_metricflow/snapshots/test_explain_plans`) exercise
- * these paths. See the "Deferred to W15" block at the end of this file for the wiring
- * pre-conditions each method needs.
+ * W13/W14 filled the leaf, projection, aggregation, combination, semi-additive, and window
+ * reaggregation methods. W15 fills the cumulative time-range join, standard/custom time-spine
+ * joins, conversion-event deduplication, and both custom-granularity offset pipelines. The
+ * visitor builds those SQL plans from the manifest-owned [TimeSpineSource] metadata and the
+ * existing SQL AST; warehouse execution remains outside this repository.
  *
  * @property columnAssociationResolver How instance specs map to SQL column names.
  * @property semanticManifestLookup The W7a/W7c lookup composition root.
@@ -153,6 +160,12 @@ class DataflowNodeToSqlSubqueryVisitor(
         val result = dataflowPlanNode.accept(this)
         nodeToOutputDataSet[dataflowPlanNode] = result
         return result
+    }
+
+    fun cacheOutputDataSets(dataflowPlanNodes: List<DataflowPlanNode>) {
+        for (node in dataflowPlanNodes) {
+            getOutputDataSet(node)
+        }
     }
 
     private fun nextUniqueTableAlias(): String =
@@ -484,7 +497,7 @@ class DataflowNodeToSqlSubqueryVisitor(
                 ).let { base ->
                     if (matching.spec.datePart != null) {
                         cc.monomer.metricflow.domain.dataflow.dataset.DataSet
-                            .metricTimeDimensionSpec(matching.spec.datePart!!)
+                        .metricTimeDimensionSpec(checkNotNull(matching.spec.datePart))
                     } else {
                         base
                     }
@@ -993,55 +1006,473 @@ class DataflowNodeToSqlSubqueryVisitor(
     }
 
     // ---------------------------------------------------------------------------------------
-    // Deferred to W15 — time-spine / custom-grain / conversion / offset paths
+    // Time spine / conversion joins
     // ---------------------------------------------------------------------------------------
-    //
-    // The remaining 5 visit methods all depend on either the `_make_time_spine_data_set` helper
-    // (which threads `TimeSpineSource.choose_time_spine_sources` + the configured time-spine
-    // ReadSqlSourceNodes from the engine pipeline) or on `_custom_granularity_time_spine_sources`
-    // (which the visitor receives in its constructor in Python). Wiring these requires:
-    //
-    // 1. The engine's `time_spine_metric_time_nodes` map populated from the manifest (currently
-    //    an empty placeholder in [ExplainPipeline] — see its KDoc).
-    // 2. Threading a `Map<String, TimeSpineSource>` for custom-granularity lookups into this
-    //    visitor's constructor.
-    // 3. Porting `_make_time_spine_data_set` proper (~135 LOC Python).
-    //
-    // None of the W14c corpus cases exercise these paths (no cumulative / time-offset / custom
-    // granularity / conversion-event explain cases in the snapshot fixtures); the deferrals are
-    // honest and unblock W15 to land them as a focused wave.
 
-    private fun w15Deferred(method: String, reason: String): Nothing =
-        throw NotImplementedError(
-            "DataflowNodeToSqlSubqueryVisitor.$method body is deferred to W15: $reason. " +
-                "The signature is stable; the conversion algorithm depends on the time-spine / " +
-                "custom-granularity / offset wiring that is W15 scope (see file-level KDoc + " +
-                "Deferred-to-W15 block).",
+    /** Build the time-spine relation used by cumulative metric joins. */
+    private fun makeTimeSpineDataSet(
+        aggTimeDimensionInstances: List<TimeDimensionInstance>,
+        timeRangeConstraint: TimeRangeConstraint?,
+    ): SqlDataSet {
+        check(aggTimeDimensionInstances.isNotEmpty()) {
+            "A time spine data set requires at least one aggregation time dimension."
+        }
+        val queriedSpecs = aggTimeDimensionInstances.map { it.spec }
+        val timeSpineSources = chooseTimeSpineSources(queriedSpecs)
+        check(timeSpineSources.size == 1) {
+            "Cumulative metrics require exactly one time spine source, got $timeSpineSources."
+        }
+        val timeSpineSource = timeSpineSources.single()
+        val timeSpineAlias = nextUniqueTableAlias()
+        val baseColumnExpr = SqlColumnReferenceExpression.fromColumnReference(
+            tableAlias = timeSpineAlias,
+            columnName = timeSpineSource.baseColumn,
         )
 
-    override fun visitJoinOverTimeRangeNode(node: JoinOverTimeRangeNode): SqlDataSet =
-        w15Deferred(
-            "visitJoinOverTimeRangeNode",
-            "requires the internal `_make_time_spine_data_set` helper (cumulative metric pipeline)",
-        )
+        val requiredSpecs = queriedSpecs
+        val selectColumns = requiredSpecs.map { spec ->
+            val columnAlias = columnAssociationResolver.resolveSpec(spec).columnName
+            val expression: SqlExpressionNode = when {
+                spec.datePart != null -> SqlExtractExpression.create(spec.datePart, baseColumnExpr)
+                spec.timeGranularity == null -> error("Time dimension spec has no grain or date part: $spec")
+                spec.timeGranularity.baseGranularity == timeSpineSource.baseGranularity -> baseColumnExpr
+                spec.timeGranularity.isCustomGranularity -> {
+                    val custom = timeSpineSource.customGranularities.firstOrNull {
+                        it.name == spec.timeGranularity.name
+                    } ?: error(
+                        "Custom granularity ${spec.timeGranularity.name} is not defined by " +
+                            "time spine ${timeSpineSource.sqlTable.sql}.",
+                    )
+                    SqlColumnReferenceExpression.fromColumnReference(
+                        tableAlias = timeSpineAlias,
+                        columnName = custom.parsedColumnName,
+                    )
+                }
+                else -> SqlDateTruncExpression.create(spec.timeGranularity.baseGranularity, baseColumnExpr)
+            }
+            SqlSelectColumn(expr = expression, columnAlias = columnAlias)
+        }
 
-    override fun visitJoinToTimeSpineNode(node: JoinToTimeSpineNode): SqlDataSet =
-        w15Deferred(
-            "visitJoinToTimeSpineNode",
-            "requires the time-spine `_choose_instance_for_time_spine_join` helper",
+        val groupByColumns = if (requiredSpecs.all { it.timeGranularity?.baseGranularity != timeSpineSource.baseGranularity }) {
+            selectColumns
+        } else {
+            emptyList()
+        }
+        val sourceSelect = SqlSelectStatementNode.create(
+            description = timeSpineSource.dataSetDescription,
+            selectColumns = selectColumns,
+            fromSource = SqlTableNode.create(timeSpineSource.sqlTable),
+            fromSourceAlias = timeSpineAlias,
+            cteSources = emptyList(),
+            joinDescs = emptyList(),
+            groupBys = groupByColumns,
+            orderBys = emptyList(),
+            where = timeRangeConstraint?.let {
+                makeTimeRangeComparisonExpr(
+                    tableAlias = timeSpineAlias,
+                    columnAlias = timeSpineSource.baseColumn,
+                    timeRangeConstraint = it,
+                )
+            },
+            limit = null,
+            distinct = false,
         )
+        val sourceInstances = queriedSpecs.map { spec ->
+            TimeDimensionInstance(
+                definedFrom = listOf(
+                    SemanticModelElementReference(
+                        semanticModelName = timeSpineSource.sqlTable.tableName,
+                        elementName = spec.elementName,
+                    ),
+                ),
+                associatedColumns = listOf(columnAssociationResolver.resolveSpec(spec)),
+                spec = spec,
+            )
+        }
+        return SqlDataSet(
+            instanceSet = InstanceSet(
+                simpleMetricInputInstances = emptyList(),
+                dimensionInstances = emptyList(),
+                timeDimensionInstances = sourceInstances,
+                entityInstances = emptyList(),
+                groupByMetricInstances = emptyList(),
+                metricInstances = emptyList(),
+                metadataInstances = emptyList(),
+            ),
+            sqlSelectNode = sourceSelect,
+        )
+    }
 
-    override fun visitJoinToCustomGranularityNode(node: JoinToCustomGranularityNode): SqlDataSet =
-        w15Deferred(
-            "visitJoinToCustomGranularityNode",
-            "requires `_get_time_spine_for_custom_granularity` + `_get_custom_granularity_column_name` helpers",
-        )
+    /** Port of `TimeSpineSource.choose_time_spine_sources`. */
+    private fun chooseTimeSpineSources(
+        requiredSpecs: List<cc.monomer.metricflow.domain.spec.TimeDimensionSpec>,
+    ): List<TimeSpineSource> = TimeSpineSource.chooseTimeSpineSources(
+        requiredTimeSpineSpecs = requiredSpecs,
+        timeSpineSources = semanticManifestLookup.timeSpineSources,
+    )
 
-    override fun visitJoinConversionEventsNode(node: JoinConversionEventsNode): SqlDataSet =
-        w15Deferred(
-            "visitJoinConversionEventsNode",
-            "conversion event join requires CTE wrap + window-function machinery",
+    override fun visitJoinOverTimeRangeNode(node: JoinOverTimeRangeNode): SqlDataSet {
+        val parentDataSet = getOutputDataSet(node.parentNode)
+        val parentAlias = nextUniqueTableAlias()
+        val aggInstances = parentDataSet.instancesForTimeDimensions(node.queriedAggTimeDimensionSpecs)
+        val timeSpineAlias = nextUniqueTableAlias()
+        val timeSpineDataSet = makeTimeSpineDataSet(aggInstances, node.timeRangeConstraint)
+        val joinSpec = chooseInstanceForTimeSpineJoin(aggInstances).spec
+        val joinDescription = SqlPlanJoinBuilder.makeCumulativeMetricTimeRangeJoinDescription(
+            node = node,
+            metricDataSet = parentDataSet.annotate(parentAlias, joinSpec),
+            timeSpineDataSet = timeSpineDataSet.annotate(timeSpineAlias, joinSpec),
         )
+        val tableAliasToInstanceSet = linkedMapOf(
+            timeSpineAlias to timeSpineDataSet.instanceSet,
+            parentAlias to parentDataSet.instanceSet.transform(
+                SelectElementsTransform(
+                    includeSpecs = null,
+                    excludeSpecs = InstanceSpecSet(
+                        timeDimensionSpecs = node.queriedAggTimeDimensionSpecs,
+                        metricSpecs = emptyList(),
+                        simpleMetricInputSpecs = emptyList(),
+                        dimensionSpecs = emptyList(),
+                        entitySpecs = emptyList(),
+                        groupByMetricSpecs = emptyList(),
+                        metadataSpecs = emptyList(),
+                    ),
+                ),
+            ),
+        )
+        return SqlDataSet(
+            instanceSet = parentDataSet.instanceSet,
+            sqlSelectNode = SqlSelectStatementNode.create(
+                description = node.description,
+                selectColumns = createSimpleSelectColumnsForInstanceSets(
+                    columnResolver = columnAssociationResolver,
+                    tableAliasToInstanceSet = tableAliasToInstanceSet,
+                ),
+                fromSource = timeSpineDataSet.checkedSqlSelectNode,
+                fromSourceAlias = timeSpineAlias,
+                cteSources = emptyList(),
+                joinDescs = listOf(joinDescription),
+                groupBys = emptyList(),
+                orderBys = emptyList(),
+                where = null,
+                limit = null,
+                distinct = false,
+            ),
+        )
+    }
+
+    private fun chooseInstanceForTimeSpineJoin(
+        aggTimeDimensionInstances: List<TimeDimensionInstance>,
+    ): TimeDimensionInstance = aggTimeDimensionInstances
+        .filter { it.spec.datePart == null }
+        .minByOrNull { it.spec.baseGranularitySortKey }
+        ?: error("No non-date-part time dimension is available for a time-spine join.")
+
+    override fun visitJoinToTimeSpineNode(node: JoinToTimeSpineNode): SqlDataSet {
+        val parentDataSet = getOutputDataSet(node.metricSourceNode)
+        val parentAlias = nextUniqueTableAlias()
+        val timeSpineDataSet = getOutputDataSet(node.timeSpineNode)
+        val timeSpineAlias = nextUniqueTableAlias()
+        if (node.timeSpineNode is OffsetCustomGranularityNode ||
+            node.timeSpineNode is OffsetBaseGrainByCustomGrainNode
+        ) {
+            // Upstream's two time-spine selectors are removed from the SQL tree but still
+            // consume their deterministic aliases after the join alias is allocated.
+            nextUniqueTableAlias()
+            nextUniqueTableAlias()
+        }
+        val requestedSpecs = node.requestedAggTimeDimensionSpecs.toSet()
+        val specsFromSpine = requestedSpecs + node.joinOnTimeDimensionSpec
+        val parentJoinColumnName = columnAssociationResolver.resolveSpec(node.joinOnTimeDimensionSpec).columnName
+        val timeSpineJoinColumnName = timeSpineDataSet
+            .instanceFromTimeDimensionGrainAndDatePart(
+                node.joinOnTimeDimensionSpec.timeGranularityName,
+                node.joinOnTimeDimensionSpec.datePart,
+            ).associatedColumn.columnName
+        val joinDescription = SqlPlanJoinBuilder.makeJoinToTimeSpineJoinDescription(
+            node = node,
+            timeSpineAlias = timeSpineAlias,
+            timeSpineColumnName = timeSpineJoinColumnName,
+            parentColumnName = parentJoinColumnName,
+            parentSqlSelectNode = parentDataSet.checkedSqlSelectNode,
+            parentAlias = parentAlias,
+        )
+        val parentOutput = parentDataSet.instanceSet.transform(
+            SelectElementsTransform(
+                includeSpecs = null,
+                excludeSpecs = InstanceSpecSet(
+                    timeDimensionSpecs = parentDataSet.instanceSet.specSet.timeDimensionSpecs.filter { it in specsFromSpine },
+                    metricSpecs = emptyList(),
+                    simpleMetricInputSpecs = emptyList(),
+                    dimensionSpecs = emptyList(),
+                    entitySpecs = emptyList(),
+                    groupByMetricSpecs = emptyList(),
+                    metadataSpecs = emptyList(),
+                ),
+            ),
+        )
+        val spineInstances = mutableListOf<TimeDimensionInstance>()
+        val spineColumns = mutableListOf<SqlSelectColumn>()
+        for (old in timeSpineDataSet.instanceSet.timeDimensionInstances) {
+            val newSpec = old.spec.withWindowFunctions(emptyList())
+            if (newSpec !in specsFromSpine) continue
+            val newInstance = if (old.spec.windowFunctions.isNotEmpty()) {
+                old.withNewSpec(newSpec, columnAssociationResolver)
+            } else {
+                old
+            }
+            spineInstances += newInstance
+            spineColumns += SqlSelectColumn(
+                expr = SqlColumnReferenceExpression.fromColumnReference(timeSpineAlias, old.associatedColumn.columnName),
+                columnAlias = newInstance.associatedColumn.columnName,
+            )
+        }
+        val outputInstanceSet = InstanceSet.merge(
+            listOf(parentOutput, InstanceSet(
+                simpleMetricInputInstances = emptyList(),
+                dimensionInstances = emptyList(),
+                timeDimensionInstances = spineInstances,
+                entityInstances = emptyList(),
+                groupByMetricInstances = emptyList(),
+                metricInstances = emptyList(),
+                metadataInstances = emptyList(),
+            )),
+        )
+        val selectColumns = spineColumns + createSimpleSelectColumnsForInstanceSets(
+            columnResolver = columnAssociationResolver,
+            tableAliasToInstanceSet = linkedMapOf(parentAlias to parentOutput),
+        )
+        val where = if (node.offsetToGrain != null && node.joinOnTimeDimensionSpec !in requestedSpecs) {
+            val joinExpr = SqlColumnReferenceExpression.fromColumnReference(timeSpineAlias, parentJoinColumnName)
+            node.requestedAggTimeDimensionSpecs
+                .map { spec ->
+                    SqlComparisonExpression.create(
+                        leftExpr = SqlColumnReferenceExpression.fromColumnReference(
+                            timeSpineAlias,
+                            columnAssociationResolver.resolveSpec(spec).columnName,
+                        ),
+                        comparison = SqlComparison.EQUALS,
+                        rightExpr = joinExpr,
+                    )
+                }
+                .let { conditions ->
+                    when (conditions.size) {
+                        0 -> null
+                        1 -> conditions[0]
+                        else -> SqlLogicalExpression.create(SqlLogicalOperator.OR, conditions)
+                    }
+                }
+        } else {
+            null
+        }
+        return SqlDataSet(
+            instanceSet = outputInstanceSet,
+            sqlSelectNode = SqlSelectStatementNode.create(
+                description = node.description,
+                selectColumns = selectColumns,
+                fromSource = timeSpineDataSet.checkedSqlSelectNode,
+                fromSourceAlias = timeSpineAlias,
+                cteSources = emptyList(),
+                joinDescs = listOf(joinDescription),
+                groupBys = emptyList(),
+                orderBys = emptyList(),
+                where = where,
+                limit = null,
+                distinct = false,
+            ),
+        )
+    }
+
+    private fun customTimeSpineSource(customGranularityName: String): TimeSpineSource =
+        TimeSpineSource.buildCustomTimeSpineSources(semanticManifestLookup.timeSpineSources.values.toList())[
+            customGranularityName
+        ] ?: error("No time spine defines custom granularity $customGranularityName.")
+
+    private fun customTimeSpineColumnName(customGranularityName: String): String =
+        customTimeSpineSource(customGranularityName).customGranularities
+            .first { it.name == customGranularityName }
+            .parsedColumnName
+
+    override fun visitJoinToCustomGranularityNode(node: JoinToCustomGranularityNode): SqlDataSet {
+        val parentDataSet = getOutputDataSet(node.parentNode)
+        val parentAlias = parentDataSet.checkedSqlSelectNode.fromSourceAlias
+        val baseSpec = node.timeDimensionSpec.withBaseGrain()
+        val parentTimeInstance = parentDataSet.instanceForTimeDimension(baseSpec)
+        val parentColumn = parentDataSet.checkedSqlSelectNode.selectColumns.firstOrNull {
+            it.columnAlias == parentTimeInstance.associatedColumn.columnName
+        } ?: error(
+            "JoinToCustomGranularityNode expected ${parentTimeInstance.associatedColumn.columnName} " +
+                "in parent columns.",
+        )
+        val customName = node.timeDimensionSpec.timeGranularityName
+            ?: error("Custom-granularity join has no granularity name.")
+        val spineSource = customTimeSpineSource(customName)
+        val spineAlias = nextUniqueTableAlias()
+        val join = SqlJoinDescription(
+            rightSource = SqlTableNode.create(spineSource.sqlTable),
+            rightSourceAlias = spineAlias,
+            onCondition = SqlComparisonExpression.create(
+                leftExpr = parentColumn.expr,
+                comparison = SqlComparison.EQUALS,
+                rightExpr = SqlColumnReferenceExpression.fromColumnReference(spineAlias, spineSource.baseColumn),
+            ),
+            joinType = SqlJoinType.LEFT_OUTER,
+        )
+        val spineInstance = TimeDimensionInstance(
+            definedFrom = parentTimeInstance.definedFrom,
+            associatedColumns = listOf(columnAssociationResolver.resolveSpec(node.timeDimensionSpec)),
+            spec = node.timeDimensionSpec,
+        )
+        return SqlDataSet(
+            instanceSet = InstanceSet.merge(
+                listOf(
+                    InstanceSet(
+                        simpleMetricInputInstances = emptyList(),
+                        dimensionInstances = emptyList(),
+                        timeDimensionInstances = listOf(spineInstance),
+                        entityInstances = emptyList(),
+                        groupByMetricInstances = emptyList(),
+                        metricInstances = emptyList(),
+                        metadataInstances = emptyList(),
+                    ),
+                    parentDataSet.instanceSet,
+                ),
+            ),
+            sqlSelectNode = SqlSelectStatementNode.create(
+                description = parentDataSet.checkedSqlSelectNode.description + "\n" + node.description,
+                selectColumns = parentDataSet.checkedSqlSelectNode.selectColumns + SqlSelectColumn(
+                    expr = SqlColumnReferenceExpression.fromColumnReference(
+                        spineAlias,
+                        customTimeSpineColumnName(customName),
+                    ),
+                    columnAlias = spineInstance.associatedColumn.columnName,
+                ),
+                fromSource = parentDataSet.checkedSqlSelectNode.fromSource,
+                fromSourceAlias = parentAlias,
+                cteSources = parentDataSet.checkedSqlSelectNode.cteSources,
+                joinDescs = parentDataSet.checkedSqlSelectNode.joinDescs + join,
+                groupBys = parentDataSet.checkedSqlSelectNode.groupBys,
+                orderBys = parentDataSet.checkedSqlSelectNode.orderBys,
+                where = parentDataSet.checkedSqlSelectNode.where,
+                limit = parentDataSet.checkedSqlSelectNode.limit,
+                distinct = parentDataSet.checkedSqlSelectNode.distinct,
+            ),
+        )
+    }
+
+    override fun visitJoinConversionEventsNode(node: JoinConversionEventsNode): SqlDataSet {
+        val baseDataSet = getOutputDataSet(node.baseNode)
+        val baseAlias = nextUniqueTableAlias()
+        val conversionDataSet = getOutputDataSet(node.conversionNode)
+        val conversionAlias = nextUniqueTableAlias()
+        val baseTimeColumn = columnAssociationResolver.resolveSpec(node.baseTimeDimensionSpec).columnName
+        val conversionTimeColumn = columnAssociationResolver.resolveSpec(node.conversionTimeDimensionSpec).columnName
+        val entityColumn = columnAssociationResolver.resolveSpec(node.entitySpec).columnName
+        val constantColumns = node.constantProperties.orEmpty().map {
+            columnAssociationResolver.resolveSpec(it.baseSpec).columnName to
+                columnAssociationResolver.resolveSpec(it.conversionSpec).columnName
+        }
+        val join = SqlPlanJoinBuilder.makeJoinConversionJoinDescription(
+            node = node,
+            baseDataSet = baseDataSet.annotate(baseAlias, node.baseTimeDimensionSpec),
+            conversionDataSet = conversionDataSet.annotate(conversionAlias, node.conversionTimeDimensionSpec),
+            columnEqualityDescriptions = listOf(
+                cc.monomer.metricflow.domain.plan_conversion.helpers.ColumnEqualityDescription(
+                    entityColumn,
+                    entityColumn,
+                    false,
+                ),
+            ) + constantColumns.map { (base, conversion) ->
+                cc.monomer.metricflow.domain.plan_conversion.helpers.ColumnEqualityDescription(base, conversion, false)
+            },
+        )
+        val baseRefs = baseDataSet.instanceSet.asList.map { instance ->
+            instance.associatedColumn.columnName to SqlColumnReferenceExpression.fromColumnReference(
+                baseAlias,
+                instance.associatedColumn.columnName,
+            )
+        }
+        val uniqueConversionNames = node.uniqueIdentifierKeys.map {
+            columnAssociationResolver.resolveSpec(it).columnName
+        }
+        val partitionColumns = listOf(entityColumn, conversionTimeColumn) + uniqueConversionNames +
+            constantColumns.map { it.second }
+        val baseWindowColumns = baseRefs.map { (columnName, reference) ->
+            SqlSelectColumn(
+                expr = SqlWindowFunctionExpression.create(
+                    sqlFunction = SqlWindowFunction.FIRST_VALUE,
+                    sqlFunctionArgs = listOf(reference),
+                    partitionByArgs = partitionColumns.map {
+                        SqlColumnReferenceExpression.fromColumnReference(conversionAlias, it)
+                    },
+                    orderByArgs = listOf(
+                        SqlWindowOrderByArgument(
+                            expr = SqlColumnReferenceExpression.fromColumnReference(baseAlias, baseTimeColumn),
+                            descending = true,
+                            nullsLast = null,
+                        ),
+                    ),
+                ),
+                columnAlias = columnName,
+            )
+        }
+        val conversionOutput = conversionDataSet.instanceSet.transform(
+            SelectElementsTransform(
+                includeSpecs = InstanceSpecSet(
+                    simpleMetricInputSpecs = listOf(node.conversionInputMetricSpec),
+                    dimensionSpecs = emptyList(),
+                    timeDimensionSpecs = emptyList(),
+                    entitySpecs = emptyList(),
+                    metricSpecs = emptyList(),
+                    groupByMetricSpecs = emptyList(),
+                    metadataSpecs = emptyList(),
+                ),
+                excludeSpecs = null,
+            ),
+        )
+        val uniqueColumns = uniqueConversionNames.map { name ->
+            SqlSelectColumn(
+                expr = SqlColumnReferenceExpression.fromColumnReference(conversionAlias, name),
+                columnAlias = name,
+            )
+        }
+        val conversionColumns = CreateSelectColumnsForInstances(conversionAlias, columnAssociationResolver)
+            .transform(conversionOutput).getColumns(null)
+        val deduped = SqlSelectStatementNode.create(
+            description = "Dedupe the fanout with ${node.uniqueIdentifierKeys.joinToString(",") { it.dunderName }} in the conversion data set",
+            selectColumns = baseWindowColumns + uniqueColumns + conversionColumns,
+            fromSource = baseDataSet.checkedSqlSelectNode,
+            fromSourceAlias = baseAlias,
+            cteSources = emptyList(),
+            joinDescs = listOf(join),
+            groupBys = emptyList(),
+            orderBys = emptyList(),
+            where = null,
+            limit = null,
+            distinct = true,
+        )
+        val outputAlias = nextUniqueTableAlias()
+        val outputInstanceSet = ChangeAssociatedColumns(columnAssociationResolver).transform(
+            InstanceSet.merge(listOf(conversionOutput, baseDataSet.instanceSet)),
+        )
+        return SqlDataSet(
+            instanceSet = outputInstanceSet,
+            sqlSelectNode = SqlSelectStatementNode.create(
+                description = node.description,
+                selectColumns = CreateSelectColumnsForInstances(outputAlias, columnAssociationResolver)
+                    .transform(outputInstanceSet).getColumns(null),
+                fromSource = deduped,
+                fromSourceAlias = outputAlias,
+                cteSources = emptyList(),
+                joinDescs = emptyList(),
+                groupBys = emptyList(),
+                orderBys = emptyList(),
+                where = null,
+                limit = null,
+                distinct = false,
+            ),
+        )
+    }
 
     /**
      * Port of `visit_semi_additive_join_node`.
@@ -1316,17 +1747,300 @@ class DataflowNodeToSqlSubqueryVisitor(
         )
     }
 
-    override fun visitOffsetCustomGranularityNode(node: OffsetCustomGranularityNode): SqlDataSet =
-        w15Deferred(
-            "visitOffsetCustomGranularityNode",
-            "custom-grain offset requires time-spine resolution + 270 LOC of custom expression building",
+    override fun visitOffsetCustomGranularityNode(node: OffsetCustomGranularityNode): SqlDataSet {
+        val timeSpineDataSet = getOutputDataSet(node.timeSpineNode)
+        val cteAlias = SequentialIdGenerator.createNextId(StaticIdPrefix.CTE).strValue
+        val cte = SqlCteNode.create(timeSpineDataSet.checkedSqlSelectNode, cteAlias)
+        val customName = node.offsetWindow.granularity
+        val customInstance = timeSpineDataSet.instanceFromTimeDimensionGrainAndDatePart(customName, null)
+        val customColumn = SqlSelectColumn.fromColumnReference(
+            tableAlias = cteAlias,
+            columnName = customInstance.associatedColumn.columnName,
         )
+        val offsetInstance = customInstance.withNewSpec(
+            customInstance.spec.withWindowFunctions(listOf(SqlWindowFunction.LEAD)),
+            columnAssociationResolver,
+        )
+        val offsetColumn = SqlSelectColumn(
+            expr = SqlWindowFunctionExpression.create(
+                sqlFunction = SqlWindowFunction.LEAD,
+                sqlFunctionArgs = listOf(customColumn.expr, SqlIntegerExpression.create(node.offsetWindow.count)),
+                partitionByArgs = emptyList(),
+                orderByArgs = listOf(SqlWindowOrderByArgument(customColumn.expr, null, null)),
+            ),
+            columnAlias = offsetInstance.associatedColumn.columnName,
+        )
+        val offsetSubquery = SqlSelectStatementNode.create(
+            description = "Offset Custom Granularity",
+            selectColumns = listOf(customColumn, offsetColumn),
+            fromSource = SqlTableNode.create(cc.monomer.metricflow.domain.spec.bind.SqlTable(null, cteAlias)),
+            fromSourceAlias = cteAlias,
+            cteSources = emptyList(),
+            joinDescs = emptyList(),
+            groupBys = listOf(customColumn),
+            orderBys = emptyList(),
+            where = null,
+            limit = null,
+            distinct = false,
+        )
+        val subqueryAlias = nextUniqueTableAlias()
+        val join = SqlJoinDescription(
+            rightSource = offsetSubquery,
+            rightSourceAlias = subqueryAlias,
+            joinType = SqlJoinType.INNER,
+            onCondition = SqlComparisonExpression.create(
+                leftExpr = customColumn.expr,
+                comparison = SqlComparison.EQUALS,
+                rightExpr = SqlColumnReferenceExpression.fromColumnReference(
+                    subqueryAlias,
+                    customInstance.associatedColumn.columnName,
+                ),
+            ),
+        )
+        val baseGrain = customTimeSpineSource(customName).baseGranularity
+        val baseInstance = timeSpineDataSet.instanceFromTimeDimensionGrainAndDatePart(baseGrain.value, null)
+        val baseColumn = SqlSelectColumn.fromColumnReference(cteAlias, baseInstance.associatedColumn.columnName)
+        val requestedInstances = mutableListOf<TimeDimensionInstance>()
+        val requestedColumns = mutableListOf<SqlSelectColumn>()
+        val offsetReference = SqlColumnReferenceExpression.fromColumnReference(
+            subqueryAlias,
+            offsetColumn.columnAlias,
+        )
+        for (spec in node.requiredTimeSpineSpecs) {
+            val newInstance = offsetInstance.withNewSpec(spec, columnAssociationResolver)
+            requestedInstances += newInstance
+            requestedColumns += SqlSelectColumn(offsetReference, newInstance.associatedColumn.columnName)
+        }
+        return SqlDataSet(
+            instanceSet = InstanceSet(
+                simpleMetricInputInstances = emptyList(),
+                dimensionInstances = emptyList(),
+                timeDimensionInstances = listOf(baseInstance) + requestedInstances,
+                entityInstances = emptyList(),
+                groupByMetricInstances = emptyList(),
+                metricInstances = emptyList(),
+                metadataInstances = emptyList(),
+            ),
+            sqlSelectNode = SqlSelectStatementNode.create(
+                description = "Join Offset Custom Granularity to Base Granularity",
+                selectColumns = listOf(baseColumn) + requestedColumns,
+                fromSource = SqlTableNode.create(cc.monomer.metricflow.domain.spec.bind.SqlTable(null, cteAlias)),
+                fromSourceAlias = cteAlias,
+                cteSources = listOf(cte),
+                joinDescs = listOf(join),
+                groupBys = emptyList(),
+                orderBys = emptyList(),
+                where = null,
+                limit = null,
+                distinct = false,
+            ),
+        )
+    }
 
-    override fun visitOffsetBaseGrainByCustomGrainNode(node: OffsetBaseGrainByCustomGrainNode): SqlDataSet =
-        w15Deferred(
-            "visitOffsetBaseGrainByCustomGrainNode",
-            "270 LOC of custom-grain offset machinery — Python implementation is the longest in this file",
+    override fun visitOffsetBaseGrainByCustomGrainNode(node: OffsetBaseGrainByCustomGrainNode): SqlDataSet {
+        val timeSpineDataSet = getOutputDataSet(node.timeSpineNode)
+        val timeSpineAlias = nextUniqueTableAlias()
+        val customName = node.offsetWindow.granularity
+        val timeSpine = customTimeSpineSource(customName)
+        val baseGrain = timeSpine.baseGranularity
+        val customInstance = timeSpineDataSet.instanceFromTimeDimensionGrainAndDatePart(customName, null)
+        val baseInstance = timeSpineDataSet.instanceFromTimeDimensionGrainAndDatePart(baseGrain.value, null)
+        val customExpr = SqlColumnReferenceExpression.fromColumnReference(
+            timeSpineAlias,
+            customInstance.associatedColumn.columnName,
         )
+        val baseExpr = SqlColumnReferenceExpression.fromColumnReference(
+            timeSpineAlias,
+            baseInstance.associatedColumn.columnName,
+        )
+        val boundColumns = mutableListOf<SqlSelectColumn>()
+        val boundInstances = mutableListOf<TimeDimensionInstance>()
+        for (windowFunction in listOf(SqlWindowFunction.FIRST_VALUE, SqlWindowFunction.LAST_VALUE)) {
+            val boundInstance = customInstance.withNewSpec(
+                customInstance.spec.withWindowFunctions(listOf(windowFunction)),
+                columnAssociationResolver,
+            )
+            boundInstances += boundInstance
+            boundColumns += SqlSelectColumn(
+                expr = SqlWindowFunctionExpression.create(
+                    sqlFunction = windowFunction,
+                    sqlFunctionArgs = listOf(baseExpr),
+                    partitionByArgs = listOf(customExpr),
+                    orderByArgs = listOf(SqlWindowOrderByArgument(baseExpr, null, null)),
+                ),
+                columnAlias = boundInstance.associatedColumn.columnName,
+            )
+        }
+        val rowNumberSpec = baseInstance.spec.withWindowFunctions(listOf(SqlWindowFunction.ROW_NUMBER))
+        val rowNumberColumn = SqlSelectColumn(
+            expr = SqlWindowFunctionExpression.create(
+                sqlFunction = SqlWindowFunction.ROW_NUMBER,
+                sqlFunctionArgs = emptyList(),
+                partitionByArgs = listOf(customExpr),
+                orderByArgs = listOf(SqlWindowOrderByArgument(baseExpr, null, null)),
+            ),
+            columnAlias = columnAssociationResolver.resolveSpec(rowNumberSpec).columnName,
+        )
+        val cteAlias = SequentialIdGenerator.createNextId(StaticIdPrefix.CTE).strValue
+        val cte = SqlCteNode.create(
+            SqlSelectStatementNode.create(
+                description = "Get Custom Granularity Bounds",
+                selectColumns = timeSpineDataSet.checkedSqlSelectNode.selectColumns + boundColumns + rowNumberColumn,
+                fromSource = timeSpineDataSet.checkedSqlSelectNode,
+                fromSourceAlias = timeSpineAlias,
+                cteSources = emptyList(),
+                joinDescs = emptyList(),
+                groupBys = emptyList(),
+                orderBys = emptyList(),
+                where = null,
+                limit = null,
+                distinct = false,
+            ),
+            cteAlias,
+        )
+        val uniqueAlias = nextUniqueTableAlias()
+        val uniqueColumns = listOf(customInstance.associatedColumn.columnName) + boundColumns.map { it.columnAlias }
+        val uniqueSelectColumns = uniqueColumns.map { SqlSelectColumn.fromColumnReference(cteAlias, it) }
+        val uniqueRows = SqlSelectStatementNode.create(
+            description = "Get Unique Rows for Custom Granularity Bounds",
+            selectColumns = uniqueSelectColumns,
+            fromSource = SqlTableNode.create(cc.monomer.metricflow.domain.spec.bind.SqlTable(null, cteAlias)),
+            fromSourceAlias = cteAlias,
+            cteSources = emptyList(),
+            joinDescs = emptyList(),
+            groupBys = uniqueSelectColumns,
+            orderBys = emptyList(),
+            where = null,
+            limit = null,
+            distinct = false,
+        )
+        val uniqueCustomColumn = SqlSelectColumn.fromColumnReference(uniqueAlias, customInstance.associatedColumn.columnName)
+        val offsetBoundColumns = boundColumns.mapIndexed { index, boundColumn ->
+            val boundInstance = boundInstances[index]
+            val offsetSpec = boundInstance.spec.withWindowFunctions(
+                boundInstance.spec.windowFunctions + SqlWindowFunction.LEAD,
+            )
+            SqlSelectColumn(
+                expr = SqlWindowFunctionExpression.create(
+                    sqlFunction = SqlWindowFunction.LEAD,
+                    sqlFunctionArgs = listOf(boundColumn.referenceFrom(uniqueAlias), SqlIntegerExpression.create(node.offsetWindow.count)),
+                    partitionByArgs = emptyList(),
+                    orderByArgs = listOf(SqlWindowOrderByArgument(uniqueCustomColumn.expr, null, null)),
+                ),
+                columnAlias = columnAssociationResolver.resolveSpec(offsetSpec).columnName,
+            )
+        }
+        val offsetAlias = nextUniqueTableAlias()
+        val offsetBounds = SqlSelectStatementNode.create(
+            description = "Offset Custom Granularity Bounds",
+            selectColumns = listOf(uniqueCustomColumn) + offsetBoundColumns,
+            fromSource = uniqueRows,
+            fromSourceAlias = uniqueAlias,
+            cteSources = emptyList(),
+            joinDescs = emptyList(),
+            groupBys = emptyList(),
+            orderBys = emptyList(),
+            where = null,
+            limit = null,
+            distinct = false,
+        )
+        val firstOffset = offsetBoundColumns[0].referenceFrom(offsetAlias)
+        val lastOffset = offsetBoundColumns[1].referenceFrom(offsetAlias)
+        val rowNumberRef = rowNumberColumn.referenceFrom(cteAlias)
+        val offsetBaseExpr = SqlAddTimeExpression.create(
+            arg = firstOffset,
+            countExpr = SqlArithmeticExpression.create(
+                leftExpr = rowNumberRef,
+                operator = SqlArithmeticOperator.SUBTRACT,
+                rightExpr = SqlIntegerExpression.create(1),
+            ),
+            granularity = baseGrain,
+        )
+        val offsetBaseColumnName = columnAssociationResolver.resolveSpec(
+            baseInstance.spec.withWindowFunctions(listOf(SqlWindowFunction.LEAD)),
+        ).columnName
+        val offsetBaseColumn = SqlSelectColumn(
+            expr = SqlCaseExpression.create(
+                whenToThenExprs = linkedMapOf(
+                    SqlComparisonExpression.create(
+                        leftExpr = offsetBaseExpr,
+                        comparison = SqlComparison.LESS_THAN_OR_EQUALS,
+                        rightExpr = lastOffset,
+                    ) to offsetBaseExpr,
+                ),
+                elseExpr = SqlNullExpression.create(),
+            ),
+            columnAlias = offsetBaseColumnName,
+        )
+        val originalBaseColumn = SqlSelectColumn.fromColumnReference(cteAlias, baseInstance.associatedColumn.columnName)
+        val join = SqlJoinDescription(
+            rightSource = offsetBounds,
+            rightSourceAlias = offsetAlias,
+            joinType = SqlJoinType.INNER,
+            onCondition = SqlComparisonExpression.create(
+                leftExpr = SqlColumnReferenceExpression.fromColumnReference(
+                    cteAlias,
+                    customInstance.associatedColumn.columnName,
+                ),
+                comparison = SqlComparison.EQUALS,
+                rightExpr = uniqueCustomColumn.referenceFrom(offsetAlias),
+            ),
+        )
+        val offsetSubquery = SqlSelectStatementNode.create(
+            description = node.description,
+            selectColumns = listOf(originalBaseColumn, offsetBaseColumn),
+            fromSource = SqlTableNode.create(cc.monomer.metricflow.domain.spec.bind.SqlTable(null, cteAlias)),
+            fromSourceAlias = cteAlias,
+            cteSources = listOf(cte),
+            joinDescs = listOf(join),
+            groupBys = emptyList(),
+            orderBys = emptyList(),
+            where = null,
+            limit = null,
+            distinct = false,
+        )
+        val offsetSubqueryAlias = nextUniqueTableAlias()
+        val offsetBaseRef = offsetBaseColumn.referenceFrom(offsetSubqueryAlias)
+        val requestedInstances = mutableListOf<TimeDimensionInstance>()
+        val requestedColumns = mutableListOf<SqlSelectColumn>()
+        for (spec in node.requiredTimeSpineSpecs) {
+            val instance = baseInstance.withNewSpec(spec, columnAssociationResolver)
+            val expression: SqlExpressionNode = when {
+                spec.datePart != null -> SqlExtractExpression.create(spec.datePart, offsetBaseRef)
+                spec.timeGranularity == null -> error("Required time-spine spec has no grain or date part: $spec")
+                spec.timeGranularity.baseGranularity == baseGrain -> offsetBaseRef
+                else -> SqlDateTruncExpression.create(spec.timeGranularity.baseGranularity, offsetBaseRef)
+            }
+            requestedInstances += instance
+            requestedColumns += SqlSelectColumn(expression, instance.associatedColumn.columnName)
+        }
+        return SqlDataSet(
+            instanceSet = InstanceSet(
+                simpleMetricInputInstances = emptyList(),
+                dimensionInstances = emptyList(),
+                timeDimensionInstances = listOf(baseInstance) + requestedInstances,
+                entityInstances = emptyList(),
+                groupByMetricInstances = emptyList(),
+                metricInstances = emptyList(),
+                metadataInstances = emptyList(),
+            ),
+            sqlSelectNode = SqlSelectStatementNode.create(
+                description = "Apply Requested Granularities",
+                selectColumns = listOf(
+                    SqlSelectColumn.fromColumnReference(offsetSubqueryAlias, baseInstance.associatedColumn.columnName),
+                ) + requestedColumns,
+                fromSource = offsetSubquery,
+                fromSourceAlias = offsetSubqueryAlias,
+                cteSources = emptyList(),
+                joinDescs = emptyList(),
+                groupBys = emptyList(),
+                orderBys = emptyList(),
+                where = null,
+                limit = null,
+                distinct = false,
+            ),
+        )
+    }
 
     // ---------------------------------------------------------------------------------------
     // Helpers

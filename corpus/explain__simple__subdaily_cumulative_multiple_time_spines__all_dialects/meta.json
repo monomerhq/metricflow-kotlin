@@ -1,0 +1,25 @@
+{
+  "case_id": "explain__simple__subdaily_cumulative_multiple_time_spines__all_dialects",
+  "subcommand": "explain",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "subdaily_cumulative_window_metric"
+    ],
+    "group_by_names": [
+      "metric_time__alien_day",
+      "metric_time__hour"
+    ]
+  },
+  "dialect_set": [
+    "Trino",
+    "BigQuery",
+    "Snowflake",
+    "Databricks",
+    "Redshift",
+    "DuckDB",
+    "Postgres"
+  ],
+  "source_test": "tests_metricflow/query_rendering/test_custom_granularity.py::test_multiple_time_spines_in_query_for_cumulative_metric",
+  "notes": "Sub-daily cumulative metric that requires multiple configured time spines."
+}

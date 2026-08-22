@@ -1,0 +1,24 @@
+{
+  "case_id": "explain__simple__bookings_growth_since_start_of_month__all_dialects",
+  "subcommand": "explain",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "bookings_growth_since_start_of_month"
+    ],
+    "group_by_names": [
+      "metric_time__day"
+    ]
+  },
+  "dialect_set": [
+    "Trino",
+    "BigQuery",
+    "Snowflake",
+    "Databricks",
+    "Redshift",
+    "DuckDB",
+    "Postgres"
+  ],
+  "source_test": "tests_metricflow/query_rendering/test_derived_metric_rendering.py::test_derived_metric_with_offset_to_grain",
+  "notes": "Derived metric offset to the start of its month."
+}

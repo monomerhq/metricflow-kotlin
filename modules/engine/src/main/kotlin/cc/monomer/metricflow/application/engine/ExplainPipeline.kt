@@ -10,9 +10,12 @@ import cc.monomer.metricflow.domain.dataflow.nodes.MetricTimeDimensionTransformN
 import cc.monomer.metricflow.domain.dataflow.nodes.ReadSqlSourceNode
 import cc.monomer.metricflow.domain.dataflow.optimizer.DataflowPlanOptimization
 import cc.monomer.metricflow.domain.manifest.model.enums.TimeGranularity
+import cc.monomer.metricflow.domain.manifest.model.references.TimeDimensionReference
 import cc.monomer.metricflow.domain.plan_conversion.DataflowToSqlPlanConverter
 import cc.monomer.metricflow.domain.plan_conversion.to_sql_plan.TypeGroupedOrderer
 import cc.monomer.metricflow.domain.plan_conversion.to_sql_plan.InputOrderPreservingTypeGroupedOrderer
+import cc.monomer.metricflow.domain.plan_conversion.to_sql_plan.InputOrderPreservingOrderer
+import cc.monomer.metricflow.domain.plan_conversion.to_sql_plan.DataflowNodeToSqlSubqueryVisitor
 import cc.monomer.metricflow.domain.spec.DunderColumnAssociationResolver
 import cc.monomer.metricflow.domain.spec.MetricFlowQuerySpec
 import cc.monomer.metricflow.domain.spec.InstanceSpecSet
@@ -21,7 +24,7 @@ import cc.monomer.metricflow.domain.sql.render.SqlPlanRenderer
 import cc.monomer.metricflow.domain.sql.render.SqlEngine
 
 /**
- * Wires the W14b explain chain: dataset construction → dataflow plan → SQL plan → SQL string.
+ * Wires the explain chain: dataset construction → dataflow plan → SQL plan → SQL string.
  *
  * Port of the construction-time wiring in
  * `metricflow.engine.metricflow_engine.MetricFlowEngine.__init__`, specifically the path that
@@ -34,13 +37,16 @@ import cc.monomer.metricflow.domain.sql.render.SqlEngine
  *   in `:domain:spec`;
  * - the [SourceNodeBuilder] needs the converter's outputs;
  * - the [DataflowPlanBuilder] needs the [SourceNodeBuilder] + the [SemanticModelToDataSetConverter]
- *   for the W14c-deferred branches.
+ *   for time-spine and metric-evaluation branches.
  *
  * Each call to [renderSql] re-runs the chain. The wiring is **per-engine, not per-call** in
  * Python; we mirror that by caching the dataflow-plan-builder ingredients lazily.
  *
  * **Dialect selection.** The consumer supplies a renderer registry to
  * [MetricFlowEngine]. The pipeline never imports a concrete dialect module.
+ * [renderSql] selects the requested dialect renderer through that registry. The same dataflow
+ * and SQL plan are used for the supported dialect renderers, including Trino, BigQuery,
+ * Snowflake, Databricks, Redshift, DuckDB, Postgres, and the default renderer.
  */
 internal class ExplainPipeline(private val engine: MetricFlowEngine) {
 
@@ -63,26 +69,33 @@ internal class ExplainPipeline(private val engine: MetricFlowEngine) {
      * `_src_*` alias lands at 10000+ to match the snapshot fixtures.
      */
     private val dataSets: List<SemanticModelDataSet> by lazy {
-        engine.semanticManifest.semanticModels.map { model ->
+        engine.semanticManifest.semanticModels.sortedBy { it.name }.map { model ->
             dataSetConverter.createSqlSourceDataSet(model.reference)
         }
     }
 
-    private val timeSpineReadNodes: Map<TimeGranularity, ReadSqlSourceNode> by lazy {
-        // Time-spine ReadSqlSourceNode construction relies on
-        // TimeSpineSource.buildStandardTimeSpineSources + a dataset wrap. The W14b
-        // SIMPLE happy path never needs the time-spine, so we leave the map empty and
-        // rely on the builder's W14c deferral when a query asks for it. We do **not**
-        // force-evaluate `TimeSpineSource.buildStandardTimeSpineSources` here either —
-        // some manifests (e.g. `minimal_valid_manifest`) supply a time-spine with no
-        // `relation_name`, which the W1 model preserves verbatim and so the call would
-        // throw IllegalArgumentException during eager construction.
-        emptyMap()
+    private val timeSpineNodes: Pair<
+        Map<TimeGranularity, ReadSqlSourceNode>,
+        Map<TimeGranularity, MetricTimeDimensionTransformNode>,
+        > by lazy {
+        val readNodes = linkedMapOf<TimeGranularity, ReadSqlSourceNode>()
+        val metricTimeNodes = linkedMapOf<TimeGranularity, MetricTimeDimensionTransformNode>()
+        for ((baseGranularity, timeSpineSource) in engine.semanticManifestLookup.timeSpineSources) {
+            val readNode = ReadSqlSourceNode(dataSetConverter.buildTimeSpineSourceDataSet(timeSpineSource))
+            readNodes[baseGranularity] = readNode
+            metricTimeNodes[baseGranularity] = MetricTimeDimensionTransformNode(
+                parentNode = readNode,
+                aggregationTimeDimensionReference = TimeDimensionReference(timeSpineSource.baseColumn),
+            )
+        }
+        readNodes to metricTimeNodes
     }
 
-    private val timeSpineMetricTimeNodes: Map<TimeGranularity, MetricTimeDimensionTransformNode> by lazy {
-        emptyMap()
-    }
+    private val timeSpineReadNodes: Map<TimeGranularity, ReadSqlSourceNode>
+        get() = timeSpineNodes.first
+
+    private val timeSpineMetricTimeNodes: Map<TimeGranularity, MetricTimeDimensionTransformNode>
+        get() = timeSpineNodes.second
 
     private val sourceNodeBuilder: SourceNodeBuilder by lazy {
         SourceNodeBuilder(
@@ -94,7 +107,19 @@ internal class ExplainPipeline(private val engine: MetricFlowEngine) {
     }
 
     private val sourceNodeSet: SourceNodeSet by lazy {
-        sourceNodeBuilder.createFromDataSets(dataSets)
+        // MetricFlow creates semantic-model datasets before SourceNodeBuilder constructs
+        // time-spine datasets. Preserve that order because both use the shared initializer
+        // ID generator and their aliases are part of rendered SQL.
+        val semanticModelDataSets = dataSets
+        sourceNodeBuilder.createFromDataSets(semanticModelDataSets)
+    }
+
+    private val nodeOutputResolver: DataflowNodeToSqlSubqueryVisitor by lazy {
+        DataflowNodeToSqlSubqueryVisitor(
+            columnAssociationResolver = columnAssociationResolver,
+            semanticManifestLookup = engine.semanticManifestLookup,
+            outputColumnOrderer = null,
+        ).also { it.cacheOutputDataSets(sourceNodeSet.allNodes) }
     }
 
     private val dataflowPlanBuilder: DataflowPlanBuilder by lazy {
@@ -103,9 +128,7 @@ internal class ExplainPipeline(private val engine: MetricFlowEngine) {
             semanticManifestGraphLookup = engine.semanticManifestGraphLookup,
             columnAssociationResolver = columnAssociationResolver,
             sourceNodeBuilder = sourceNodeBuilder,
-            // W9c visitor — the W14c branches will need a strong type, but the W14b SIMPLE
-            // pipeline doesn't dereference this. Pass a unit token so the slot is non-null.
-            nodeOutputResolver = Unit,
+            nodeOutputResolver = nodeOutputResolver,
         )
     }
 
@@ -117,11 +140,10 @@ internal class ExplainPipeline(private val engine: MetricFlowEngine) {
     }
 
     /**
-     * Render the [querySpec] as a SQL string using the **default** ANSI renderer.
+     * Render the [querySpec] as a SQL string using the requested [dialect].
      *
      * Builds the dataflow plan, converts to SQL plan (with full optimizer cascade), then
-     * renders via [SqlPlanRenderer]. Per-dialect routing is W14c — the dialect-aware
-     * renderer factory + adapter wiring lands when the corpus diff requires it.
+     * renders via [SqlPlanRenderer].
      *
      * @param outputSelectionSpecs optional final-projection spec set. When non-null, the
      *   builder wraps the metric-output node with a [cc.monomer.metricflow.domain
@@ -135,6 +157,7 @@ internal class ExplainPipeline(private val engine: MetricFlowEngine) {
         querySpec: MetricFlowQuerySpec,
         dialect: SqlEngine,
         outputSelectionSpecs: InstanceSpecSet?,
+        orderOutputColumnsByInputOrder: Boolean,
     ): String {
         // Eagerly construct the dataset / source-node-set / builder inside the
         // initializer ID-scope so that per-model `_src_*` aliases land at 10000+. After
@@ -145,7 +168,7 @@ internal class ExplainPipeline(private val engine: MetricFlowEngine) {
             dataflowPlanBuilder
         }
         return SequentialIdGenerator.idNumberSpace(QUERY_ID_START) {
-            renderSqlInScope(querySpec, dialect, outputSelectionSpecs)
+            renderSqlInScope(querySpec, dialect, outputSelectionSpecs, orderOutputColumnsByInputOrder)
         }
     }
 
@@ -153,23 +176,25 @@ internal class ExplainPipeline(private val engine: MetricFlowEngine) {
         querySpec: MetricFlowQuerySpec,
         dialect: SqlEngine,
         outputSelectionSpecs: InstanceSpecSet?,
+        orderOutputColumnsByInputOrder: Boolean,
     ): String {
+        val optimizations = DataflowPlanOptimization.enabledOptimizations()
         val dataflowPlan = dataflowPlanBuilder.buildPlan(
             querySpec = querySpec,
             outputSqlTable = null,
             outputSelectionSpecs = outputSelectionSpecs,
-            optimizations = DataflowPlanOptimization.enabledOptimizations(),
+            optimizations = optimizations,
         )
         // Choose an OutputColumnOrderer mirroring Python's `MetricFlowEngine.explain` —
         // input-order-preserving by default; otherwise the type-grouped fallback.
         // The orderer also acts as a column allow-list — the WriteToResultDataTableNode visitor
         // emits exactly the columns the orderer produces, which is what drives the
         // SqlColumnPrunerOptimizer to trim unused columns in inner SELECTs.
-        val orderer = if (querySpec.inputSpecOrder.groupByItemSpecs.isNotEmpty() ||
-            querySpec.inputSpecOrder.metricSpecs.isNotEmpty()) {
-            InputOrderPreservingTypeGroupedOrderer(querySpec.inputSpecOrder)
-        } else {
-            TypeGroupedOrderer()
+        val orderer = when {
+            orderOutputColumnsByInputOrder -> InputOrderPreservingOrderer(querySpec.inputSpecOrder)
+            DataflowPlanOptimization.PASSTHROUGH_METRIC_EVALUATION in optimizations ->
+                InputOrderPreservingTypeGroupedOrderer(querySpec.inputSpecOrder)
+            else -> TypeGroupedOrderer()
         }
         val sqlPlanResult = sqlPlanConverter.convertToSqlPlan(
             sqlEngineType = dialect,

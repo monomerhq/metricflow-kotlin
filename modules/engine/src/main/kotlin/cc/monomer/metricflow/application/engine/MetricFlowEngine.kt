@@ -1,19 +1,16 @@
 package cc.monomer.metricflow.application.engine
 
-import cc.monomer.metricflow.common.errors.SemanticManifestConfigurationError
 import cc.monomer.metricflow.domain.lookup.GroupByItemProperty
 import cc.monomer.metricflow.domain.lookup.GroupByItemSetFilter
 import cc.monomer.metricflow.domain.lookup.LinkableElementType
 import cc.monomer.metricflow.domain.lookup.SemanticManifestLookup
 import cc.monomer.metricflow.domain.lookup.SemanticModelHelper
-import cc.monomer.metricflow.domain.manifest.model.Metric
 import cc.monomer.metricflow.domain.manifest.model.SemanticManifest
-import cc.monomer.metricflow.domain.manifest.model.enums.MetricType
-import cc.monomer.metricflow.domain.manifest.model.naming.METRIC_TIME_ELEMENT_NAME
 import cc.monomer.metricflow.domain.manifest.model.references.MetricReference
 import cc.monomer.metricflow.domain.manifest.model.references.SemanticModelElementReference
 import cc.monomer.metricflow.domain.manifest.validation.SemanticManifestValidationResults
 import cc.monomer.metricflow.domain.manifest.validation.SemanticManifestValidator
+import cc.monomer.metricflow.domain.metric_evaluation.plan.MetricEvaluationPlan
 import cc.monomer.metricflow.domain.semantic_graph.SemanticManifestGraphLookup
 import cc.monomer.metricflow.domain.semantic_graph.attribute_resolution.AnnotatedSpec
 import cc.monomer.metricflow.domain.semantic_graph.attribute_resolution.GroupByItemSet
@@ -25,19 +22,6 @@ import cc.monomer.metricflow.domain.semantic_graph.attribute_resolution.GroupByI
  * Port of `metricflow/engine/metricflow_engine.py::MetricFlowEngine`, minus the
  * SQL-execution methods (`query`, `get_dimension_values`) which are out of
  * scope for the Kotlin port.
- *
- * ## Wave-W10 status
- *
- * | Entry point | Status |
- * |---|---|
- * | `validateManifest` | **Done** — delegates to [SemanticManifestValidator] |
- * | `listMetrics` | **Done** — iterates manifest metrics, includes dimensions via the simple resolver |
- * | `listDimensions` | **Done** — manifest iteration; metric-filtered variant uses the W7c BFS resolver |
- * | `entitiesForMetrics` | **Done** — uses the W7c BFS resolver |
- * | `listGroupBys` | **Done** — dimensions + entities via the W7c BFS resolver |
- * | `listSavedQueries` | **Done** — iterates the manifest's `saved_queries` block |
- * | `explain` | **Deferred** — depends on `DataflowPlanBuilder.buildPlan` body (W11+) |
- * | `explainGetDimensionValues` | **Deferred** — same dependency chain as `explain` |
  *
  * ## Resolver caveats
  *
@@ -97,6 +81,10 @@ class MetricFlowEngine(
      */
     fun listMetrics(includeDimensions: Boolean): List<EngineMetric> {
         val metricLookup = semanticManifestLookup.metricLookup
+        metricLookup.validateMetricDefinitionDependencies(
+            rootMetricReferences = metricLookup.metricReferences,
+            maximumMetricLevels = MetricEvaluationPlan.MAX_METRIC_DEFINITION_RECURSION_DEPTH,
+        )
         val out = mutableListOf<EngineMetric>()
         for (pydanticMetric in metricLookup.getMetrics(metricLookup.metricReferences)) {
             if (pydanticMetric.typeParams.isPrivate == true) continue
@@ -154,6 +142,7 @@ class MetricFlowEngine(
 
     /** List all entities reachable from the specified metric set. */
     fun entitiesForMetrics(metricNames: List<String>): List<EngineEntity> {
+        checkMetricNames(metricNames)
         val groupByItemSet = resolveCommonGroupByItems(
             metricNames = metricNames,
             filter = GroupByItemSetFilter.create(
@@ -182,6 +171,7 @@ class MetricFlowEngine(
             val dims = listDimensions(metricNames = null, orderBy = orderBy)
             return GroupByListing(dimensions = dims, entities = emptyList())
         }
+        checkMetricNames(metricNames)
         var withoutAnyOf = SIMPLE_DIMENSIONS_WITHOUT_ANY_PROPERTIES - ENTITY_WITH_ANY_PROPERTIES
         if (includeDerivedTimeGranularities) {
             withoutAnyOf = withoutAnyOf - setOf(GroupByItemProperty.DERIVED_TIME_GRANULARITY)
@@ -211,32 +201,20 @@ class MetricFlowEngine(
     /**
      * Render the SQL for a metric query.
      *
-     * **W14 wire-up — chain probed, body deferrals propagate.** The full chain is:
+     * The full chain is:
      *
      *   user input
-     *     → [cc.monomer.metricflow.domain.query.MetricFlowQueryParser.parseAndValidateQuery]   (W14 deferred body — query resolver)
-     *     → [cc.monomer.metricflow.domain.dataflow.builder.DataflowPlanBuilder.buildPlan]      (W14 deferred body — metric-evaluation recursion)
-     *     → [cc.monomer.metricflow.domain.plan_conversion.DataflowToSqlPlanConverter.convertToSqlPlan] (W13 partial: 15/23 visit bodies; W14 deferred: 8 visit bodies)
+     *     → [cc.monomer.metricflow.domain.query.MetricFlowQueryParser.parseAndValidateQuery]
+     *     → [cc.monomer.metricflow.domain.dataflow.builder.DataflowPlanBuilder.buildPlan]
+     *     → [cc.monomer.metricflow.domain.plan_conversion.DataflowToSqlPlanConverter.convertToSqlPlan]
      *     → dialect-specific SQL renderer
      *
-     * As of W14, the engine wiring **calls** the chain (instead of throwing immediately), so
-     * callers receive the first under-the-chain [NotImplementedError] as a concrete deferral
-     * with the missing layer named. This is the scaffolding that lets the diff-runner surface
-     * per-case UNIMPLEMENTED diagnostics. Once the layers below land their bodies, every
-     * corpus case naturally migrates from UNIMPLEMENTED → PASS / FAIL without further wiring.
-     *
-     * The chain is **not** wrapped in extra try/catch — any [NotImplementedError] raised by a
-     * subordinate layer (W14 deferred body) propagates verbatim to the call site, which the
-     * diff-runner then categorises as UNIMPLEMENTED. Other exceptions (genuine bugs) surface
-     * as ERROR.
+     * Time-dependent metric shapes ask the planner for a compatible configured time spine only
+     * when their dataflow requires one. Simple aggregation-time queries and time bounds may use
+     * the model-owned time column directly, so they remain valid without a physical spine.
      */
     fun explain(request: MetricFlowExplainRequest): MetricFlowExplainResult {
-        requireConfiguredTimeSpine(
-            metricNames = request.metricNames.orEmpty(),
-            groupByNames = request.groupByNames.orEmpty(),
-            timeConstraintStart = request.timeConstraintStart,
-            timeConstraintEnd = request.timeConstraintEnd,
-        )
+        checkMetricNames(request.metricNames.orEmpty())
 
         // Step 1: parse + validate the request into a MetricFlowQuerySpec.
         val parser = cc.monomer.metricflow.domain.query.MetricFlowQueryParser(
@@ -263,19 +241,7 @@ class MetricFlowEngine(
                 "Query failed to resolve: ${queryResolution.inputToIssueSet.mergedIssueSet}",
             )
         }
-        val rawQuerySpec = queryResolution.checkedQuerySpec
-            ?: throw IllegalStateException("Query resolved without errors but no spec was produced")
-        // The W14a resolver doesn't yet propagate the request's time-range bounds into the spec
-        // — attach them here so the W14c builder can emit a ConstrainTimeRangeNode.
-        val timeRangeConstraint = buildTimeRangeConstraint(
-            start = parseDateTime(request.timeConstraintStart),
-            end = parseDateTime(request.timeConstraintEnd),
-        )
-        val querySpec = if (timeRangeConstraint != null) {
-            rawQuerySpec.withTimeRangeConstraint(timeRangeConstraint)
-        } else {
-            rawQuerySpec
-        }
+        val querySpec = queryResolution.checkedQuerySpec
 
         // Step 2-4: build the dataflow plan, convert to SQL plan, render.
         val pipeline = explainPipeline
@@ -283,6 +249,7 @@ class MetricFlowEngine(
             querySpec = querySpec,
             dialect = request.dialect,
             outputSelectionSpecs = null,
+            orderOutputColumnsByInputOrder = request.orderOutputColumnsByInputOrder,
         )
         return MetricFlowExplainResult(
             sql = sql,
@@ -316,12 +283,7 @@ class MetricFlowEngine(
      * `query_type == DIMENSION_VALUES` branch + `output_selection_specs`).
      */
     fun explainGetDimensionValues(request: ExplainGetDimensionValuesRequest): MetricFlowExplainResult {
-        requireConfiguredTimeSpine(
-            metricNames = request.metricNames,
-            groupByNames = listOf(request.getGroupByValues),
-            timeConstraintStart = request.timeConstraintStart,
-            timeConstraintEnd = request.timeConstraintEnd,
-        )
+        checkMetricNames(request.metricNames)
 
         val parser = cc.monomer.metricflow.domain.query.MetricFlowQueryParser(
             semanticManifestLookup = semanticManifestLookup,
@@ -347,17 +309,7 @@ class MetricFlowEngine(
                 "Query failed to resolve: ${queryResolution.inputToIssueSet.mergedIssueSet}",
             )
         }
-        val rawQuerySpec = queryResolution.checkedQuerySpec
-            ?: throw IllegalStateException("Query resolved without errors but no spec was produced")
-        val timeRangeConstraint = buildTimeRangeConstraint(
-            start = parseDateTime(request.timeConstraintStart),
-            end = parseDateTime(request.timeConstraintEnd),
-        )
-        val querySpec = if (timeRangeConstraint != null) {
-            rawQuerySpec.withTimeRangeConstraint(timeRangeConstraint)
-        } else {
-            rawQuerySpec
-        }
+        val querySpec = queryResolution.checkedQuerySpec
         // Mirror Python's `InvalidQueryException` for entity group-bys in DIMENSION_VALUES.
         if (querySpec.entitySpecs.isNotEmpty()) {
             throw IllegalArgumentException(
@@ -382,6 +334,7 @@ class MetricFlowEngine(
             querySpec = querySpec,
             dialect = request.dialect,
             outputSelectionSpecs = outputSelectionSpecs,
+            orderOutputColumnsByInputOrder = false,
         )
         return MetricFlowExplainResult(
             sql = sql,
@@ -409,88 +362,6 @@ class MetricFlowEngine(
             }
         }
 
-    /**
-     * Build a [cc.monomer.metricflow.common.time.TimeRangeConstraint] from the explain
-     * request's time-constraint bounds. Returns null when either bound is null (no constraint).
-     *
-     * Port of the inline `TimeRangeConstraint` construction in
-     * `MetricFlowEngine._build_query_spec` (Python).
-     */
-    private fun buildTimeRangeConstraint(
-        start: java.time.LocalDateTime?,
-        end: java.time.LocalDateTime?,
-    ): cc.monomer.metricflow.common.time.TimeRangeConstraint? {
-        if (start == null || end == null) return null
-        return cc.monomer.metricflow.common.time.TimeRangeConstraint(
-            startTime = start,
-            endTime = end,
-        )
-    }
-
-    /**
-     * Reject time-dependent requests before resolution when the manifest has no time spine.
-     *
-     * Lookup construction accepts an empty spine set so atemporal metrics remain usable. This
-     * guard preserves the opposite half of that contract: synthetic `metric_time`, explicit time
-     * bounds, cumulative / conversion metrics, time offsets, and metrics configured to join to
-     * the spine never degrade into fact-table-only SQL.
-     */
-    private fun requireConfiguredTimeSpine(
-        metricNames: List<String>,
-        groupByNames: List<String>,
-        timeConstraintStart: String?,
-        timeConstraintEnd: String?,
-    ) {
-        if (semanticManifestLookup.timeSpineSources.isNotEmpty()) return
-
-        val usesMetricTime = groupByNames.any(::isMetricTimeQueryName)
-        val usesTimeConstraint = timeConstraintStart != null || timeConstraintEnd != null
-        val usesTimeDependentMetric = metricNames.any { metricName ->
-            val metricReference = MetricReference(metricName)
-            metricReference in semanticManifestLookup.metricLookup.metricReferences &&
-                metricRequiresTimeSpine(
-                    metric = semanticManifestLookup.metricLookup.getMetric(metricReference),
-                    visitedMetricNames = linkedSetOf(),
-                )
-        }
-
-        if (usesMetricTime || usesTimeConstraint || usesTimeDependentMetric) {
-            throw SemanticManifestConfigurationError(
-                "This query requires a configured time spine, but the manifest has none.",
-            )
-        }
-    }
-
-    private fun metricRequiresTimeSpine(
-        metric: Metric,
-        visitedMetricNames: MutableSet<String>,
-    ): Boolean {
-        if (!visitedMetricNames.add(metric.name)) return false
-        if (metric.type == MetricType.CUMULATIVE || metric.type == MetricType.CONVERSION) return true
-        if (
-            metric.type == MetricType.SIMPLE &&
-            (
-                metric.typeParams.joinToTimespine ||
-                    metric.typeParams.measure?.joinToTimespine == true ||
-                    metric.inputMeasures.any { it.joinToTimespine }
-                )
-        ) {
-            return true
-        }
-
-        return metric.inputMetrics.any { metricInput ->
-            metricInput.offsetWindow != null ||
-                metricInput.offsetToGrain != null ||
-                metricRequiresTimeSpine(
-                    metric = semanticManifestLookup.metricLookup.getMetric(metricInput.asReference),
-                    visitedMetricNames = visitedMetricNames,
-                )
-        }
-    }
-
-    private fun isMetricTimeQueryName(queryName: String): Boolean =
-        queryName.substringBefore("__").equals(METRIC_TIME_ELEMENT_NAME, ignoreCase = true)
-
     // --- Helpers -----------------------------------------------------------
 
     /**
@@ -515,10 +386,15 @@ class MetricFlowEngine(
 
     private fun checkMetricNames(metricNames: Iterable<String>) {
         val metricLookup = semanticManifestLookup.metricLookup
-        val unknown = metricNames.filter { MetricReference(it) !in metricLookup.metricReferences }
+        val requestedMetricReferences = metricNames.map(::MetricReference)
+        val unknown = requestedMetricReferences.filter { it !in metricLookup.metricReferences }
         if (unknown.isNotEmpty()) {
-            throw IllegalArgumentException("Unknown metric names: $unknown")
+            throw IllegalArgumentException("Unknown metric names: ${unknown.map { it.elementName }}")
         }
+        metricLookup.validateMetricDefinitionDependencies(
+            rootMetricReferences = requestedMetricReferences,
+            maximumMetricLevels = MetricEvaluationPlan.MAX_METRIC_DEFINITION_RECURSION_DEPTH,
+        )
     }
 
     /**
@@ -758,10 +634,6 @@ data class GroupByListing(
  * since SQL execution is out of scope. The `queriedSemanticModels` field mirrors what
  * Python's `MetricFlowEngine.explain` exposes via `query_spec.queried_semantic_models`.
  *
- * **Wave-W14 status — unreachable in practice.** The engine's explain method throws
- * [NotImplementedError] before constructing this result. The type exists so call-site code
- * compiles and so future waves can `return MetricFlowExplainResult(...)` without changing
- * any signatures.
  */
 data class MetricFlowExplainResult(
     val sql: String,

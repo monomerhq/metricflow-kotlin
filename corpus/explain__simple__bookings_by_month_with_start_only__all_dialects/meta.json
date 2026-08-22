@@ -1,0 +1,25 @@
+{
+  "case_id": "explain__simple__bookings_by_month_with_start_only__all_dialects",
+  "subcommand": "explain",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "bookings"
+    ],
+    "group_by_names": [
+      "metric_time__month"
+    ],
+    "time_constraint_start": "2020-01-15"
+  },
+  "dialect_set": [
+    "Trino",
+    "BigQuery",
+    "Snowflake",
+    "Databricks",
+    "Redshift",
+    "DuckDB",
+    "Postgres"
+  ],
+  "source_test": "metricflow_semantics/query/query_parser.py::_adjust_time_constraint",
+  "notes": "A start-only range fills the all-time end and expands the start to the month boundary."
+}

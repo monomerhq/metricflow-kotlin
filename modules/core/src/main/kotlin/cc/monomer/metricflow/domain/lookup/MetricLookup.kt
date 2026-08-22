@@ -3,6 +3,7 @@ package cc.monomer.metricflow.domain.lookup
 import cc.monomer.metricflow.common.errors.DuplicateMetricError
 import cc.monomer.metricflow.common.errors.MetricFlowInternalError
 import cc.monomer.metricflow.common.errors.MetricNotFoundError
+import cc.monomer.metricflow.common.errors.MetricDefinitionDependencyError
 import cc.monomer.metricflow.common.util.cache.ResultCache
 import cc.monomer.metricflow.domain.manifest.model.Metric
 import cc.monomer.metricflow.domain.manifest.model.MetricInput
@@ -72,6 +73,59 @@ class MetricLookup(
      */
     val metricReferences: List<MetricReference>
         get() = metrics.keys.sorted()
+
+    /**
+     * Validate that every requested metric dependency path is acyclic and no deeper than
+     * [maximumMetricLevels]. The root metric is level 1, so a maximum of 100 levels permits
+     * 99 metric-to-metric reference hops.
+     *
+     * The traversal is iterative so an invalid manifest cannot fail with a JVM stack overflow.
+     * It intentionally follows every metric-input type exposed by [metricInputs], not only
+     * DERIVED metrics, because ratio, cumulative, and conversion metrics also contribute to the
+     * effective execution dependency graph.
+     */
+    fun validateMetricDefinitionDependencies(
+        rootMetricReferences: Iterable<MetricReference>,
+        maximumMetricLevels: Int,
+    ) {
+        require(maximumMetricLevels > 0) { "maximumMetricLevels must be positive" }
+
+        data class PendingMetric(
+            val reference: MetricReference,
+            val ancestorPath: List<MetricReference>,
+        )
+
+        val pendingMetrics = ArrayDeque<PendingMetric>()
+        rootMetricReferences.toList().asReversed().forEach { rootReference ->
+            pendingMetrics.addLast(PendingMetric(rootReference, emptyList()))
+        }
+
+        while (pendingMetrics.isNotEmpty()) {
+            val pendingMetric = pendingMetrics.removeLast()
+            val cycleStart = pendingMetric.ancestorPath.indexOf(pendingMetric.reference)
+            if (cycleStart >= 0) {
+                val cycle = pendingMetric.ancestorPath.drop(cycleStart) + pendingMetric.reference
+                throw MetricDefinitionDependencyError(
+                    "Metric dependency cycle detected: " + cycle.joinToString(" -> ") { it.elementName },
+                )
+            }
+
+            val currentPath = pendingMetric.ancestorPath + pendingMetric.reference
+            if (currentPath.size > maximumMetricLevels) {
+                throw MetricDefinitionDependencyError(
+                    "Metric definition depth exceeds the maximum of $maximumMetricLevels levels: " +
+                        currentPath.joinToString(" -> ") { it.elementName },
+                )
+            }
+
+            val metric = getMetric(pendingMetric.reference)
+            val inputReferences = metricInputs(metric, includeConversionMetricInput = true)
+                .map { it.asReference }
+            inputReferences.asReversed().forEach { inputReference ->
+                pendingMetrics.addLast(PendingMetric(inputReference, currentPath))
+            }
+        }
+    }
 
     /**
      * Return the set of semantic models whose simple metrics contribute to the given complex

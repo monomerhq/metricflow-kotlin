@@ -78,7 +78,13 @@ def _pyd_dump(obj: Any) -> Any:
 
 
 def _normalize_repository_paths(value: Any, repository_root: pathlib.Path = REPOSITORY_ROOT) -> Any:
-    """Replace checkout-specific absolute paths with repository-relative paths."""
+    """Replace checkout-specific absolute paths with repository-relative paths.
+
+    Corpus data can be regenerated from a different worktree than the one doing
+    the verification. Prefer the active repository root, then recognize the
+    immutable upstream fixture subtree so a foreign checkout prefix can never be
+    persisted in a request fixture.
+    """
     if isinstance(value, dict):
         return {key: _normalize_repository_paths(item, repository_root) for key, item in value.items()}
     if isinstance(value, list):
@@ -92,6 +98,11 @@ def _normalize_repository_paths(value: Any, repository_root: pathlib.Path = REPO
     try:
         return candidate.relative_to(repository_root).as_posix()
     except ValueError:
+        parts = candidate.parts
+        upstream_anchor = ("python_oracle", "upstream")
+        for index in range(len(parts) - len(upstream_anchor) + 1):
+            if tuple(parts[index : index + len(upstream_anchor)]) == upstream_anchor:
+                return pathlib.PurePosixPath(*parts[index:]).as_posix()
         return value
 
 

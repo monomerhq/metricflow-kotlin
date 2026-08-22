@@ -51,6 +51,17 @@ class SequentialIdGeneratorTest {
     }
 
     @Test
+    fun `different prefix objects with the same string share a counter`() {
+        SequentialIdGenerator.reset()
+        assertEquals(
+            "cte_0",
+            SequentialIdGenerator.createNextId(StaticIdPrefix.SQL_PLAN_COMMON_TABLE_EXPRESSION_ID_PREFIX).strValue,
+        )
+        assertEquals("cte_1", SequentialIdGenerator.createNextId(StaticIdPrefix.CTE).strValue)
+        assertEquals("cte_2", SequentialIdGenerator.createNextId(DynamicIdPrefix("cte")).strValue)
+    }
+
+    @Test
     fun `node id is unique per call`() {
         SequentialIdGenerator.reset()
         val a = NodeId.createUnique(StaticIdPrefix.SQL_EXPR_FUNCTION_ID_PREFIX)

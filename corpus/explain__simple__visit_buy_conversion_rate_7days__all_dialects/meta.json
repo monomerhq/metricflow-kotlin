@@ -1,0 +1,27 @@
+{
+  "case_id": "explain__simple__visit_buy_conversion_rate_7days__all_dialects",
+  "subcommand": "explain",
+  "manifest_id": "simple_manifest",
+  "args": {
+    "metric_names": [
+      "visit_buy_conversion_rate_7days"
+    ],
+    "group_by_names": [
+      "metric_time__day"
+    ],
+    "where_constraints": [
+      "{{ TimeDimension('metric_time', 'day') }} = '2020-01-01'"
+    ]
+  },
+  "dialect_set": [
+    "Trino",
+    "BigQuery",
+    "Snowflake",
+    "Databricks",
+    "Redshift",
+    "DuckDB",
+    "Postgres"
+  ],
+  "source_test": "tests_metricflow/query_rendering/test_conversion_metric_rendering.py::test_conversion_metric_with_window",
+  "notes": "Conversion metric with a seven-day conversion window."
+}

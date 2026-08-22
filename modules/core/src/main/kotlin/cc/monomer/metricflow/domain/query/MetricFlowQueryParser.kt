@@ -1,7 +1,11 @@
 package cc.monomer.metricflow.domain.query
 
+import cc.monomer.metricflow.common.time.Java8TimePeriodAdjuster
 import cc.monomer.metricflow.common.time.TimeRangeConstraint
+import cc.monomer.metricflow.domain.lookup.MetricLookup
 import cc.monomer.metricflow.domain.lookup.SemanticManifestLookup
+import cc.monomer.metricflow.domain.manifest.model.enums.TimeGranularity
+import cc.monomer.metricflow.domain.manifest.model.references.MetricReference
 import cc.monomer.metricflow.domain.manifest.model.filter.WhereFilter
 import cc.monomer.metricflow.domain.manifest.model.filter.WhereFilterIntersection
 import cc.monomer.metricflow.domain.query.filter.DefaultWhereFilterPatternFactory
@@ -227,7 +231,6 @@ class MetricFlowQueryParser(
      * the engine catches the resulting [NotImplementedError] at that boundary so the
      * diff-runner categorises explain-target cases as UNIMPLEMENTED rather than ERROR.
      */
-    @Suppress("UNUSED_PARAMETER")
     fun parseAndValidateQuery(
         metricNames: List<String>,
         metrics: List<MetricQueryParameter>,
@@ -272,7 +275,46 @@ class MetricFlowQueryParser(
             graphLookup = effectiveGraphLookup,
             whereFilterPatternFactory = whereFilterPatternFactory,
         )
-        return resolver.resolveQuery(resolverInput)
+        val resolution = resolver.resolveQuery(resolverInput)
+        if (timeConstraintStart == null && timeConstraintEnd == null) return resolution
+
+        val querySpec = resolution.querySpec ?: return resolution
+        val requestedMetricTimeGrain = querySpec.timeDimensionSpecs
+            .filter { it.isMetricTime && it.baseGranularity != null }
+            .minByOrNull { it.baseGranularitySortKey }
+            ?.baseGranularity
+        val effectiveMetricTimeGrain = requestedMetricTimeGrain
+            ?: querySpec.metricSpecs
+                .map { minimumQueryableTimeGranularity(it.reference, effectiveGraphLookup) }
+                .maxByOrNull(TimeGranularity::toInt)
+            ?: effectiveGraphLookup.manifestObjectLookup.minTimeGrainUsedInModels
+            ?: error("Unable to resolve a metric-time grain for a constrained query.")
+        val timeRangeConstraint = TimeRangeConstraint(
+            startTime = timeConstraintStart ?: TimeRangeConstraint.ALL_TIME_BEGIN,
+            endTime = timeConstraintEnd ?: TimeRangeConstraint.ALL_TIME_END,
+        )
+        val adjustedConstraint = Java8TimePeriodAdjuster().expandTimeConstraintToFillGranularity(
+            timeConstraint = timeRangeConstraint,
+            granularity = effectiveMetricTimeGrain,
+        )
+        return resolution.copy(querySpec = querySpec.withTimeRangeConstraint(adjustedConstraint))
+    }
+
+    private fun minimumQueryableTimeGranularity(
+        metricReference: MetricReference,
+        graphLookup: SemanticManifestGraphLookup,
+    ): TimeGranularity {
+        graphLookup.manifestObjectLookup.simpleMetricNameToInput[metricReference.elementName]?.let {
+            return it.aggTimeDimensionGrain
+        }
+        val metric = semanticManifestLookup.metricLookup.getMetric(metricReference)
+        val inputMetrics = MetricLookup.metricInputs(metric, includeConversionMetricInput = true)
+        check(inputMetrics.isNotEmpty()) {
+            "Expected a non-simple metric to have inputs: ${metricReference.elementName}"
+        }
+        return inputMetrics
+            .map { minimumQueryableTimeGranularity(MetricReference(it.name), graphLookup) }
+            .maxBy(TimeGranularity::toInt)
     }
 
     /**

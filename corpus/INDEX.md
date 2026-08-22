@@ -1,6 +1,6 @@
 # Corpus index
 
-Total cases: 112
+Total cases: 136
 Generated from disk by scanning `corpus/<case>/meta.json`.
 
 | case_id | subcommand | manifest | dialects | source |
@@ -8,37 +8,61 @@ Generated from disk by scanning `corpus/<case>/meta.json`.
 | `entities_for_metrics__simple__bookings` | `entities_for_metrics` | `simple_manifest` |  | (derived) |
 | `entities_for_metrics__simple__bookings_views` | `entities_for_metrics` | `simple_manifest` |  | (derived) |
 | `entities_for_metrics__simple_multi_hop_join__txn_count` | `entities_for_metrics` | `multi_hop_join_manifest` |  | (derived) |
-| `explain__minimal_fixture__bookings_by_metric_time` | `explain` | `minimal_valid_manifest` |  | python_oracle/tests/fixtures/minimal_valid_manifest.json |
-| `explain__simple__average_booking_value` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__bookers_by_metric_time` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__booking_fees_derived` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__booking_fees_per_booker_derived` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__bookings_by_booking_is_instant` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__bookings_by_ds_month` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__bookings_by_ds_quarter` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__bookings_by_ds_week` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__bookings_by_ds_year` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__bookings_by_listing` | `explain` | `simple_manifest` |  | derived (entity group_by) |
-| `explain__simple__bookings_by_listing_country` | `explain` | `simple_manifest` |  | tests_metricflow/query_rendering/test_query_rendering.py::test_local_dimension_using_local_entity (variant) |
-| `explain__simple__bookings_by_metric_time__all_dialects` | `explain` | `simple_manifest` |  | tests_metricflow/integration/test_rendered_query.py::test_render_query |
-| `explain__simple__bookings_by_metric_time_with_limit` | `explain` | `simple_manifest` |  | tests_metricflow/query_rendering/test_query_rendering.py::test_limit_rows |
-| `explain__simple__bookings_by_metric_time_with_order` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__bookings_listings_by_metric_time` | `explain` | `simple_manifest` |  | tests_metricflow/integration/test_rendered_query.py::test_id_enumeration |
-| `explain__simple__bookings_listings_views_multi` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__bookings_no_groupby` | `explain` | `simple_manifest` |  | derived (no group_by) |
-| `explain__simple__bookings_order_output_columns_by_input_order` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__bookings_per_dollar_ratio` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__bookings_per_listing_ratio` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__bookings_with_time_constraint` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__bookings_with_where` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__identity_verifications_by_metric_time` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__instant_bookings_by_metric_time` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__max_min_booking_value` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__revenue_by_metric_time` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__views_by_listing` | `explain` | `simple_manifest` |  | (derived) |
-| `explain__simple__views_by_metric_time` | `explain` | `simple_manifest` |  | (derived) |
-| `explain_get_dimension_values__simple__listing_country_for_bookings` | `explain_get_dimension_values` | `simple_manifest` |  | MetricFlowEngine.explain_get_dimension_values |
-| `explain_get_dimension_values__simple__metric_time_for_bookings` | `explain_get_dimension_values` | `simple_manifest` |  | (derived) |
+| `explain__minimal_fixture__bookings_by_metric_time` | `explain` | `minimal_valid_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | python_oracle/tests/fixtures/minimal_valid_manifest.json |
+| `explain__simple__average_booking_value` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__bookers_by_metric_time` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__booking_fees_derived` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__booking_fees_per_booker_derived` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__bookings_all_time__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_cumulative_metric_rendering.py |
+| `explain__simple__bookings_all_time_with_time_constraint__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_cumulative_metric_rendering.py::test_cumulative_metric_no_window_with_time_constraint |
+| `explain__simple__bookings_by_booking_is_instant` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__bookings_by_ds_month` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__bookings_by_ds_quarter` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__bookings_by_ds_week` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__bookings_by_ds_year` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__bookings_by_listing` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | derived (entity group_by) |
+| `explain__simple__bookings_by_listing_country` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_query_rendering.py::test_local_dimension_using_local_entity (variant) |
+| `explain__simple__bookings_by_metric_time__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/integration/test_rendered_query.py::test_render_query |
+| `explain__simple__bookings_by_metric_time_with_limit` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_query_rendering.py::test_limit_rows |
+| `explain__simple__bookings_by_metric_time_with_order` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__bookings_by_month_with_end_only__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | metricflow_semantics/query/query_parser.py::_adjust_time_constraint |
+| `explain__simple__bookings_by_month_with_start_only__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | metricflow_semantics/query/query_parser.py::_adjust_time_constraint |
+| `explain__simple__bookings_custom_alien_day__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_custom_granularity.py::test_simple_metric_with_custom_granularity |
+| `explain__simple__bookings_growth_2_weeks__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_derived_metric_rendering.py::test_derived_metric_with_offset_window |
+| `explain__simple__bookings_growth_2_weeks_with_time_constraint__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_derived_metric_rendering.py::test_time_offset_metric_with_time_constraint |
+| `explain__simple__bookings_growth_since_start_of_month__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_derived_metric_rendering.py::test_derived_metric_with_offset_to_grain |
+| `explain__simple__bookings_join_to_time_spine__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_time_spine_join_rendering.py |
+| `explain__simple__bookings_listings_by_metric_time` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/integration/test_rendered_query.py::test_id_enumeration |
+| `explain__simple__bookings_listings_views_multi` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__bookings_no_groupby` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | derived (no group_by) |
+| `explain__simple__bookings_offset_one_alien_day_by_alien_day__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_custom_granularity.py::test_custom_offset_window_with_only_window_grain |
+| `explain__simple__bookings_offset_one_alien_day_by_day__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_custom_granularity.py::test_custom_offset_window |
+| `explain__simple__bookings_order_output_columns_by_input_order` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__bookings_per_dollar_ratio` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__bookings_per_listing_ratio` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__bookings_with_time_constraint` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__bookings_with_where` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__identity_verifications_by_metric_time` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__instant_bookings_by_metric_time` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__max_min_booking_value` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__revenue_by_metric_time` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__revenue_mtd_by_month__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_cumulative_metric_rendering.py::test_cumulative_metric_grain_to_date |
+| `explain__simple__subdaily_cumulative_grain_to_date_hour__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_granularity_date_part_rendering.py::test_subdaily_cumulative_grain_to_date_metric |
+| `explain__simple__subdaily_cumulative_multiple_time_spines__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_custom_granularity.py::test_multiple_time_spines_in_query_for_cumulative_metric |
+| `explain__simple__subdaily_join_multiple_time_spines__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_custom_granularity.py::test_multiple_time_spines_in_query_for_join_to_time_spine_metric |
+| `explain__simple__subdaily_offset_to_grain_hour__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_granularity_date_part_rendering.py::test_subdaily_offset_to_grain_metric |
+| `explain__simple__subdaily_offset_window_hour__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_granularity_date_part_rendering.py::test_subdaily_offset_window_metric |
+| `explain__simple__trailing_2_months_revenue__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_cumulative_metric_rendering.py::test_cumulative_metric |
+| `explain__simple__trailing_2_months_revenue_by_month__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_cumulative_metric_rendering.py |
+| `explain__simple__trailing_2_months_revenue_with_time_constraint__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_cumulative_metric_rendering.py::test_cumulative_metric_with_time_constraint |
+| `explain__simple__views_by_listing` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__views_by_metric_time` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__simple__visit_buy_conversion_rate_7days__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_conversion_metric_rendering.py::test_conversion_metric_with_window |
+| `explain__simple__visit_buy_conversion_rate_7days_with_filter_only__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_conversion_metric_rendering.py |
+| `explain__simple__visit_buy_conversion_rate_7days_with_time_constraint__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_conversion_metric_rendering.py::test_conversion_metric_with_window_and_time_constraint |
+| `explain__simple__visit_buy_conversion_rate_by_session__all_dialects` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/plan_conversion/dataflow_to_sql/test_conversion_metrics_to_sql.py::test_conversion_rate_with_constant_properties |
+| `explain_get_dimension_values__simple__listing_country_for_bookings` | `explain_get_dimension_values` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | MetricFlowEngine.explain_get_dimension_values |
+| `explain_get_dimension_values__simple__metric_time_for_bookings` | `explain_get_dimension_values` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
 | `list_dimensions__ambiguous_resolution_manifest__all` | `list_dimensions` | `ambiguous_resolution_manifest` |  | (derived) |
 | `list_dimensions__cyclic_join_manifest__all` | `list_dimensions` | `cyclic_join_manifest` |  | (derived) |
 | `list_dimensions__data_warehouse_validation_manifest__all` | `list_dimensions` | `data_warehouse_validation_manifest` |  | (derived) |

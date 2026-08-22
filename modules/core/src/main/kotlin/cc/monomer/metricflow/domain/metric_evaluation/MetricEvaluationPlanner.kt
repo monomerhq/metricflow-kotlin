@@ -26,7 +26,7 @@ import cc.monomer.metricflow.domain.spec.where.WhereFilterSpec
  */
 abstract class MetricEvaluationPlanner(
     protected val manifestObjectLookup: ManifestObjectLookup,
-    metricLookup: MetricLookup,
+    protected val metricLookup: MetricLookup,
     @Suppress("unused") // Held for parity with Python ctor; subclasses may pull on it as the planner grows.
     protected val columnAssociationResolver: ColumnAssociationResolver,
 ) {

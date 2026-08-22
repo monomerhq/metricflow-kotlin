@@ -20,7 +20,7 @@ plugins {
 }
 
 group = "cc.monomer.metricflow"
-version = "0.2.0"
+version = "0.2.1"
 
 allprojects {
     group = rootProject.group
@@ -65,7 +65,19 @@ tasks.register("printVersion") {
 tasks.register("verifyPublicRepository") {
     group = "verification"
     description = "Runs the public artifact and differential-corpus release gates."
-    dependsOn("verifyPublicArtifact", ":internal-diff-runner:run", "verifyMonomerProductBundle")
+    dependsOn(
+        "verifyPublicArtifact",
+        ":internal-diff-runner:run",
+        "verifyMonomerProductBundle",
+        "verifyCorpusPathNormalization",
+    )
+}
+
+tasks.register<Exec>("verifyCorpusPathNormalization") {
+    group = "verification"
+    description = "Rejects checkout-specific absolute paths in corpus request fixtures."
+    workingDir(rootProject.projectDir)
+    commandLine("python3", "-m", "unittest", "harness.test_manifest_loader")
 }
 
 val monomerProductArtifactIds = listOf(

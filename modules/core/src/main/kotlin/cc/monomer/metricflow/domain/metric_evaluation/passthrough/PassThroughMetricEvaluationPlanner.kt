@@ -61,6 +61,11 @@ class PassThroughMetricEvaluationPlanner(
         predicatePushdownState: PredicatePushdownState,
         filterSpecFactory: WhereFilterSpecFactory,
     ): MetricEvaluationPlan {
+        metricLookup.validateMetricDefinitionDependencies(
+            rootMetricReferences = metricSpecs.map { it.reference },
+            maximumMetricLevels = MetricEvaluationPlan.MAX_METRIC_DEFINITION_RECURSION_DEPTH,
+        )
+
         val queryElementCollector = MetricQueryElementCollector()
 
         val topLevelQueryElements: OrderedSet<MetricQueryElement> = FrozenOrderedSet(

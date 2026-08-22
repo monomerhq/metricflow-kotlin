@@ -133,4 +133,52 @@ internal object MetricEvaluationFixtures {
             timeSpines = listOf(timeSpine()),
         ),
     )
+
+    fun manifestWithMetricLevels(metricLevels: Int): SemanticManifest {
+        require(metricLevels > 0) { "metricLevels must be positive" }
+        val metrics = buildList {
+            add(bookingsMetric())
+            for (level in 2..metricLevels) {
+                val inputName = if (level == 2) "bookings" else "metric_level_${level - 1}"
+                add(
+                    Metric(
+                        name = "metric_level_$level",
+                        type = MetricType.DERIVED,
+                        typeParams = MetricTypeParams(
+                            expr = inputName,
+                            metrics = listOf(MetricInput(name = inputName)),
+                        ),
+                    ),
+                )
+            }
+        }
+        return SemanticManifest(
+            semanticModels = listOf(bookingsModel()),
+            metrics = metrics,
+            projectConfiguration = ProjectConfiguration(timeSpines = listOf(timeSpine())),
+        )
+    }
+
+    fun manifestWithMetricCycle(): SemanticManifest = SemanticManifest(
+        semanticModels = listOf(bookingsModel()),
+        metrics = listOf(
+            Metric(
+                name = "metric_a",
+                type = MetricType.DERIVED,
+                typeParams = MetricTypeParams(
+                    expr = "metric_b",
+                    metrics = listOf(MetricInput(name = "metric_b")),
+                ),
+            ),
+            Metric(
+                name = "metric_b",
+                type = MetricType.DERIVED,
+                typeParams = MetricTypeParams(
+                    expr = "metric_a",
+                    metrics = listOf(MetricInput(name = "metric_a")),
+                ),
+            ),
+        ),
+        projectConfiguration = ProjectConfiguration(timeSpines = listOf(timeSpine())),
+    )
 }

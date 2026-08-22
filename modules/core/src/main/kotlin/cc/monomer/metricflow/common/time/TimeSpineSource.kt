@@ -1,8 +1,10 @@
 package cc.monomer.metricflow.common.time
 
+import cc.monomer.metricflow.common.errors.SemanticManifestConfigurationError
 import cc.monomer.metricflow.domain.manifest.model.SemanticManifest
 import cc.monomer.metricflow.domain.manifest.model.TimeSpineCustomGranularityColumn
 import cc.monomer.metricflow.domain.manifest.model.enums.TimeGranularity
+import cc.monomer.metricflow.domain.spec.TimeDimensionSpec
 import cc.monomer.metricflow.domain.spec.bind.SqlTable
 
 /**
@@ -17,11 +19,6 @@ import cc.monomer.metricflow.domain.spec.bind.SqlTable
  * - [customGranularities] — additional columns mapping the spine to custom grains
  *   (e.g. `fiscal_quarter`).
  *
- * **Note on `chooseTimeSpineSources`**: the Python static method
- * `choose_time_spine_sources(required_time_spine_specs, time_spine_sources)` takes a
- * `Sequence[TimeDimensionSpec]` — and `TimeDimensionSpec` lives in `:domain:spec` (W4
- * isn't porting that full module yet). We defer that one method to W7 (when the spec
- * family lands). Everything else is ported.
  */
 data class TimeSpineSource(
     val sqlTable: SqlTable,
@@ -141,5 +138,75 @@ data class TimeSpineSource(
                 }
             }
         }
+
+        /**
+         * Choose the smallest set of time spines that satisfies the requested time specs.
+         *
+         * Port of `TimeSpineSource.choose_time_spine_sources`. Custom grains are tied to the
+         * spine that declares them. Standard grains can use any spine whose base grain is at
+         * least as fine as every requested standard grain; among those compatible spines, the
+         * coarsest one is selected to minimise joins and aggregation work. When a custom spine
+         * cannot also satisfy the standard requirements, that coarsest compatible standard
+         * spine is added as a second source.
+         */
+        fun chooseTimeSpineSources(
+            requiredTimeSpineSpecs: Iterable<TimeDimensionSpec>,
+            timeSpineSources: Map<TimeGranularity, TimeSpineSource>,
+        ): List<TimeSpineSource> {
+            val requiredSpecs = requiredTimeSpineSpecs.toList()
+            require(requiredSpecs.isNotEmpty()) {
+                "Choosing time spine source requires time spine specs, but the " +
+                    "`requiredTimeSpineSpecs` parameter is empty. This indicates internal misconfiguration."
+            }
+
+            val customTimeSpines = buildCustomTimeSpineSources(timeSpineSources.values.toList())
+            val requiredTimeSpines = linkedSetOf<TimeSpineSource>()
+            for (spec in requiredSpecs) {
+                if (spec.timeGranularity != null && spec.hasCustomGrain) {
+                    requiredTimeSpines.add(customTimeSpines.getValue(spec.timeGranularity.name))
+                }
+            }
+
+            // A date-part request has no explicit grain. DAY is the largest standard grain
+            // that remains compatible with every supported date part.
+            val smallestRequiredStandardGrain = requiredSpecs
+                .map { spec -> spec.timeGranularity?.baseGranularity ?: TimeGranularity.DAY }
+                .minBy { it.toInt() }
+            val compatibleTimeSpinesForStandardGrains = timeSpineSources
+                .filterKeys { grain -> grain.toInt() <= smallestRequiredStandardGrain.toInt() }
+
+            if (compatibleTimeSpinesForStandardGrains.isEmpty()) {
+                val smallestAvailable = timeSpineSources.keys
+                    .minByOrNull { it.toInt() }
+                    ?.name
+                    ?: "none"
+                throw SemanticManifestConfigurationError(
+                    "This query requires a time spine with granularity " +
+                        "${smallestRequiredStandardGrain.name} or smaller, which is not configured. " +
+                        "The smallest available time spine granularity is $smallestAvailable, which is too large. " +
+                        "See documentation for how to configure a new time spine: " +
+                        "https://docs.getdbt.com/docs/build/metricflow-time-spine",
+                )
+            }
+
+            // If the custom spine cannot satisfy the standard grains, add the coarsest
+            // compatible standard spine. This mirrors Python's value-based source comparison.
+            if (requiredTimeSpines.intersect(compatibleTimeSpinesForStandardGrains.values.toSet()).isEmpty()) {
+                val largestCompatibleGrain = compatibleTimeSpinesForStandardGrains.keys
+                    .maxBy { it.toInt() }
+                requiredTimeSpines.add(compatibleTimeSpinesForStandardGrains.getValue(largestCompatibleGrain))
+            }
+
+            return requiredTimeSpines.sortedBy { it.baseGranularity.toInt() }
+        }
+
+        /** Sequence-shaped overload matching the upstream method's public input contract. */
+        fun chooseTimeSpineSources(
+            requiredTimeSpineSpecs: Sequence<TimeDimensionSpec>,
+            timeSpineSources: Map<TimeGranularity, TimeSpineSource>,
+        ): List<TimeSpineSource> = chooseTimeSpineSources(
+            requiredTimeSpineSpecs = requiredTimeSpineSpecs.asIterable(),
+            timeSpineSources = timeSpineSources,
+        )
     }
 }

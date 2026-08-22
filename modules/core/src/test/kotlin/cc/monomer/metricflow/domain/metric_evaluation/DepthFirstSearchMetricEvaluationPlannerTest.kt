@@ -1,5 +1,6 @@
 package cc.monomer.metricflow.domain.metric_evaluation
 
+import cc.monomer.metricflow.common.errors.MetricDefinitionDependencyError
 import cc.monomer.metricflow.common.dag.SequentialIdGenerator
 import cc.monomer.metricflow.domain.lookup.SemanticManifestLookup
 import cc.monomer.metricflow.domain.metric_evaluation.plan.CumulativeMetricQueryNode
@@ -7,6 +8,7 @@ import cc.monomer.metricflow.domain.metric_evaluation.plan.DerivedMetricsQueryNo
 import cc.monomer.metricflow.domain.metric_evaluation.plan.MetricEvaluationPlan
 import cc.monomer.metricflow.domain.metric_evaluation.plan.SimpleMetricsQueryNode
 import cc.monomer.metricflow.domain.metric_evaluation.plan.TopLevelQueryNode
+import cc.monomer.metricflow.domain.metric_evaluation.passthrough.PassThroughMetricEvaluationPlanner
 import cc.monomer.metricflow.domain.plan_conversion.node_processor.PredicatePushdownState
 import cc.monomer.metricflow.domain.query.filter.WhereFilterSpecFactory
 import cc.monomer.metricflow.domain.query.resolution.FilterSpecResolutionLookUp
@@ -18,6 +20,7 @@ import cc.monomer.metricflow.domain.spec.MetricSpec
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class DepthFirstSearchMetricEvaluationPlannerTest {
@@ -112,4 +115,134 @@ class DepthFirstSearchMetricEvaluationPlannerTest {
         assertEquals(setOf("bookings", "listings"), sourceMetricNames)
         assertTrue(derivedEdges.all { it.targetNodeOutputSpec == bplSpec })
     }
+
+    @Test
+    fun `metric definition depth accepts one hundred metric levels`() {
+        val manifest = MetricEvaluationFixtures.manifestWithMetricLevels(
+            MetricEvaluationPlan.MAX_METRIC_DEFINITION_RECURSION_DEPTH,
+        )
+        val planner = plannerFor(manifest)
+        val rootMetricSpec = MetricSpec.fromElementName(
+            "metric_level_${MetricEvaluationPlan.MAX_METRIC_DEFINITION_RECURSION_DEPTH}",
+        )
+
+        val plan = planner.buildPlan(
+            metricSpecs = listOf(rootMetricSpec),
+            groupByItemSpecs = emptyList(),
+            predicatePushdownState = PredicatePushdownState.withPushdownDisabled(),
+            filterSpecFactory = filterSpecFactory(),
+        )
+
+        assertEquals(MetricEvaluationPlan.MAX_METRIC_DEFINITION_RECURSION_DEPTH + 1, plan.nodes.size)
+    }
+
+    @Test
+    fun `metric definition depth rejects level one hundred and one`() {
+        val rejectedLevel = MetricEvaluationPlan.MAX_METRIC_DEFINITION_RECURSION_DEPTH + 1
+        val manifest = MetricEvaluationFixtures.manifestWithMetricLevels(rejectedLevel)
+        val planner = plannerFor(manifest)
+
+        val error = assertFailsWith<MetricDefinitionDependencyError> {
+            planner.buildPlan(
+                metricSpecs = listOf(MetricSpec.fromElementName("metric_level_$rejectedLevel")),
+                groupByItemSpecs = emptyList(),
+                predicatePushdownState = PredicatePushdownState.withPushdownDisabled(),
+                filterSpecFactory = filterSpecFactory(),
+            )
+        }
+
+        assertTrue(error.message.orEmpty().contains("maximum of 100 levels"))
+    }
+
+    @Test
+    fun `metric dependency cycle fails without requeueing forever`() {
+        val planner = plannerFor(MetricEvaluationFixtures.manifestWithMetricCycle())
+
+        val error = assertFailsWith<MetricDefinitionDependencyError> {
+            planner.buildPlan(
+                metricSpecs = listOf(MetricSpec.fromElementName("metric_a")),
+                groupByItemSpecs = emptyList(),
+                predicatePushdownState = PredicatePushdownState.withPushdownDisabled(),
+                filterSpecFactory = filterSpecFactory(),
+            )
+        }
+
+        assertTrue(error.message.orEmpty().contains("metric_a -> metric_b -> metric_a"))
+    }
+
+    @Test
+    fun `pass-through planner accepts one hundred metric levels`() {
+        val maximumLevels = MetricEvaluationPlan.MAX_METRIC_DEFINITION_RECURSION_DEPTH
+        val planner = passThroughPlannerFor(MetricEvaluationFixtures.manifestWithMetricLevels(maximumLevels))
+
+        val plan = planner.buildPlan(
+            metricSpecs = listOf(MetricSpec.fromElementName("metric_level_$maximumLevels")),
+            groupByItemSpecs = emptyList(),
+            predicatePushdownState = PredicatePushdownState.withPushdownDisabled(),
+            filterSpecFactory = filterSpecFactory(),
+        )
+
+        assertTrue(plan.nodes.isNotEmpty())
+    }
+
+    @Test
+    fun `pass-through planner rejects level one hundred and one`() {
+        val rejectedLevel = MetricEvaluationPlan.MAX_METRIC_DEFINITION_RECURSION_DEPTH + 1
+        val planner = passThroughPlannerFor(MetricEvaluationFixtures.manifestWithMetricLevels(rejectedLevel))
+
+        val error = assertFailsWith<MetricDefinitionDependencyError> {
+            planner.buildPlan(
+                metricSpecs = listOf(MetricSpec.fromElementName("metric_level_$rejectedLevel")),
+                groupByItemSpecs = emptyList(),
+                predicatePushdownState = PredicatePushdownState.withPushdownDisabled(),
+                filterSpecFactory = filterSpecFactory(),
+            )
+        }
+
+        assertTrue(error.message.orEmpty().contains("maximum of 100 levels"))
+    }
+
+    @Test
+    fun `pass-through planner rejects a metric dependency cycle`() {
+        val planner = passThroughPlannerFor(MetricEvaluationFixtures.manifestWithMetricCycle())
+
+        val error = assertFailsWith<MetricDefinitionDependencyError> {
+            planner.buildPlan(
+                metricSpecs = listOf(MetricSpec.fromElementName("metric_a")),
+                groupByItemSpecs = emptyList(),
+                predicatePushdownState = PredicatePushdownState.withPushdownDisabled(),
+                filterSpecFactory = filterSpecFactory(),
+            )
+        }
+
+        assertTrue(error.message.orEmpty().contains("metric_a -> metric_b -> metric_a"))
+    }
+
+    private fun plannerFor(
+        manifest: cc.monomer.metricflow.domain.manifest.model.SemanticManifest,
+    ): DepthFirstSearchMetricEvaluationPlanner {
+        val manifestLookup = SemanticManifestLookup(manifest)
+        return DepthFirstSearchMetricEvaluationPlanner(
+            manifestObjectLookup = ManifestObjectLookup(manifest),
+            metricLookup = manifestLookup.metricLookup,
+            columnAssociationResolver = StubResolver(),
+        )
+    }
+
+    private fun passThroughPlannerFor(
+        manifest: cc.monomer.metricflow.domain.manifest.model.SemanticManifest,
+    ): PassThroughMetricEvaluationPlanner {
+        val manifestLookup = SemanticManifestLookup(manifest)
+        return PassThroughMetricEvaluationPlanner(
+            manifestObjectLookup = ManifestObjectLookup(manifest),
+            metricLookup = manifestLookup.metricLookup,
+            columnAssociationResolver = StubResolver(),
+        )
+    }
+
+    private fun filterSpecFactory(): WhereFilterSpecFactory = WhereFilterSpecFactory(
+        columnAssociationResolver = StubResolver(),
+        specResolutionLookup = FilterSpecResolutionLookUp.EMPTY,
+        customGrainNames = emptyList(),
+    )
 }
