@@ -1,6 +1,5 @@
 package cc.monomer.metricflow.application.engine
 
-import cc.monomer.metricflow.common.errors.SemanticManifestConfigurationError
 import cc.monomer.metricflow.domain.manifest.model.SemanticManifest
 import cc.monomer.metricflow.domain.manifest.model.serialization.ManifestJson
 import cc.monomer.metricflow.domain.sql.render.SqlEngine
@@ -91,56 +90,55 @@ class AtemporalQueryWithoutTimeSpineTest {
     }
 
     @Test
-    fun `metric time group by still requires a configured time spine`() {
-        val exception = assertFailsWith<SemanticManifestConfigurationError> {
-            engineWithoutTimeSpine().explain(
-                request(
-                    metricName = "bookings",
-                    groupByNames = listOf("METRIC_TIME__DAY"),
-                    timeConstraintStart = null,
-                    timeConstraintEnd = null,
-                ),
-            )
-        }
+    fun `simple metric time group by uses the model time column without a configured spine`() {
+        val result = engineWithoutTimeSpine().explain(
+            request(
+                metricName = "bookings",
+                groupByNames = listOf("METRIC_TIME__DAY"),
+                timeConstraintStart = null,
+                timeConstraintEnd = null,
+            ),
+        )
 
-        assertContains(exception.message.orEmpty(), "time spine", ignoreCase = true)
+        assertFalse(result.sql.isBlank())
+        assertContains(result.sql, "GROUP BY")
+        assertFalse(result.sql.contains("time_spine", ignoreCase = true))
     }
 
     @Test
-    fun `time range still requires a configured time spine`() {
-        val exception = assertFailsWith<SemanticManifestConfigurationError> {
-            engineWithoutTimeSpine().explain(
-                request(
-                    metricName = "bookings",
-                    groupByNames = emptyList(),
-                    timeConstraintStart = "2026-01-01",
-                    timeConstraintEnd = "2026-01-31",
-                ),
-            )
-        }
+    fun `simple metric time range uses the model time column without a configured spine`() {
+        val result = engineWithoutTimeSpine().explain(
+            request(
+                metricName = "bookings",
+                groupByNames = emptyList(),
+                timeConstraintStart = "2026-01-01",
+                timeConstraintEnd = "2026-01-31",
+            ),
+        )
 
-        assertContains(exception.message.orEmpty(), "time spine", ignoreCase = true)
+        assertFalse(result.sql.isBlank())
+        assertContains(result.sql, "WHERE")
+        assertFalse(result.sql.contains("time_spine", ignoreCase = true))
     }
 
     @Test
-    fun `cumulative metric still requires a configured time spine`() {
-        val exception = assertFailsWith<SemanticManifestConfigurationError> {
-            engineWithoutTimeSpine().explain(
-                request(
-                    metricName = "revenue_all_time",
-                    groupByNames = emptyList(),
-                    timeConstraintStart = null,
-                    timeConstraintEnd = null,
-                ),
-            )
-        }
+    fun `all-time cumulative metric does not require a physical spine`() {
+        val result = engineWithoutTimeSpine().explain(
+            request(
+                metricName = "revenue_all_time",
+                groupByNames = emptyList(),
+                timeConstraintStart = null,
+                timeConstraintEnd = null,
+            ),
+        )
 
-        assertContains(exception.message.orEmpty(), "time spine", ignoreCase = true)
+        assertFalse(result.sql.isBlank())
+        assertFalse(result.sql.contains("time_spine", ignoreCase = true))
     }
 
     @Test
-    fun `time offset metric still requires a configured time spine`() {
-        val exception = assertFailsWith<SemanticManifestConfigurationError> {
+    fun `time offset metric without metric time is rejected during query resolution`() {
+        val exception = assertFailsWith<IllegalArgumentException> {
             engineWithoutTimeSpine().explain(
                 request(
                     metricName = "bookings_5_day_lag",
@@ -151,39 +149,37 @@ class AtemporalQueryWithoutTimeSpineTest {
             )
         }
 
-        assertContains(exception.message.orEmpty(), "time spine", ignoreCase = true)
+        assertContains(exception.message.orEmpty(), "OffsetMetricRequiresMetricTimeIssue")
     }
 
     @Test
-    fun `conversion metric still requires a configured time spine`() {
-        val exception = assertFailsWith<SemanticManifestConfigurationError> {
-            engineWithoutTimeSpine().explain(
-                request(
-                    metricName = "visit_buy_conversion_rate",
-                    groupByNames = emptyList(),
-                    timeConstraintStart = null,
-                    timeConstraintEnd = null,
-                ),
-            )
-        }
+    fun `atemporal conversion metric does not require a physical spine`() {
+        val result = engineWithoutTimeSpine().explain(
+            request(
+                metricName = "visit_buy_conversion_rate",
+                groupByNames = emptyList(),
+                timeConstraintStart = null,
+                timeConstraintEnd = null,
+            ),
+        )
 
-        assertContains(exception.message.orEmpty(), "time spine", ignoreCase = true)
+        assertFalse(result.sql.isBlank())
+        assertFalse(result.sql.contains("time_spine", ignoreCase = true))
     }
 
     @Test
-    fun `join to time spine metric still requires a configured time spine`() {
-        val exception = assertFailsWith<SemanticManifestConfigurationError> {
-            engineWithoutTimeSpine().explain(
-                request(
-                    metricName = "bookings_join_to_time_spine",
-                    groupByNames = emptyList(),
-                    timeConstraintStart = null,
-                    timeConstraintEnd = null,
-                ),
-            )
-        }
+    fun `atemporal physical time-spine join metric does not join a physical spine`() {
+        val result = engineWithoutTimeSpine().explain(
+            request(
+                metricName = "bookings_join_to_time_spine",
+                groupByNames = emptyList(),
+                timeConstraintStart = null,
+                timeConstraintEnd = null,
+            ),
+        )
 
-        assertContains(exception.message.orEmpty(), "time spine", ignoreCase = true)
+        assertFalse(result.sql.isBlank())
+        assertFalse(Regex("\\bJOIN\\b", RegexOption.IGNORE_CASE).containsMatchIn(result.sql), result.sql)
     }
 
     private fun engineWithoutTimeSpine(): MetricFlowEngine {

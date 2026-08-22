@@ -1,15 +1,11 @@
 package cc.monomer.metricflow.application.engine
 
-import cc.monomer.metricflow.common.errors.SemanticManifestConfigurationError
 import cc.monomer.metricflow.domain.lookup.GroupByItemProperty
 import cc.monomer.metricflow.domain.lookup.GroupByItemSetFilter
 import cc.monomer.metricflow.domain.lookup.LinkableElementType
 import cc.monomer.metricflow.domain.lookup.SemanticManifestLookup
 import cc.monomer.metricflow.domain.lookup.SemanticModelHelper
-import cc.monomer.metricflow.domain.manifest.model.Metric
 import cc.monomer.metricflow.domain.manifest.model.SemanticManifest
-import cc.monomer.metricflow.domain.manifest.model.enums.MetricType
-import cc.monomer.metricflow.domain.manifest.model.naming.METRIC_TIME_ELEMENT_NAME
 import cc.monomer.metricflow.domain.manifest.model.references.MetricReference
 import cc.monomer.metricflow.domain.manifest.model.references.SemanticModelElementReference
 import cc.monomer.metricflow.domain.manifest.validation.SemanticManifestValidationResults
@@ -213,17 +209,12 @@ class MetricFlowEngine(
      *     → [cc.monomer.metricflow.domain.plan_conversion.DataflowToSqlPlanConverter.convertToSqlPlan]
      *     → dialect-specific SQL renderer
      *
-     * Time-dependent metric shapes use the configured manifest time spine. A missing compatible
-     * spine is a configuration error; atemporal queries continue through the same pipeline.
+     * Time-dependent metric shapes ask the planner for a compatible configured time spine only
+     * when their dataflow requires one. Simple aggregation-time queries and time bounds may use
+     * the model-owned time column directly, so they remain valid without a physical spine.
      */
     fun explain(request: MetricFlowExplainRequest): MetricFlowExplainResult {
         checkMetricNames(request.metricNames.orEmpty())
-        requireConfiguredTimeSpine(
-            metricNames = request.metricNames.orEmpty(),
-            groupByNames = request.groupByNames.orEmpty(),
-            timeConstraintStart = request.timeConstraintStart,
-            timeConstraintEnd = request.timeConstraintEnd,
-        )
 
         // Step 1: parse + validate the request into a MetricFlowQuerySpec.
         val parser = cc.monomer.metricflow.domain.query.MetricFlowQueryParser(
@@ -293,12 +284,6 @@ class MetricFlowEngine(
      */
     fun explainGetDimensionValues(request: ExplainGetDimensionValuesRequest): MetricFlowExplainResult {
         checkMetricNames(request.metricNames)
-        requireConfiguredTimeSpine(
-            metricNames = request.metricNames,
-            groupByNames = listOf(request.getGroupByValues),
-            timeConstraintStart = request.timeConstraintStart,
-            timeConstraintEnd = request.timeConstraintEnd,
-        )
 
         val parser = cc.monomer.metricflow.domain.query.MetricFlowQueryParser(
             semanticManifestLookup = semanticManifestLookup,
@@ -376,70 +361,6 @@ class MetricFlowEngine(
                 java.time.LocalDate.parse(it).atStartOfDay()
             }
         }
-
-    /**
-     * Reject time-dependent requests before resolution when the manifest has no time spine.
-     *
-     * Lookup construction accepts an empty spine set so atemporal metrics remain usable. This
-     * guard preserves the opposite half of that contract: synthetic `metric_time`, explicit time
-     * bounds, cumulative / conversion metrics, time offsets, and metrics configured to join to
-     * the spine never degrade into fact-table-only SQL.
-     */
-    private fun requireConfiguredTimeSpine(
-        metricNames: List<String>,
-        groupByNames: List<String>,
-        timeConstraintStart: String?,
-        timeConstraintEnd: String?,
-    ) {
-        if (semanticManifestLookup.timeSpineSources.isNotEmpty()) return
-
-        val usesMetricTime = groupByNames.any(::isMetricTimeQueryName)
-        val usesTimeConstraint = timeConstraintStart != null || timeConstraintEnd != null
-        val usesTimeDependentMetric = metricNames.any { metricName ->
-            val metricReference = MetricReference(metricName)
-            metricReference in semanticManifestLookup.metricLookup.metricReferences &&
-                metricRequiresTimeSpine(
-                    metric = semanticManifestLookup.metricLookup.getMetric(metricReference),
-                    visitedMetricNames = linkedSetOf(),
-                )
-        }
-
-        if (usesMetricTime || usesTimeConstraint || usesTimeDependentMetric) {
-            throw SemanticManifestConfigurationError(
-                "This query requires a configured time spine, but the manifest has none.",
-            )
-        }
-    }
-
-    private fun metricRequiresTimeSpine(
-        metric: Metric,
-        visitedMetricNames: MutableSet<String>,
-    ): Boolean {
-        if (!visitedMetricNames.add(metric.name)) return false
-        if (metric.type == MetricType.CUMULATIVE || metric.type == MetricType.CONVERSION) return true
-        if (
-            metric.type == MetricType.SIMPLE &&
-            (
-                metric.typeParams.joinToTimespine ||
-                    metric.typeParams.measure?.joinToTimespine == true ||
-                    metric.inputMeasures.any { it.joinToTimespine }
-                )
-        ) {
-            return true
-        }
-
-        return metric.inputMetrics.any { metricInput ->
-            metricInput.offsetWindow != null ||
-                metricInput.offsetToGrain != null ||
-                metricRequiresTimeSpine(
-                    metric = semanticManifestLookup.metricLookup.getMetric(metricInput.asReference),
-                    visitedMetricNames = visitedMetricNames,
-                )
-        }
-    }
-
-    private fun isMetricTimeQueryName(queryName: String): Boolean =
-        queryName.substringBefore("__").equals(METRIC_TIME_ELEMENT_NAME, ignoreCase = true)
 
     // --- Helpers -----------------------------------------------------------
 
