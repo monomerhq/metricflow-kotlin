@@ -8,6 +8,7 @@ import cc.monomer.metricflow.domain.manifest.model.SemanticManifest
 import cc.monomer.metricflow.domain.manifest.model.enums.MetricType
 import cc.monomer.metricflow.domain.manifest.model.serialization.ManifestJson
 import cc.monomer.metricflow.domain.sql.render.SqlEngine
+import cc.monomer.metricflow.infrastructure.sql.render.bigquery.BigQuerySqlPlanRenderer
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -17,7 +18,12 @@ class MetricDependencyBoundaryTest {
 
     @Test
     fun `all metric-scoped engine entries reject cycles before semantic graph construction`() {
-        val engine = MetricFlowEngine(manifestWithMetricCycle())
+        val engine = MetricFlowEngine(
+            semanticManifest = manifestWithMetricCycle(),
+            sqlPlanRendererRegistry = SqlPlanRendererRegistry.of(
+                SqlPlanRendererRegistration(SqlEngine.BIGQUERY, BigQuerySqlPlanRenderer()),
+            ),
+        )
         val operations = listOf<() -> Unit>(
             { engine.listMetrics(includeDimensions = true) },
             { engine.listDimensions(listOf("metric_a"), GroupByOrderByAttribute.DUNDER_NAME) },
