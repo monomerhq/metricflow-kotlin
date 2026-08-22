@@ -91,7 +91,7 @@ artifacts + 1 internal-only**:
 | `render-postgres` | `metricflow-render-postgres` | Postgres dialect renderer |
 | `engine` | `metricflow-engine` | Clean in-process engine facade. Requires an explicit `SqlPlanRendererRegistry`; no gRPC, Netty, logback, or dialect renderer is transitive. |
 | `grpc-server` | `metricflow-grpc-server` | Optional protobuf/gRPC server and wire adapters. Includes the complete public renderer set, including DuckDB. |
-| `internal-tests/diff-runner` | (not published) | Differential test runner that compares Kotlin output against the Python oracle for the entire 112-case corpus |
+| `internal-tests/diff-runner` | (not published) | Differential test runner that compares Kotlin output against the Python oracle for the entire 136-case corpus |
 
 `:core` and `:engine` carry no gRPC/Netty/protobuf dependencies; `:engine` is pure in-process
 planning and rendering orchestration. Consumers choose only the renderer modules they serve.
@@ -140,13 +140,13 @@ bundle is the signed evidence for the immutable ZIP.
 ## Running the corpus diff-runner
 
 The internal correctness gate. Compares Kotlin against the Python oracle on the
-112-case corpus:
+136-case corpus:
 
 ```bash
 ./gradlew :internal-diff-runner:run
 ```
 
-A green run prints `PASS=112 FAIL=0 UNIMPLEMENTED=0 ERROR=0`.
+A green run prints `PASS=136 FAIL=0 UNIMPLEMENTED=0 ERROR=0`.
 
 ## Verify the Maven artifacts
 
@@ -154,7 +154,7 @@ A green run prints `PASS=112 FAIL=0 UNIMPLEMENTED=0 ERROR=0`.
 ./gradlew verifyPublicRepository
 ```
 
-This runs every public module check, verifies the 112-case differential corpus,
+This runs every public module check, verifies the 136-case differential corpus,
 and publishes POM, binary, sources, and javadoc JARs into
 `build/maven-staging/`. It does not contact a remote repository.
 

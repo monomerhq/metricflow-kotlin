@@ -42,6 +42,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 # the venv interpreter (no ``-m``).
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+from harness.manifest_loader import _normalize_repository_paths
+
 ORACLE_CLI = ROOT / "python_oracle" / "cli.py"
 ORACLE_PY = ROOT / "python_oracle" / ".venv" / "bin" / "python"
 MANIFEST_YAML_ROOT = (
@@ -188,7 +190,7 @@ def _write_request(case_dir: pathlib.Path, request_payload: Dict[str, Any]) -> N
     The runner adds the dialect when needed. Keeping the request dialect-free
     lets one ``request.json`` cover all dialects for an explain case.
     """
-    payload = dict(request_payload)
+    payload = _normalize_repository_paths(dict(request_payload))
     payload.pop("sql_engine", None)
     (case_dir / "request.json").write_text(json.dumps(payload, indent=2, sort_keys=False))
 

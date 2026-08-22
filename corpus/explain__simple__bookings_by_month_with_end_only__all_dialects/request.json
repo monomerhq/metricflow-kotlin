@@ -21,7 +21,7 @@
           "role": null,
           "expr": "verification_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/id_verifications.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/id_verifications.yaml",
             "file_slice": {
               "filename": "id_verifications.yaml",
               "content": "name: verification\ntype: primary\nexpr: verification_id\n",
@@ -39,7 +39,7 @@
           "role": null,
           "expr": "user_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/id_verifications.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/id_verifications.yaml",
             "file_slice": {
               "filename": "id_verifications.yaml",
               "content": "name: user\ntype: foreign\nexpr: user_id\n",
@@ -60,7 +60,7 @@
           "expr": "1",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/id_verifications.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/id_verifications.yaml",
             "file_slice": {
               "filename": "id_verifications.yaml",
               "content": "name: identity_verifications\nexpr: \"1\"\nagg: sum\n",
@@ -86,7 +86,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/id_verifications.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/id_verifications.yaml",
             "file_slice": {
               "filename": "id_verifications.yaml",
               "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
@@ -108,7 +108,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/id_verifications.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/id_verifications.yaml",
             "file_slice": {
               "filename": "id_verifications.yaml",
               "content": "name: ds_partitioned\ntype: time\nis_partition: true\ntype_params:\n  time_granularity: day\n",
@@ -127,7 +127,7 @@
           "type_params": null,
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/id_verifications.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/id_verifications.yaml",
             "file_slice": {
               "filename": "id_verifications.yaml",
               "content": "name: verification_type\ntype: categorical\n",
@@ -141,7 +141,7 @@
       ],
       "label": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/id_verifications.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/id_verifications.yaml",
         "file_slice": {
           "filename": "id_verifications.yaml",
           "content": "name: id_verifications\ndescription: id_verifications\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: fct_id_verifications\ndefaults:\n  agg_time_dimension: ds\nmeasures:\n- name: identity_verifications\n  expr: \"1\"\n  agg: sum\ndimensions:\n- name: ds\n  type: time\n  type_params:\n    time_granularity: day\n- name: ds_partitioned\n  type: time\n  is_partition: true\n  type_params:\n    time_granularity: day\n- name: verification_type\n  type: categorical\nentities:\n- name: verification\n  type: primary\n  expr: verification_id\n- name: user\n  type: foreign\n  expr: user_id\n",
@@ -172,7 +172,7 @@
           "role": null,
           "expr": "user_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
             "file_slice": {
               "filename": "visits_source.yaml",
               "content": "name: user\ntype: foreign\nexpr: user_id\n",
@@ -190,7 +190,7 @@
           "role": null,
           "expr": "session_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
             "file_slice": {
               "filename": "visits_source.yaml",
               "content": "name: session\ntype: foreign\nexpr: session_id\n",
@@ -211,7 +211,7 @@
           "expr": "1",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
             "file_slice": {
               "filename": "visits_source.yaml",
               "content": "name: visits\nexpr: 1\nagg: count\n",
@@ -232,7 +232,7 @@
           "expr": "user_id",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
             "file_slice": {
               "filename": "visits_source.yaml",
               "content": "name: visitors\nexpr: user_id\nagg: count_distinct\n",
@@ -258,7 +258,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
             "file_slice": {
               "filename": "visits_source.yaml",
               "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
@@ -277,7 +277,7 @@
           "type_params": null,
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
             "file_slice": {
               "filename": "visits_source.yaml",
               "content": "name: referrer_id\ntype: categorical\n",
@@ -291,7 +291,7 @@
       ],
       "label": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
         "file_slice": {
           "filename": "visits_source.yaml",
           "content": "name: visits_source\ndescription: visits_source\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: fct_visits\ndefaults:\n  agg_time_dimension: ds\nmeasures:\n- name: visits\n  expr: 1\n  agg: count\n- name: visitors\n  expr: user_id\n  agg: count_distinct\ndimensions:\n- name: ds\n  type: time\n  type_params:\n    time_granularity: day\n- name: referrer_id\n  type: categorical\nprimary_entity: visit\nentities:\n- name: user\n  type: foreign\n  expr: user_id\n- name: session\n  type: foreign\n  expr: session_id\n",
@@ -322,7 +322,7 @@
           "role": null,
           "expr": "listing_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/views_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/views_source.yaml",
             "file_slice": {
               "filename": "views_source.yaml",
               "content": "name: listing\ntype: foreign\nexpr: listing_id\n",
@@ -340,7 +340,7 @@
           "role": null,
           "expr": "user_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/views_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/views_source.yaml",
             "file_slice": {
               "filename": "views_source.yaml",
               "content": "name: user\ntype: foreign\nexpr: user_id\n",
@@ -361,7 +361,7 @@
           "expr": "1",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/views_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/views_source.yaml",
             "file_slice": {
               "filename": "views_source.yaml",
               "content": "name: views\nexpr: \"1\"\nagg: sum\n",
@@ -387,7 +387,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/views_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/views_source.yaml",
             "file_slice": {
               "filename": "views_source.yaml",
               "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
@@ -409,7 +409,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/views_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/views_source.yaml",
             "file_slice": {
               "filename": "views_source.yaml",
               "content": "name: ds_partitioned\ntype: time\nis_partition: true\ntype_params:\n  time_granularity: day\n",
@@ -423,7 +423,7 @@
       ],
       "label": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/views_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/views_source.yaml",
         "file_slice": {
           "filename": "views_source.yaml",
           "content": "name: views_source\ndescription: views_source\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: fct_views\ndefaults:\n  agg_time_dimension: ds\nmeasures:\n- name: views\n  expr: \"1\"\n  agg: sum\ndimensions:\n- name: ds\n  type: time\n  type_params:\n    time_granularity: day\n- name: ds_partitioned\n  type: time\n  is_partition: true\n  type_params:\n    time_granularity: day\nprimary_entity: view\nentities:\n- name: listing\n  type: foreign\n  expr: listing_id\n- name: user\n  type: foreign\n  expr: user_id\n",
@@ -452,7 +452,7 @@
           "role": null,
           "expr": "company_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/companies.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/companies.yaml",
             "file_slice": {
               "filename": "companies.yaml",
               "content": "name: company\ntype: primary\nexpr: company_id\n",
@@ -470,7 +470,7 @@
           "role": null,
           "expr": "user_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/companies.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/companies.yaml",
             "file_slice": {
               "filename": "companies.yaml",
               "content": "name: user\ntype: unique\nexpr: user_id\n",
@@ -492,7 +492,7 @@
           "type_params": null,
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/companies.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/companies.yaml",
             "file_slice": {
               "filename": "companies.yaml",
               "content": "name: company_name\ntype: categorical\n",
@@ -506,7 +506,7 @@
       ],
       "label": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/companies.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/companies.yaml",
         "file_slice": {
           "filename": "companies.yaml",
           "content": "name: companies\ndescription: If a user is a company / business, this defines the mapping.\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: dim_companies\ndimensions:\n- name: company_name\n  type: categorical\nentities:\n- name: company\n  type: primary\n  expr: company_id\n- name: user\n  type: unique\n  expr: user_id\n",
@@ -537,7 +537,7 @@
           "role": null,
           "expr": "listing_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: listing\ntype: foreign\nexpr: listing_id\n",
@@ -555,7 +555,7 @@
           "role": null,
           "expr": "guest_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: guest\ntype: foreign\nexpr: guest_id\n",
@@ -573,7 +573,7 @@
           "role": null,
           "expr": "host_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: host\ntype: foreign\nexpr: host_id\n",
@@ -594,7 +594,7 @@
           "expr": "1",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: bookings\nexpr: \"1\"\nagg: sum\n",
@@ -615,7 +615,7 @@
           "expr": "CASE WHEN is_instant THEN 1 ELSE 0 END",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: instant_bookings\nexpr: is_instant\nagg: sum_boolean\n",
@@ -636,7 +636,7 @@
           "expr": null,
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: booking_value\nagg: sum\n",
@@ -657,7 +657,7 @@
           "expr": "booking_value",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: max_booking_value\nagg: max\nexpr: booking_value\n",
@@ -678,7 +678,7 @@
           "expr": "booking_value",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: min_booking_value\nagg: min\nexpr: booking_value\n",
@@ -699,7 +699,7 @@
           "expr": "guest_id",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: bookers\nexpr: guest_id\nagg: count_distinct\n",
@@ -720,7 +720,7 @@
           "expr": "booking_value",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: average_booking_value\nexpr: booking_value\nagg: average\n",
@@ -741,7 +741,7 @@
           "expr": "booking_value",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: booking_payments\nexpr: booking_value\nagg: sum\nagg_time_dimension: paid_at\n",
@@ -762,7 +762,7 @@
           "expr": "CASE WHEN referrer_id IS NOT NULL THEN 1 ELSE 0 END",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: referred_bookings\nexpr: referrer_id\nagg: count\n",
@@ -787,7 +787,7 @@
             "use_approximate_percentile": false
           },
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: median_booking_value\nexpr: booking_value\nagg: median\n",
@@ -812,7 +812,7 @@
             "use_approximate_percentile": false
           },
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: booking_value_p99\nexpr: booking_value\nagg: percentile\nagg_params:\n  percentile: 0.99\n",
@@ -837,7 +837,7 @@
             "use_approximate_percentile": false
           },
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: discrete_booking_value_p99\nexpr: booking_value\nagg: percentile\nagg_params:\n  percentile: 0.99\n  use_discrete_percentile: true\n",
@@ -862,7 +862,7 @@
             "use_approximate_percentile": true
           },
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: approximate_continuous_booking_value_p99\nexpr: booking_value\nagg: percentile\nagg_params:\n  percentile: 0.99\n  use_approximate_percentile: true\n",
@@ -887,7 +887,7 @@
             "use_approximate_percentile": true
           },
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: approximate_discrete_booking_value_p99\nexpr: booking_value\nagg: percentile\nagg_params:\n  percentile: 0.99\n  use_discrete_percentile: true\n  use_approximate_percentile: true\n",
@@ -910,7 +910,7 @@
           "type_params": null,
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: is_instant\ntype: categorical\n",
@@ -932,7 +932,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
@@ -954,7 +954,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: ds_partitioned\ntype: time\nis_partition: true\ntype_params:\n  time_granularity: day\n",
@@ -976,7 +976,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
             "file_slice": {
               "filename": "bookings_source.yaml",
               "content": "name: paid_at\ntype: time\ntype_params:\n  time_granularity: day\n",
@@ -990,7 +990,7 @@
       ],
       "label": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
         "file_slice": {
           "filename": "bookings_source.yaml",
           "content": "name: bookings_source\ndescription: bookings_source\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: fct_bookings\ndefaults:\n  agg_time_dimension: ds\nmeasures:\n- name: bookings\n  expr: \"1\"\n  agg: sum\n- name: instant_bookings\n  expr: is_instant\n  agg: sum_boolean\n- name: booking_value\n  agg: sum\n- name: max_booking_value\n  agg: max\n  expr: booking_value\n- name: min_booking_value\n  agg: min\n  expr: booking_value\n- name: bookers\n  expr: guest_id\n  agg: count_distinct\n- name: average_booking_value\n  expr: booking_value\n  agg: average\n- name: booking_payments\n  expr: booking_value\n  agg: sum\n  agg_time_dimension: paid_at\n- name: referred_bookings\n  expr: referrer_id\n  agg: count\n- name: median_booking_value\n  expr: booking_value\n  agg: median\n- name: booking_value_p99\n  expr: booking_value\n  agg: percentile\n  agg_params:\n    percentile: 0.99\n- name: discrete_booking_value_p99\n  expr: booking_value\n  agg: percentile\n  agg_params:\n    percentile: 0.99\n    use_discrete_percentile: true\n- name: approximate_continuous_booking_value_p99\n  expr: booking_value\n  agg: percentile\n  agg_params:\n    percentile: 0.99\n    use_approximate_percentile: true\n- name: approximate_discrete_booking_value_p99\n  expr: booking_value\n  agg: percentile\n  agg_params:\n    percentile: 0.99\n    use_discrete_percentile: true\n    use_approximate_percentile: true\ndimensions:\n- name: is_instant\n  type: categorical\n- name: ds\n  type: time\n  type_params:\n    time_granularity: day\n- name: ds_partitioned\n  type: time\n  is_partition: true\n  type_params:\n    time_granularity: day\n- name: paid_at\n  type: time\n  type_params:\n    time_granularity: day\nprimary_entity: booking\nentities:\n- name: listing\n  type: foreign\n  expr: listing_id\n- name: guest\n  type: foreign\n  expr: guest_id\n- name: host\n  type: foreign\n  expr: host_id\n",
@@ -1021,7 +1021,7 @@
           "role": null,
           "expr": "user_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
             "file_slice": {
               "filename": "accounts_source.yaml",
               "content": "name: user\ntype: foreign\nexpr: user_id\n",
@@ -1042,7 +1042,7 @@
           "expr": null,
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
             "file_slice": {
               "filename": "accounts_source.yaml",
               "content": "name: account_balance\nagg: sum\n",
@@ -1063,7 +1063,7 @@
           "expr": "account_balance",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
             "file_slice": {
               "filename": "accounts_source.yaml",
               "content": "name: total_account_balance_first_day\nagg: sum\nexpr: account_balance\nnon_additive_dimension:\n  name: ds\n  window_choice: min\n",
@@ -1088,7 +1088,7 @@
           "expr": "account_balance",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
             "file_slice": {
               "filename": "accounts_source.yaml",
               "content": "name: current_account_balance_by_user\nagg: sum\nexpr: account_balance\nnon_additive_dimension:\n  name: ds\n  window_choice: max\n  window_groupings:\n  - user\n",
@@ -1115,7 +1115,7 @@
           "expr": "account_balance",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
             "file_slice": {
               "filename": "accounts_source.yaml",
               "content": "name: total_account_balance_first_day_of_month\nagg: sum\nexpr: account_balance\nagg_time_dimension: ds_month\nnon_additive_dimension:\n  name: ds_month\n  window_choice: min\ncreate_metric: true\n",
@@ -1145,7 +1145,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
             "file_slice": {
               "filename": "accounts_source.yaml",
               "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
@@ -1167,7 +1167,7 @@
           },
           "expr": "ds_month",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
             "file_slice": {
               "filename": "accounts_source.yaml",
               "content": "name: ds_month\ntype: time\nexpr: ds_month\ntype_params:\n  time_granularity: month\n",
@@ -1186,7 +1186,7 @@
           "type_params": null,
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
             "file_slice": {
               "filename": "accounts_source.yaml",
               "content": "name: account_type\ntype: categorical\n",
@@ -1200,7 +1200,7 @@
       ],
       "label": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
         "file_slice": {
           "filename": "accounts_source.yaml",
           "content": "name: accounts_source\ndescription: accounts_source\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: fct_accounts\ndefaults:\n  agg_time_dimension: ds\nmeasures:\n- name: account_balance\n  agg: sum\n- name: total_account_balance_first_day\n  agg: sum\n  expr: account_balance\n  non_additive_dimension:\n    name: ds\n    window_choice: min\n- name: current_account_balance_by_user\n  agg: sum\n  expr: account_balance\n  non_additive_dimension:\n    name: ds\n    window_choice: max\n    window_groupings:\n    - user\n- name: total_account_balance_first_day_of_month\n  agg: sum\n  expr: account_balance\n  agg_time_dimension: ds_month\n  non_additive_dimension:\n    name: ds_month\n    window_choice: min\n  create_metric: true\ndimensions:\n- name: ds\n  type: time\n  type_params:\n    time_granularity: day\n- name: ds_month\n  type: time\n  expr: ds_month\n  type_params:\n    time_granularity: month\n- name: account_type\n  type: categorical\nprimary_entity: account\nentities:\n- name: user\n  type: foreign\n  expr: user_id\n",
@@ -1229,7 +1229,7 @@
           "role": null,
           "expr": "listing_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/lux_listing_mapping.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/lux_listing_mapping.yaml",
             "file_slice": {
               "filename": "lux_listing_mapping.yaml",
               "content": "name: listing\ntype: primary\nexpr: listing_id\n",
@@ -1247,7 +1247,7 @@
           "role": null,
           "expr": "lux_listing_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/lux_listing_mapping.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/lux_listing_mapping.yaml",
             "file_slice": {
               "filename": "lux_listing_mapping.yaml",
               "content": "name: lux_listing\ntype: foreign\nexpr: lux_listing_id\n",
@@ -1263,7 +1263,7 @@
       "dimensions": [],
       "label": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/lux_listing_mapping.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/lux_listing_mapping.yaml",
         "file_slice": {
           "filename": "lux_listing_mapping.yaml",
           "content": "name: lux_listing_mapping\ndescription: lux_listing_mapping\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: dim_lux_listing_id_mapping\nentities:\n- name: listing\n  type: primary\n  expr: listing_id\n- name: lux_listing\n  type: foreign\n  expr: lux_listing_id\n",
@@ -1294,7 +1294,7 @@
           "role": null,
           "expr": "user_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
             "file_slice": {
               "filename": "user_sm_source.yaml",
               "content": "name: user\ntype: primary\nexpr: user_id\n",
@@ -1315,7 +1315,7 @@
           "expr": "1",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
             "file_slice": {
               "filename": "user_sm_source.yaml",
               "content": "name: new_users\nexpr: \"1\"\nagg: SUM\ncreate_metric: true\n",
@@ -1336,7 +1336,7 @@
           "expr": "1",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
             "file_slice": {
               "filename": "user_sm_source.yaml",
               "content": "name: archived_users\nexpr: \"1\"\nagg: SUM\ncreate_metric: true\nagg_time_dimension: archived_at\n",
@@ -1362,7 +1362,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
             "file_slice": {
               "filename": "user_sm_source.yaml",
               "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
@@ -1384,7 +1384,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
             "file_slice": {
               "filename": "user_sm_source.yaml",
               "content": "name: created_at\ntype: time\ntype_params:\n  time_granularity: day\n",
@@ -1406,7 +1406,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
             "file_slice": {
               "filename": "user_sm_source.yaml",
               "content": "name: ds_partitioned\ntype: time\nis_partition: true\ntype_params:\n  time_granularity: day\n",
@@ -1425,7 +1425,7 @@
           "type_params": null,
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
             "file_slice": {
               "filename": "user_sm_source.yaml",
               "content": "name: home_state\ntype: categorical\n",
@@ -1447,7 +1447,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
             "file_slice": {
               "filename": "user_sm_source.yaml",
               "content": "name: last_profile_edit_ts\ntype: time\ntype_params:\n  time_granularity: millisecond\n",
@@ -1469,7 +1469,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
             "file_slice": {
               "filename": "user_sm_source.yaml",
               "content": "name: bio_added_ts\ntype: time\ntype_params:\n  time_granularity: second\n",
@@ -1491,7 +1491,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
             "file_slice": {
               "filename": "user_sm_source.yaml",
               "content": "name: last_login_ts\ntype: time\ntype_params:\n  time_granularity: minute\n",
@@ -1513,7 +1513,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
             "file_slice": {
               "filename": "user_sm_source.yaml",
               "content": "name: archived_at\ntype: time\ntype_params:\n  time_granularity: hour\n",
@@ -1527,7 +1527,7 @@
       ],
       "label": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
         "file_slice": {
           "filename": "user_sm_source.yaml",
           "content": "name: users_ds_source\ndescription: users_ds_source\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: dim_users\ndefaults:\n  agg_time_dimension: created_at\ndimensions:\n- name: ds\n  type: time\n  type_params:\n    time_granularity: day\n- name: created_at\n  type: time\n  type_params:\n    time_granularity: day\n- name: ds_partitioned\n  type: time\n  is_partition: true\n  type_params:\n    time_granularity: day\n- name: home_state\n  type: categorical\n- name: last_profile_edit_ts\n  type: time\n  type_params:\n    time_granularity: millisecond\n- name: bio_added_ts\n  type: time\n  type_params:\n    time_granularity: second\n- name: last_login_ts\n  type: time\n  type_params:\n    time_granularity: minute\n- name: archived_at\n  type: time\n  type_params:\n    time_granularity: hour\nentities:\n- name: user\n  type: primary\n  expr: user_id\nmeasures:\n- name: new_users\n  expr: \"1\"\n  agg: SUM\n  create_metric: true\n- name: archived_users\n  expr: \"1\"\n  agg: SUM\n  create_metric: true\n  agg_time_dimension: archived_at\n",
@@ -1558,7 +1558,7 @@
           "role": null,
           "expr": "user_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
             "file_slice": {
               "filename": "buys_source.yaml",
               "content": "name: user\ntype: foreign\nexpr: user_id\n",
@@ -1576,7 +1576,7 @@
           "role": null,
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
             "file_slice": {
               "filename": "buys_source.yaml",
               "content": "name: session_id\ntype: foreign\n",
@@ -1597,7 +1597,7 @@
           "expr": "1",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
             "file_slice": {
               "filename": "buys_source.yaml",
               "content": "name: buys\nexpr: 1\nagg: count\n",
@@ -1618,7 +1618,7 @@
           "expr": "1",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
             "file_slice": {
               "filename": "buys_source.yaml",
               "content": "name: buys_month\nexpr: 1\nagg: count\nagg_time_dimension: ds_month\n",
@@ -1639,7 +1639,7 @@
           "expr": "user_id",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
             "file_slice": {
               "filename": "buys_source.yaml",
               "content": "name: buyers\nexpr: user_id\nagg: count_distinct\n",
@@ -1665,7 +1665,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
             "file_slice": {
               "filename": "buys_source.yaml",
               "content": "name: ds\ntype: time\ntype_params:\n  time_granularity: day\n",
@@ -1687,7 +1687,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
             "file_slice": {
               "filename": "buys_source.yaml",
               "content": "name: ds_month\ntype: time\ntype_params:\n  time_granularity: month\n",
@@ -1701,7 +1701,7 @@
       ],
       "label": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
         "file_slice": {
           "filename": "buys_source.yaml",
           "content": "name: buys_source\ndescription: buys_source\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: fct_buys\ndefaults:\n  agg_time_dimension: ds\nmeasures:\n- name: buys\n  expr: 1\n  agg: count\n- name: buys_month\n  expr: 1\n  agg: count\n  agg_time_dimension: ds_month\n- name: buyers\n  expr: user_id\n  agg: count_distinct\ndimensions:\n- name: ds\n  type: time\n  type_params:\n    time_granularity: day\n- name: ds_month\n  type: time\n  type_params:\n    time_granularity: month\nprimary_entity: buy\nentities:\n- name: user\n  type: foreign\n  expr: user_id\n- name: session_id\n  type: foreign\n",
@@ -1732,7 +1732,7 @@
           "role": null,
           "expr": "user_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/revenue.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/revenue.yaml",
             "file_slice": {
               "filename": "revenue.yaml",
               "content": "name: user\ntype: foreign\nexpr: user_id\n",
@@ -1753,7 +1753,7 @@
           "expr": "revenue",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/revenue.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/revenue.yaml",
             "file_slice": {
               "filename": "revenue.yaml",
               "content": "name: txn_revenue\nexpr: revenue\nagg: sum\n",
@@ -1779,7 +1779,7 @@
           },
           "expr": "created_at",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/revenue.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/revenue.yaml",
             "file_slice": {
               "filename": "revenue.yaml",
               "content": "name: ds\ntype: time\nexpr: created_at\ntype_params:\n  time_granularity: day\n",
@@ -1793,7 +1793,7 @@
       ],
       "label": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/revenue.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/revenue.yaml",
         "file_slice": {
           "filename": "revenue.yaml",
           "content": "name: revenue\ndescription: revenue\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: fct_revenue\ndefaults:\n  agg_time_dimension: ds\nmeasures:\n- name: txn_revenue\n  expr: revenue\n  agg: sum\ndimensions:\n- name: ds\n  type: time\n  expr: created_at\n  type_params:\n    time_granularity: day\nprimary_entity: revenue_instance\nentities:\n- name: user\n  type: foreign\n  expr: user_id\n",
@@ -1822,7 +1822,7 @@
           "role": null,
           "expr": "user_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/users_latest.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/users_latest.yaml",
             "file_slice": {
               "filename": "users_latest.yaml",
               "content": "name: user\ntype: primary\nexpr: user_id\n",
@@ -1847,7 +1847,7 @@
           },
           "expr": "ds",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/users_latest.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/users_latest.yaml",
             "file_slice": {
               "filename": "users_latest.yaml",
               "content": "name: ds_latest\ntype: time\nexpr: ds\ntype_params:\n  time_granularity: day\n",
@@ -1866,7 +1866,7 @@
           "type_params": null,
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/users_latest.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/users_latest.yaml",
             "file_slice": {
               "filename": "users_latest.yaml",
               "content": "name: home_state_latest\ntype: categorical\n",
@@ -1880,7 +1880,7 @@
       ],
       "label": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/users_latest.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/users_latest.yaml",
         "file_slice": {
           "filename": "users_latest.yaml",
           "content": "name: users_latest\ndescription: users_latest\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: dim_users_latest\ndimensions:\n- name: ds_latest\n  type: time\n  expr: ds\n  type_params:\n    time_granularity: day\n- name: home_state_latest\n  type: categorical\nentities:\n- name: user\n  type: primary\n  expr: user_id\n",
@@ -1911,7 +1911,7 @@
           "role": null,
           "expr": "listing_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
             "file_slice": {
               "filename": "listings_latest.yaml",
               "content": "name: listing\ntype: primary\nexpr: listing_id\n",
@@ -1929,7 +1929,7 @@
           "role": null,
           "expr": "user_id",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
             "file_slice": {
               "filename": "listings_latest.yaml",
               "content": "name: user\ntype: foreign\nexpr: user_id\n",
@@ -1950,7 +1950,7 @@
           "expr": "1",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
             "file_slice": {
               "filename": "listings_latest.yaml",
               "content": "name: listings\nexpr: 1\nagg: sum\n",
@@ -1971,7 +1971,7 @@
           "expr": "capacity",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
             "file_slice": {
               "filename": "listings_latest.yaml",
               "content": "name: largest_listing\nexpr: capacity\nagg: max\n",
@@ -1992,7 +1992,7 @@
           "expr": "capacity",
           "agg_params": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
             "file_slice": {
               "filename": "listings_latest.yaml",
               "content": "name: smallest_listing\nexpr: capacity\nagg: min\n",
@@ -2018,7 +2018,7 @@
           },
           "expr": "created_at",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
             "file_slice": {
               "filename": "listings_latest.yaml",
               "content": "name: ds\ntype: time\nexpr: created_at\ntype_params:\n  time_granularity: day\n",
@@ -2040,7 +2040,7 @@
           },
           "expr": null,
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
             "file_slice": {
               "filename": "listings_latest.yaml",
               "content": "name: created_at\ntype: time\ntype_params:\n  time_granularity: day\n",
@@ -2059,7 +2059,7 @@
           "type_params": null,
           "expr": "country",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
             "file_slice": {
               "filename": "listings_latest.yaml",
               "content": "name: country_latest\ntype: categorical\nexpr: country\n",
@@ -2078,7 +2078,7 @@
           "type_params": null,
           "expr": "is_lux",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
             "file_slice": {
               "filename": "listings_latest.yaml",
               "content": "name: is_lux_latest\ntype: categorical\nexpr: is_lux\n",
@@ -2097,7 +2097,7 @@
           "type_params": null,
           "expr": "capacity",
           "metadata": {
-            "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
+            "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
             "file_slice": {
               "filename": "listings_latest.yaml",
               "content": "name: capacity_latest\ntype: categorical\nexpr: capacity\n",
@@ -2111,7 +2111,7 @@
       ],
       "label": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/listings_latest.yaml",
         "file_slice": {
           "filename": "listings_latest.yaml",
           "content": "name: listings_latest\ndescription: listings_latest\nnode_relation:\n  schema_name: mf_corpus_2026_05_11_static\n  alias: dim_listings_latest\ndefaults:\n  agg_time_dimension: ds\nmeasures:\n- name: listings\n  expr: 1\n  agg: sum\n- name: largest_listing\n  expr: capacity\n  agg: max\n- name: smallest_listing\n  expr: capacity\n  agg: min\ndimensions:\n- name: ds\n  type: time\n  expr: created_at\n  type_params:\n    time_granularity: day\n- name: created_at\n  type: time\n  type_params:\n    time_granularity: day\n- name: country_latest\n  type: categorical\n  expr: country\n- name: is_lux_latest\n  type: categorical\n  expr: is_lux\n- name: capacity_latest\n  type: categorical\n  expr: capacity\nentities:\n- name: listing\n  type: primary\n  expr: listing_id\n- name: user\n  type: foreign\n  expr: user_id\n",
@@ -2165,7 +2165,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"bookings\"\ndescription: \"bookings metric\"\ntype: simple\ntype_params:\n  measure: bookings\n",
@@ -2219,7 +2219,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"average_booking_value\"\ndescription: \"average booking value metric\"\ntype: simple\ntype_params:\n  measure: average_booking_value\n",
@@ -2273,7 +2273,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"instant_bookings\"\ndescription: \"instant bookings\"\ntype: simple\ntype_params:\n  measure: instant_bookings\n",
@@ -2327,7 +2327,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"booking_value\"\ndescription: \"booking value\"\ntype: simple\ntype_params:\n  measure: booking_value\n",
@@ -2381,7 +2381,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"max_booking_value\"\ndescription: \"max booking value\"\ntype: simple\ntype_params:\n  measure: max_booking_value\n",
@@ -2435,7 +2435,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"min_booking_value\"\ndescription: \"min booking value\"\ntype: simple\ntype_params:\n  measure: min_booking_value\n",
@@ -2495,7 +2495,7 @@
         ]
       },
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"instant_booking_value\"\ndescription: \"booking value of instant bookings\"\ntype: simple\ntype_params:\n  measure: booking_value\nfilter: \"{{ Dimension('booking__is_instant') }}\"\n",
@@ -2555,7 +2555,7 @@
         ]
       },
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"average_instant_booking_value\"\ndescription: \"average booking value of instant bookings\"\ntype: simple\ntype_params:\n  measure: average_booking_value\nfilter: \"{{ Dimension('booking__is_instant') }}\"\n",
@@ -2615,7 +2615,7 @@
         ]
       },
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"booking_value_for_non_null_listing_id\"\ndescription: \"booking value of instant bookings\"\ntype: simple\ntype_params:\n  measure: booking_value\nfilter: \"{{ Entity('listing') }} IS NOT NULL\"\n",
@@ -2669,7 +2669,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"bookers\"\ndescription: \"bookers\"\ntype: simple\ntype_params:\n  measure: bookers\n",
@@ -2723,7 +2723,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"booking_payments\"\ndescription: \"Booking payments.\"\ntype: simple\ntype_params:\n  measure: booking_payments\n",
@@ -2777,7 +2777,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"views\"\ndescription: \"views\"\ntype: simple\ntype_params:\n  measure: views\n",
@@ -2831,7 +2831,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"listings\"\ndescription: \"listings\"\ntype: simple\ntype_params:\n  measure: listings\n",
@@ -2891,7 +2891,7 @@
         ]
       },
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"lux_listings\"\ndescription: \"lux_listings\"\ntype: simple\ntype_params:\n  measure: listings\nfilter: \"{{ Dimension('listing__is_lux_latest') }}\"\n",
@@ -2945,7 +2945,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"smallest_listing\"\ndescription: \"smallest listing\"\ntype: simple\ntype_params:\n  measure: smallest_listing\n",
@@ -2999,7 +2999,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"largest_listing\"\ndescription: \"largest listing\"\ntype: simple\ntype_params:\n  measure: largest_listing\ntime_granularity: month\n",
@@ -3053,7 +3053,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"identity_verifications\"\ndescription: \"identity_verifications\"\ntype: simple\ntype_params:\n  measure: identity_verifications\n",
@@ -3107,7 +3107,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"revenue\"\ndescription: \"revenue\"\ntype: simple\ntype_params:\n  measure: txn_revenue\n",
@@ -3169,7 +3169,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"trailing_2_months_revenue\"\ndescription: \"trailing_2_months_revenue\"\ntype: cumulative\ntype_params:\n  measure: txn_revenue\n  cumulative_type_params:\n    window: 2 month\n    period_agg: average\n",
@@ -3228,7 +3228,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"revenue_all_time\"\ndescription: \"revenue_all_time\"\ntype: cumulative\ntype_params:\n  measure: txn_revenue\n  cumulative_type_params:\n    period_agg: last\n",
@@ -3293,7 +3293,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"every_two_days_bookers\"\ndescription: \"every_two_days_bookers\"\ntype: cumulative\ntype_params:\n  measure: bookers\n  window: 2 days\n",
@@ -3352,7 +3352,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"revenue_mtd\"\ndescription: \"revenue mtd\"\ntype: cumulative\ntype_params:\n  measure: txn_revenue\n  cumulative_type_params:\n    grain_to_date: month\n",
@@ -3402,7 +3402,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: booking_fees\ndescription: Booking value multiplied by constant - simple expr metric test\ntype: derived\ntype_params:\n  expr: \"booking_value * 0.05\"\n  metrics:\n  - name: booking_value\n",
@@ -3466,7 +3466,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: booking_fees_per_booker\ndescription: booking_fees divided by bookers - single source multi measure expr test\ntype: derived\ntype_params:\n  expr: \"booking_value * 0.05 / bookers\"\n  metrics:\n  - name: booking_value\n  - name: bookers\n",
@@ -3533,7 +3533,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: booking_fees_last_week_per_booker_this_week\ndescription: booking_fees divided by bookers - single source multi measure expr test\ntype: derived\ntype_params:\n  expr: \"booking_value * 0.05 / bookers\"\n  metrics:\n  - name: booking_value\n    offset_window: 1 week\n  - name: bookers\n",
@@ -3597,7 +3597,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: views_times_booking_value\ndescription: Booking_value multiplied by views - expr metric test\ntype: derived\ntype_params:\n  expr: \"booking_value * views\"\n  metrics:\n  - name: booking_value\n  - name: views\n",
@@ -3658,7 +3658,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_per_booker\ndescription: bookings divided by bookers - single semantic model ratio metric test\ntype: ratio\ntype_params:\n  numerator:\n    name: bookings\n  denominator:\n    name: bookers\n",
@@ -3719,7 +3719,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_per_view\ndescription: Bookings divided by views - ratio metric test\ntype: ratio\ntype_params:\n  numerator:\n    name: bookings\n  denominator:\n    name: views\n",
@@ -3780,7 +3780,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_per_listing\ndescription: Bookings divided by listings - ratio with primary identifier test\ntype: ratio\ntype_params:\n  numerator:\n    name: bookings\n  denominator:\n    name: listings\n",
@@ -3841,7 +3841,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_per_dollar\ndescription: Number of bookings per dollar of value\ntype: ratio\ntype_params:\n  numerator:\n    name: bookings\n  denominator:\n    name: booking_value\n",
@@ -3895,7 +3895,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"account_balance\"\ndescription: \"account_balance\"\ntype: simple\ntype_params:\n  measure: account_balance\n",
@@ -3953,7 +3953,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"total_account_balance_first_day\"\ndescription: \"total_account_balance_first_day\"\ntype: simple\ntype_params:\n  measure: total_account_balance_first_day\n",
@@ -4013,7 +4013,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"current_account_balance_by_user\"\ndescription: \"current_account_balance_by_user\"\ntype: simple\ntype_params:\n  measure: current_account_balance_by_user\n",
@@ -4080,7 +4080,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: instant_booking_fraction_of_max_value\ndescription: |\n  Average instant booking value as a ratio of overall max booking value.\n  Tests constrained ratio measure and predicate pushdown with different filters\n  on the same measure input.\ntype: ratio\ntype_params:\n  numerator:\n    name: average_booking_value\n    filter: \"{{ Dimension('booking__is_instant') }}\"\n  denominator:\n    name: max_booking_value\n",
@@ -4147,7 +4147,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: lux_booking_fraction_of_max_value\ndescription: |\n  Average lux booking value as a ratio of overall max booking value.\n  Tests constrained ratio measure with external dimension join.\ntype: ratio\ntype_params:\n  numerator:\n    name: average_booking_value\n    filter: \"{{ Dimension('listing__is_lux_latest') }}\"\n  denominator:\n    name: max_booking_value\n",
@@ -4237,7 +4237,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: lux_booking_value_rate_expr\ndescription: |\n  Lux booking value defined as an expr with lux booking value, lux bookings, and total value as inputs.\n  Tests constrained measure expr metric with external dimension join.\ntype: derived\ntype_params:\n  expr: \"average_booking_value * bookings / NULLIF(booking_value, 0)\"\n  metrics:\n  - name: average_booking_value\n    filter: \"{{ Dimension('listing__is_lux_latest') }}\"\n  - name: bookings\n    filter: \"{{ Dimension('listing__is_lux_latest') }}\"\n  - name: booking_value\n",
@@ -4297,7 +4297,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: instant_booking_value_ratio\ndescription: |\n  Instant booking value defined as a ratio metric of instant booking value / booking value\n  Tests constrained measure ratio metric with re-use of the same base measure\ntype: ratio\ntype_params:\n  numerator:\n    name: booking_value\n    filter: \"{{ Dimension('booking__is_instant') }}\"\n    alias: booking_value_with_is_instant_constraint\n  denominator:\n    name: booking_value\n",
@@ -4367,7 +4367,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: instant_lux_booking_value_rate\ndescription: |\n  Instant booking value for lux bookings defined as a filtered metric on lux_booking_value_rate_expr\n  Tests constraint application for nested derived metrics.\ntype: derived\ntype_params:\n  expr: instant_lux_booking_value_rate\n  metrics:\n  - name: lux_booking_value_rate_expr\n    filter: \"{{ Dimension('booking__is_instant') }}\"\n    alias: instant_lux_booking_value_rate\n",
@@ -4433,7 +4433,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: regional_starting_balance_ratios\ndescription: |\n  First day account balance ratio of western vs eastern region starting balance ratios,\n  used to test interaction between semi-additive measures and measure constraints, and\n  behavior of predicate pushdown when there are multiple filters on the same categorical dimension\ntype: ratio\ntype_params:\n  numerator:\n    name: total_account_balance_first_day\n    filter: \"{{ Dimension('user__home_state_latest') }} IN ('CA', 'HI', 'WA')\"\n    alias: west_coast_balance_first_day\n  denominator:\n    name: total_account_balance_first_day\n    filter: \"{{ Dimension('user__home_state_latest') }} IN ('MD', 'NY', 'TX')\"\n    alias: east_coast_balance_first_dat\n",
@@ -4489,7 +4489,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: double_counted_delayed_bookings\ndescription: |\n  Minimal repro case for an expr with a single constrained and aliased measure as input.\ntype: derived\ntype_params:\n  expr: delayed_bookings * 2\n  metrics:\n  - name: bookings\n    filter: \"NOT {{ Dimension('booking__is_instant') }}\"\n    alias: delayed_bookings\n",
@@ -4543,7 +4543,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"referred_bookings\"\ndescription: \"bookings made through a referral\"\ntype: simple\ntype_params:\n  measure: referred_bookings\n",
@@ -4607,7 +4607,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"non_referred_bookings_pct\"\ndescription: \"percentage of bookings that are not made through a referral\"\ntype: derived\ntype_params:\n  expr: (bookings - ref_bookings) * 1.0 / bookings\n  metrics:\n  - name: referred_bookings\n    alias: ref_bookings\n  - name: bookings\n",
@@ -4664,7 +4664,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"booking_value_sub_instant\"\ndescription: \"booking_value - instant_booking_value\"\ntype: derived\ntype_params:\n  expr: booking_value - instant_booking_value\n  metrics:\n  - name: instant_booking_value\n  - name: booking_value\n",
@@ -4714,7 +4714,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"booking_value_sub_instant_add_10\"\ndescription: \"Add 10 to booking_value - instant_booking_value\"\ntype: derived\ntype_params:\n  expr: booking_value_sub_instant + 10\n  metrics:\n  - name: booking_value_sub_instant\n",
@@ -4784,7 +4784,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_per_lux_listing_derived\ndescription: Bookings divided by listings - using derived metric type\ntype: derived\ntype_params:\n  expr: bookings * 1.0 / NULLIF(lux_listing, 0)\n  metrics:\n  - name: bookings\n  - name: listings\n    alias: lux_listing\n    filter: \"{{ Dimension('listing__is_lux_latest') }}\"\n",
@@ -4862,7 +4862,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"instant_plus_non_referred_bookings_pct\"\ndescription: |\n  percentage of bookings that are not made through a referral + instant booking pct,\n  used to test nested derived metrics.\ntype: derived\ntype_params:\n  expr: non_referred + (instant * 1.0 / bookings)\n  metrics:\n  - name: non_referred_bookings_pct\n    alias: non_referred\n  - name: instant_bookings\n    alias: instant\n  - name: bookings\n",
@@ -4912,7 +4912,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"trailing_2_months_revenue_sub_10\"\ndescription: |\n  Test derived metric with a cumulative metric\ntype: derived\ntype_params:\n  expr: t2mr - 10\n  metrics:\n  - name: trailing_2_months_revenue\n    alias: t2mr\n",
@@ -4976,7 +4976,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: booking_value_per_view\ndescription: proportion of booking value per view, which allows us to test joins to\n  listings with null values\ntype: derived\ntype_params:\n  expr: booking_value / NULLIF(views, 0)\n  metrics:\n  - name: booking_value\n  - name: views\n",
@@ -5034,7 +5034,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"median_booking_value\"\ndescription: \"median booking value\"\ntype: simple\ntype_params:\n  measure: median_booking_value\n",
@@ -5092,7 +5092,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"booking_value_p99\"\ndescription: \"p99 booking value\"\ntype: simple\ntype_params:\n  measure: booking_value_p99\n",
@@ -5150,7 +5150,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"discrete_booking_value_p99\"\ndescription: \"discrete p99 booking value\"\ntype: simple\ntype_params:\n  measure: discrete_booking_value_p99\n",
@@ -5208,7 +5208,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"approximate_continuous_booking_value_p99\"\ndescription: \"approximate continuous p99 booking value\"\ntype: simple\ntype_params:\n  measure: approximate_continuous_booking_value_p99\n",
@@ -5266,7 +5266,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"approximate_discrete_booking_value_p99\"\ndescription: \"approximate discrete p99 booking value\"\ntype: simple\ntype_params:\n  measure: approximate_discrete_booking_value_p99\n",
@@ -5326,7 +5326,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"bookings_growth_2_weeks\"\ndescription: |\n  percentage growth of bookings compared to bookings 2 weeks prior,\n  used to test derived metrics with an offset_window.\ntype: derived\ntype_params:\n  expr: bookings - bookings_2_weeks_ago\n  metrics:\n  - name: bookings\n  - name: bookings\n    offset_window: 14 days\n    alias: bookings_2_weeks_ago\n",
@@ -5385,7 +5385,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_all_time\ndescription: bookings cumulative all time\ntype: cumulative\ntype_params:\n  measure: bookings\n",
@@ -5435,7 +5435,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_all_time_at_start_of_month\ndescription: bookings at the start of the month\ntype: derived\ntype_params:\n  expr: bookings_all_time\n  metrics:\n  - name: bookings_all_time\n    offset_to_grain: month\n",
@@ -5485,7 +5485,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_all_time_at_start_of_year\ndescription: bookings at the start of the year\ntype: derived\ntype_params:\n  expr: bookings_all_time\n  metrics:\n  - name: bookings_all_time\n    offset_to_grain: year\n",
@@ -5542,7 +5542,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"bookings_growth_since_start_of_month\"\ndescription: |\n  count of bookings on a given day compared to the start of the month,\n  used to test derived metrics with an offset_to_grain.\ntype: derived\ntype_params:\n  expr: bookings - bookings_at_start_of_month\n  metrics:\n  - name: bookings\n  - name: bookings\n    offset_to_grain: month\n    alias: bookings_at_start_of_month\n",
@@ -5599,7 +5599,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_since_start_of_month\ndescription: |\n  count of bookings since the start of the month, used to test derived metrics with an offset_to_grain.\ntype: derived\ntype_params:\n  expr: bookings_all_time - bookings_all_time_at_start_of_month\n  metrics:\n  - name: bookings_all_time\n  - name: bookings_all_time\n    offset_to_grain: month\n    alias: bookings_all_time_at_start_of_month\n",
@@ -5656,7 +5656,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_since_start_of_year\ndescription: |\n  count of bookings since the start of the year, used to test derived metrics with an offset_to_grain.\ntype: derived\ntype_params:\n  expr: bookings_all_time - bookings_all_time_at_start_of_year\n  metrics:\n  - name: bookings_all_time\n  - name: bookings_all_time\n    offset_to_grain: year\n    alias: bookings_all_time_at_start_of_year\n",
@@ -5716,7 +5716,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"bookings_month_start_compared_to_1_month_prior\"\ndescription: |\n  percentage growth of bookings compared to bookings 2 weeks prior,\n  used to test derived metrics with an offset_window.\ntype: derived\ntype_params:\n  expr: month_start_bookings - bookings_1_month_ago\n  metrics:\n  - name: bookings\n    offset_to_grain: month\n    alias: month_start_bookings\n  - name: bookings\n    offset_window: 1 month\n    alias: bookings_1_month_ago\n",
@@ -5769,7 +5769,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"bookings_5_day_lag\"\ndescription: |\n  number of bookings 5 days ago. used to test derived metric offset\n  with only one input metric.\ntype: derived\ntype_params:\n  expr: bookings_5_days_ago\n  metrics:\n  - name: bookings\n    offset_window: 5 days\n    alias: bookings_5_days_ago\n",
@@ -5822,7 +5822,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"every_2_days_bookers_2_days_ago\"\ndescription: |\n  number of bookers 2 days ago. used to test derived metric offset\n  with a cumulative input metric.\ntype: derived\ntype_params:\n  expr: every_2_days_bookers_2_days_ago\n  metrics:\n  - name: every_two_days_bookers\n    offset_window: 2 days\n    alias: every_2_days_bookers_2_days_ago\n",
@@ -5876,7 +5876,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_join_to_time_spine\ndescription: simple metric joining to time spine\ntype: simple\ntype_params:\n  measure:\n    name: bookings\n    join_to_timespine: true\n",
@@ -5961,7 +5961,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: visit_buy_conversion_rate_7days\ndescription: conversion rate on visits-buys on a 7 day window\ntype: conversion\ntype_params:\n  conversion_type_params:\n    base_measure: visits\n    conversion_measure: buys\n    window: 7 days\n    entity: user\n    calculation: conversion_rate\n",
@@ -6043,7 +6043,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: visit_buy_conversion_rate\ndescription: conversion rate on visits-buys\ntype: conversion\ntype_params:\n  conversion_type_params:\n    base_measure: visits\n    conversion_measure: buys\n    entity: user\n    calculation: conversion_rate\n",
@@ -6128,7 +6128,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: visit_buy_conversions\ndescription: conversion count on visits-buys on a 7 day window\ntype: conversion\ntype_params:\n  conversion_type_params:\n    base_measure: visits\n    conversion_measure:\n      name: buys\n      fill_nulls_with: 0\n    window: 7 days\n    entity: user\n    calculation: conversions\n",
@@ -6213,7 +6213,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: visit_buy_conversion_rate_with_monthly_conversion\ndescription: conversion rate on visits-buys_month\ntype: conversion\ntype_params:\n  conversion_type_params:\n    base_measure: visits\n    conversion_measure: buys_month\n    entity: user\n    calculation: conversion_rate\n    window: 1 month\n",
@@ -6303,7 +6303,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: visit_buy_conversion_rate_by_session\ndescription: conversion rate on visits-buys on a 7 day window held by a constant session_id\ntype: conversion\ntype_params:\n  conversion_type_params:\n    base_measure: visits\n    conversion_measure: buys\n    window: 7 days\n    entity: user\n    calculation: conversion_rate\n    constant_properties:\n    - base_property: session\n      conversion_property: session_id\n",
@@ -6357,7 +6357,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_fill_nulls_with_0_without_time_spine\ndescription: Simple metric filling 0 without time spine. Not a commonly expected scenario.\ntype: simple\ntype_params:\n  measure:\n    name: bookings\n    fill_nulls_with: 0\n",
@@ -6411,7 +6411,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_fill_nulls_with_0\ndescription: simple metric filling nulls with 0 and joining to time spine\ntype: simple\ntype_params:\n  measure:\n    name: bookings\n    join_to_timespine: true\n    fill_nulls_with: 0\ntime_granularity: week\n",
@@ -6492,7 +6492,7 @@
         ]
       },
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: instant_bookings_with_measure_filter\ndescription: simple metric joining to time spine with measure filter\ntype: simple\ntype_params:\n  measure:\n    name: bookings\n    join_to_timespine: true\n    filter: \"{{ Dimension('booking__is_instant') }}\"\nfilter: \"{{ Entity('listing') }} IS NOT NULL\"\n",
@@ -6573,7 +6573,7 @@
         ]
       },
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_join_to_time_spine_with_tiered_filters\ndescription: simple metric that joins to timespine and has metric_time filters at\n  both the measure and metric level\ntype: simple\ntype_params:\n  measure:\n    name: bookings\n    join_to_timespine: true\n    filter: \"{{ TimeDimension('metric_time', 'day') }} >= '2020-01-02'\"\nfilter: \"{{ TimeDimension('metric_time', 'day') }} <= '2020-01-02'\"\n",
@@ -6635,7 +6635,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: every_two_days_bookers_fill_nulls_with_0\ndescription: cumulative metric filling 0\ntype: cumulative\ntype_params:\n  measure:\n    name: bookers\n    join_to_timespine: true\n    fill_nulls_with: 0\n  cumulative_type_params:\n    window: 2 days\n",
@@ -6695,7 +6695,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_growth_2_weeks_fill_nulls_with_0\ndescription: offset derived metric filling 0 for both input metrics\ntype: derived\ntype_params:\n  expr: bookings_fill_nulls_with_0 - bookings_2_weeks_ago\n  metrics:\n  - name: bookings_fill_nulls_with_0\n  - name: bookings_fill_nulls_with_0\n    offset_window: 14 days\n    alias: bookings_2_weeks_ago\n",
@@ -6762,7 +6762,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_growth_2_weeks_fill_nulls_with_0_for_non_offset\ndescription: offset derived metric filling 0 for one input metric, but not the other\ntype: derived\ntype_params:\n  expr: bookings_fill_nulls_with_0 - bookings_2_weeks_ago\n  metrics:\n  - name: bookings_fill_nulls_with_0\n  - name: bookings\n    offset_window: 14 days\n    alias: bookings_2_weeks_ago\n",
@@ -6815,7 +6815,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"bookings_offset_once\"\ndescription: bookings metric offset once.\ntype: derived\ntype_params:\n  expr: 2 * bookings\n  metrics:\n  - name: bookings\n    offset_window: 5 days\n",
@@ -6868,7 +6868,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"bookings_offset_twice\"\ndescription: bookings metric offset twice.\ntype: derived\ntype_params:\n  expr: 2 * bookings_offset_once\n  metrics:\n  - name: bookings_offset_once\n    offset_window: 2 days\n",
@@ -6921,7 +6921,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"bookings_offset_alien_day\"\ndescription: bookings metric offset by a martian day.\ntype: derived\ntype_params:\n  expr: 2 * bookings\n  metrics:\n  - name: bookings\n    offset_window: 1 alien_day\n",
@@ -6971,7 +6971,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_at_start_of_month\ndescription: |\n  Derived metric with offset to grain - single input metric.\n  Not a particularly useful metric but it allows us to isolate behavior for offset to grain.\ntype: derived\ntype_params:\n  expr: bookings_start_of_month\n  metrics:\n  - name: bookings\n    offset_to_grain: month\n    alias: bookings_start_of_month\n",
@@ -7028,7 +7028,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: booking_fees_since_start_of_month\ndescription: nested derived metric with offset and multiple input metrics\ntype: derived\ntype_params:\n  expr: booking_fees - booking_fees_start_of_month\n  metrics:\n  - name: booking_fees\n    offset_to_grain: month\n    alias: booking_fees_start_of_month\n  - name: booking_fees\n",
@@ -7081,7 +7081,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_1_month_ago\ndescription: bookings 1 month ago\ntype: derived\ntype_params:\n  expr: bookings\n  metrics:\n  - name: bookings\n    offset_window: 1 month\n",
@@ -7141,7 +7141,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_mom\ndescription: bookings month over month\ntype: derived\ntype_params:\n  expr: (bookings - bookings_1_month_ago) / NULLIF(bookings_1_month_ago, 0)\n  metrics:\n  - name: bookings\n    offset_window: 1 month\n    alias: bookings_1_month_ago\n  - name: bookings\n",
@@ -7194,7 +7194,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_1_year_ago\ndescription: bookings 1 year ago\ntype: derived\ntype_params:\n  expr: bookings\n  metrics:\n  - name: bookings\n    offset_window: 1 year\n",
@@ -7254,7 +7254,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_yoy\ndescription: bookings year over year\ntype: derived\ntype_params:\n  expr: (bookings - bookings_1_year_ago) / NULLIF(bookings_1_year_ago, 0)\n  metrics:\n  - name: bookings\n    offset_window: 1 year\n    alias: bookings_1_year_ago\n  - name: bookings\n",
@@ -7304,7 +7304,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"derived_bookings_0\"\ndescription: Derived metric for testing optimizations for duplicate measures in a\n  query.\ntype: derived\ntype_params:\n  expr: bookings\n  metrics:\n  - name: bookings\n",
@@ -7354,7 +7354,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: \"derived_bookings_1\"\ndescription: Derived metric for testing optimizations for duplicate measures in a\n  query.\ntype: derived\ntype_params:\n  expr: bookings\n  metrics:\n  - name: bookings\n",
@@ -7404,7 +7404,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: twice_bookings_fill_nulls_with_0_without_time_spine\ndescription: 2x bookings_fill_nulls_with_0_without_time_spine\ntype: derived\ntype_params:\n  expr: 2 * bookings_fill_nulls_with_0_without_time_spine\n  metrics:\n  - name: bookings_fill_nulls_with_0_without_time_spine\n",
@@ -7454,7 +7454,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: nested_fill_nulls_without_time_spine\ndescription: 3x twice_bookings_fill_nulls_with_0_without_time_spine\ntype: derived\ntype_params:\n  expr: 3 * twice_bookings_fill_nulls_with_0_without_time_spine\n  metrics:\n  - name: twice_bookings_fill_nulls_with_0_without_time_spine\n",
@@ -7539,7 +7539,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: visit_buy_conversion_rate_7days_fill_nulls_with_0\ndescription: conversion rate on visits-buys on a 7 day window, filling nulls with\n  0 for both input measures\ntype: conversion\ntype_params:\n  conversion_type_params:\n    base_measure:\n      name: visits\n      fill_nulls_with: 0\n      join_to_timespine: true\n    conversion_measure:\n      name: buys\n      fill_nulls_with: 0\n      join_to_timespine: true\n    window: 7 days\n    entity: user\n    calculation: conversion_rate\n",
@@ -7599,7 +7599,7 @@
         ]
       },
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: active_listings\ndescription: Listings with at least 2 bookings\ntype: simple\ntype_params:\n  measure: listings\nfilter: \"{{ Metric('bookings', ['listing']) }} > 2\"\n",
@@ -7659,7 +7659,7 @@
         ]
       },
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: popular_listing_bookings_per_booker\ndescription: bookings per booker for listings with at least 10 views\ntype: ratio\ntype_params:\n  numerator:\n    name: listings\n  denominator:\n    name: listings\nfilter: \"{{ Metric('views', ['listing']) }} > 10\"\ntime_granularity: week\n",
@@ -7709,7 +7709,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: derived_shared_alias_1a\ndescription: \"Minimal repro case for derived metrics which give the same alias for\\\n  \\ different underlying metrics\"\ntype: derived\ntype_params:\n  expr: shared_alias - 10\n  metrics:\n  - name: bookings\n    alias: shared_alias\n",
@@ -7759,7 +7759,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: derived_shared_alias_1b\ndescription: \"Minimal repro case for derived metrics which give the same alias for\\\n  \\ different underlying metrics\"\ntype: derived\ntype_params:\n  expr: shared_alias - 100\n  metrics:\n  - name: bookings\n    alias: shared_alias\n",
@@ -7809,7 +7809,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: derived_shared_alias_2\ndescription: \"Minimal repro case for derived metrics which give the same alias for\\\n  \\ different underlying metrics\"\ntype: derived\ntype_params:\n  expr: shared_alias + 10\n  metrics:\n  - name: instant_bookings\n    alias: shared_alias\n",
@@ -7862,7 +7862,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_offset_one_alien_day\ndescription: bookings offset by one alien_day\ntype: derived\ntype_params:\n  expr: bookings\n  metrics:\n  - name: bookings\n    offset_window: 1 alien_day\n",
@@ -7922,7 +7922,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: bookings_alien_day_over_alien_day\ndescription: bookings growth martian day over martian day\ntype: derived\ntype_params:\n  expr: bookings - bookings_offset / NULLIF(bookings_offset, 0)\n  metrics:\n  - name: bookings\n    offset_window: 1 alien_day\n    alias: bookings_offset\n  - name: bookings\n",
@@ -7984,7 +7984,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: trailing_7_days_bookings\ndescription: \"trailing 7 days bookings - cumulative metric with window\"\ntype: cumulative\ntype_params:\n  measure: bookings\n  cumulative_type_params:\n    window: 7 days\n",
@@ -8037,7 +8037,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: trailing_7_days_bookings_offset_1_week\ndescription: \"trailing 7 days bookings offset by 1 week - offset_window metric using\\\n  \\ cumulative input\"\ntype: derived\ntype_params:\n  expr: trailing_7_days_bookings_1_week_ago\n  metrics:\n  - name: trailing_7_days_bookings\n    offset_window: 1 week\n    alias: trailing_7_days_bookings_1_week_ago\n",
@@ -8129,7 +8129,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: test_simple_derived_metric\ndescription: \"test simple derived metric\"\ntype: derived\ntype_params:\n  expr: alias_1 + alias_2 + alias_3 + alias_4\n  metrics:\n  - name: bookings\n    alias: alias_1\n  - name: referred_bookings\n    alias: alias_2\n  - name: instant_bookings\n    alias: alias_3\n  - name: booking_value\n    alias: alias_4\n",
@@ -8197,7 +8197,7 @@
         ]
       },
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: trailing_2_months_revenue_with_filter\ndescription: Cumulative metric with a filter defined in the YAML\ntype: cumulative\nfilter: \"{{ Dimension('user__home_state_latest') }} = 'CA'\"\ntype_params:\n  measure: txn_revenue\n  cumulative_type_params:\n    window: 2 month\n",
@@ -8288,7 +8288,7 @@
         ]
       },
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/metrics.yaml",
         "file_slice": {
           "filename": "metrics.yaml",
           "content": "name: visit_buy_conversion_rate_with_filter\ndescription: Conversion metric with a filter defined in the YAML\ntype: conversion\nfilter: \"{{ Dimension('visit__referrer_id') }} = 'fb_ad_1'\"\ntype_params:\n  conversion_type_params:\n    base_measure: visits\n    conversion_measure: buys\n    window: 7 days\n    entity: user\n    calculation: conversion_rate\n",
@@ -8350,7 +8350,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
         "file_slice": {
           "filename": "user_sm_source.yaml",
           "content": "name: subdaily_cumulative_window_metric\ndescription: cumulative window metric with a sub-daily agg time dim\ntype: cumulative\ntype_params:\n  measure: archived_users\n  cumulative_type_params:\n    window: 3 hours\n",
@@ -8409,7 +8409,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
         "file_slice": {
           "filename": "user_sm_source.yaml",
           "content": "name: subdaily_cumulative_grain_to_date_metric\ndescription: cumulative grain to date metric with a sub-daily agg time dim\ntype: cumulative\ntype_params:\n  measure: archived_users\n  cumulative_type_params:\n    grain_to_date: hour\n",
@@ -8462,7 +8462,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
         "file_slice": {
           "filename": "user_sm_source.yaml",
           "content": "name: subdaily_offset_window_metric\ndescription: offset window metric with a sub-daily agg time dim\ntype: derived\ntype_params:\n  expr: archived_users\n  metrics:\n  - name: archived_users\n    offset_window: 1 hour\n",
@@ -8512,7 +8512,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
         "file_slice": {
           "filename": "user_sm_source.yaml",
           "content": "name: subdaily_offset_grain_to_date_metric\ndescription: offset grain to date metric with a sub-daily agg time dim\ntype: derived\ntype_params:\n  expr: archived_users\n  metrics:\n  - name: archived_users\n    offset_to_grain: hour\n",
@@ -8566,7 +8566,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
         "file_slice": {
           "filename": "user_sm_source.yaml",
           "content": "name: subdaily_join_to_time_spine_metric\ndescription: simple metric with sub-daily agg time dim that joins to time spine\ntype: simple\ntype_params:\n  measure:\n    name: archived_users\n    join_to_timespine: true\n",
@@ -8620,7 +8620,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
         "file_slice": {
           "filename": "user_sm_source.yaml",
           "content": "name: simple_subdaily_metric_default_day\ndescription: simple metric with sub-daily agg time dim that doesn't specify default\n  granularity\ntype: simple\ntype_params:\n  measure:\n    name: archived_users\n",
@@ -8674,7 +8674,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
         "file_slice": {
           "filename": "user_sm_source.yaml",
           "content": "name: simple_subdaily_metric_default_hour\ndescription: simple metric with sub-daily agg time dim that has an explicit default\n  granularity\ntype: simple\ntype_params:\n  measure:\n    name: archived_users\ntime_granularity: hour\n",
@@ -8728,7 +8728,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
         "file_slice": {
           "filename": "user_sm_source.yaml",
           "content": "name: archived_users_join_to_time_spine\ndescription: subdaily metric joining to time spine\ntype: simple\ntype_params:\n  measure:\n    name: archived_users\n    join_to_timespine: true\n",
@@ -8786,7 +8786,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/accounts_source.yaml",
         "file_slice": {
           "filename": "accounts_source.yaml",
           "content": "name: total_account_balance_first_day_of_month\nagg: sum\nexpr: account_balance\nagg_time_dimension: ds_month\nnon_additive_dimension:\n  name: ds_month\n  window_choice: min\ncreate_metric: true\n",
@@ -8840,7 +8840,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
         "file_slice": {
           "filename": "user_sm_source.yaml",
           "content": "name: new_users\nexpr: \"1\"\nagg: SUM\ncreate_metric: true\n",
@@ -8894,7 +8894,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/user_sm_source.yaml",
         "file_slice": {
           "filename": "user_sm_source.yaml",
           "content": "name: archived_users\nexpr: \"1\"\nagg: SUM\ncreate_metric: true\nagg_time_dimension: archived_at\n",
@@ -8948,7 +8948,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
         "file_slice": {
           "filename": "visits_source.yaml",
           "content": "name: visits\nexpr: 1\nagg: count\n",
@@ -9002,7 +9002,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
         "file_slice": {
           "filename": "buys_source.yaml",
           "content": "name: buys\nexpr: 1\nagg: count\n",
@@ -9056,7 +9056,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
         "file_slice": {
           "filename": "buys_source.yaml",
           "content": "name: buys\nexpr: 1\nagg: count\n",
@@ -9110,7 +9110,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
         "file_slice": {
           "filename": "buys_source.yaml",
           "content": "name: buys_month\nexpr: 1\nagg: count\nagg_time_dimension: ds_month\n",
@@ -9164,7 +9164,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/bookings_source.yaml",
         "file_slice": {
           "filename": "bookings_source.yaml",
           "content": "name: bookers\nexpr: guest_id\nagg: count_distinct\n",
@@ -9218,7 +9218,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/visits_source.yaml",
         "file_slice": {
           "filename": "visits_source.yaml",
           "content": "name: visits\nexpr: 1\nagg: count\n",
@@ -9272,7 +9272,7 @@
       },
       "filter": null,
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/semantic_models/buys_source.yaml",
         "file_slice": {
           "filename": "buys_source.yaml",
           "content": "name: buys\nexpr: 1\nagg: count\n",
@@ -9294,7 +9294,7 @@
       }
     ],
     "metadata": {
-      "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/project_configuration.yaml",
+      "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/project_configuration.yaml",
       "file_slice": {
         "filename": "project_configuration.yaml",
         "content": "time_spine_table_configurations:\n- location: mf_corpus_2026_05_11_static.mf_time_spine\n  column_name: ds\n  grain: day\ntime_spines:\n- node_relation:\n    alias: mf_time_spine_nanosecond\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: nanosecond\n- node_relation:\n    alias: mf_time_spine_microsecond\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: microsecond\n- node_relation:\n    alias: mf_time_spine_millisecond\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: millisecond\n- node_relation:\n    alias: mf_time_spine_second\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: second\n- node_relation:\n    alias: mf_time_spine_minute\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: minute\n- node_relation:\n    alias: mf_time_spine_hour\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ts\n    time_granularity: hour\n- node_relation:\n    alias: mf_time_spine\n    schema_name: mf_corpus_2026_05_11_static\n  primary_column:\n    name: ds\n    time_granularity: day\n  custom_granularities:\n  - name: alien_day\n",
@@ -9430,7 +9430,7 @@
       },
       "description": "Booking-related metrics that are of the highest priority.",
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/saved_queries.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/saved_queries.yaml",
         "file_slice": {
           "filename": "saved_queries.yaml",
           "content": "name: p0_booking\ndescription: Booking-related metrics that are of the highest priority.\nquery_params:\n  metrics:\n  - bookings\n  - instant_bookings\n  group_by:\n  - TimeDimension('metric_time', 'day')\n  - Dimension('listing__capacity_latest')\n  where:\n  - \"{{ Dimension('listing__capacity_latest') }} > 3\"\n",
@@ -9464,7 +9464,7 @@
       },
       "description": "p0 bookings with order by and limit",
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/saved_queries.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/saved_queries.yaml",
         "file_slice": {
           "filename": "saved_queries.yaml",
           "content": "name: p0_booking_with_order_by_and_limit\ndescription: p0 bookings with order by and limit\nquery_params:\n  metrics:\n  - bookings\n  - views\n  group_by:\n  - TimeDimension('metric_time', 'day')\n  - Dimension('listing__capacity_latest')\n  order_by:\n  - TimeDimension('metric_time', 'day').descending(True)\n  - Dimension('listing__capacity_latest')\n  - Metric('bookings').descending(True)\n  - Metric('views')\n  limit: 10\n",
@@ -9491,7 +9491,7 @@
       },
       "description": "Saved query that includes a cumulative metric. Added as cumulative metrics have a branch in the CLI for\nadjusting the time constraint.\n",
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/saved_queries.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/saved_queries.yaml",
         "file_slice": {
           "filename": "saved_queries.yaml",
           "content": "name: saved_query_with_cumulative_metric\ndescription: |\n  Saved query that includes a cumulative metric. Added as cumulative metrics have a branch in the CLI for\n  adjusting the time constraint.\nquery_params:\n  metrics:\n  - trailing_2_months_revenue\n  group_by:\n  - TimeDimension('metric_time', 'day')\n",
@@ -9529,7 +9529,7 @@
       },
       "description": "Saved query that includes multiple metrics from different input sources requiring a metric join and\na query-level filter on a mix of categorical and time dimension filters.\nNote this will not run on Trino due to the invalid filter construction - Trino will not cast string literals\nto timestamp types the way other engines do.\n",
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/saved_queries.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/saved_queries.yaml",
         "file_slice": {
           "filename": "saved_queries.yaml",
           "content": "name: saved_query_with_metric_joins_and_filter\ndescription: |\n  Saved query that includes multiple metrics from different input sources requiring a metric join and\n  a query-level filter on a mix of categorical and time dimension filters.\n  Note this will not run on Trino due to the invalid filter construction - Trino will not cast string literals\n  to timestamp types the way other engines do.\nquery_params:\n  metrics:\n  - bookings\n  - views\n  - bookings_per_view\n  group_by:\n  - Dimension('listing__capacity_latest')\n  where:\n  - \"{{ Dimension('listing__is_lux_latest') }}\"\n  - \"{{ TimeDimension('metric_time', 'day') }} >= '2020-01-02'\"\n",
@@ -9555,7 +9555,7 @@
       },
       "description": "Query without metrics",
       "metadata": {
-        "repo_file_path": "/Users/user/Desktop/metricflow-kotlin/python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/saved_queries.yaml",
+        "repo_file_path": "python_oracle/upstream/metricflow_semantics/test_helpers/semantic_manifest_yamls/simple_manifest/saved_queries.yaml",
         "file_slice": {
           "filename": "saved_queries.yaml",
           "content": "name: dimensions_only\ndescription: Query without metrics\nquery_params:\n  group_by:\n  - Dimension('listing__capacity_latest')\n  - TimeDimension('metric_time', 'month')\n  metrics: []\n",
