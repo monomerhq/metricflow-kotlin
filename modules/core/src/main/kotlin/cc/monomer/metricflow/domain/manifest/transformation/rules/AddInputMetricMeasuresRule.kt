@@ -4,6 +4,8 @@ import cc.monomer.metricflow.domain.manifest.model.Metric
 import cc.monomer.metricflow.domain.manifest.model.MetricInputMeasure
 import cc.monomer.metricflow.domain.manifest.model.SemanticManifest
 import cc.monomer.metricflow.domain.manifest.model.enums.MetricType
+import cc.monomer.metricflow.domain.lookup.MetricLookup
+import cc.monomer.metricflow.domain.metric_evaluation.plan.MetricEvaluationPlan
 import cc.monomer.metricflow.domain.manifest.transformation.ModelTransformError
 import cc.monomer.metricflow.domain.manifest.transformation.SemanticManifestTransformRule
 
@@ -31,6 +33,21 @@ import cc.monomer.metricflow.domain.manifest.transformation.SemanticManifestTran
 object AddInputMetricMeasuresRule : SemanticManifestTransformRule {
     override fun transformModel(semanticManifest: SemanticManifest): SemanticManifest {
         val metricsByName: Map<String, Metric> = semanticManifest.metrics.associateBy { it.name }
+        semanticManifest.metrics.forEach { metric ->
+            metric.inputMetrics.forEach { inputMetric ->
+                if (inputMetric.name !in metricsByName) {
+                    throw ModelTransformError(
+                        "Metric '${inputMetric.name}' is not configured as a metric in the model.",
+                    )
+                }
+            }
+        }
+        val dependencyManifest = semanticManifest.copy(metrics = metricsByName.values.toList())
+        val metricLookup = MetricLookup(dependencyManifest)
+        metricLookup.validateMetricDefinitionDependencies(
+            rootMetricReferences = metricLookup.metricReferences,
+            maximumMetricLevels = MetricEvaluationPlan.MAX_METRIC_DEFINITION_RECURSION_DEPTH,
+        )
         val newMetrics = semanticManifest.metrics.map { metric ->
             if (metric.typeParams.inputMeasures.isNotEmpty()) return@map metric
             val collected = LinkedHashSet<MetricInputMeasure>()

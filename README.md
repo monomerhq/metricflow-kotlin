@@ -66,7 +66,7 @@ The full public API surface is documented in [`docs/PUBLIC_API.md`](docs/PUBLIC_
 The published namespace is `cc.monomer.metricflow`; there is no compatibility
 artifact for the former private package.
 
-The current public release is version `0.2.1`. The tag-driven release workflow
+The current public release is version `0.2.2`. The tag-driven release workflow
 publishes the immutable product bundle, a signed Sigstore attestation for that
 ZIP, and a separately identified materialized SLSA statement for its exact Maven
 artifact set. Local verification produces the same Maven repository layout
@@ -106,7 +106,7 @@ the product bundle.
 
 ```bash
 ./gradlew verifyMonomerProductBundle
-# build/bundles/metricflow-monomer-product-0.2.1.zip
+# build/bundles/metricflow-monomer-product-0.2.2.zip
 ```
 
 The ZIP has exactly one root, `maven-repository/`, and contains the eight Maven
