@@ -25,7 +25,7 @@ class SqlStringExpression(
     init {
         // Keep the original text for dialect rendering, but never allow an opaque query or
         // trailing statement to enter a semantic SQL plan.
-        SqlScalarExpressionParser.referencedColumnNames(sqlExpr)
+        referencedColumnNames(sqlExpr)
     }
 
     override val description: String get() = "String SQL Expression: $sqlExpr"
@@ -60,6 +60,16 @@ class SqlStringExpression(
     }
 
     companion object {
+        /**
+         * Validate a SQL fragment as one scalar expression and return its referenced columns.
+         *
+         * This is the public boundary for callers that need the same maintained syntax and
+         * shape validation as [SqlStringExpression] construction. The parser implementation
+         * remains internal so callers cannot accidentally depend on its representation.
+         */
+        fun referencedColumnNames(sqlExpr: String): Set<String> =
+            SqlScalarExpressionParser.referencedColumnNames(sqlExpr)
+
         /** Convenience matching Python's `SqlStringExpression.create`. */
         fun create(
             sqlExpr: String,

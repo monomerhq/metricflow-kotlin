@@ -11,7 +11,7 @@ import cc.monomer.metricflow.domain.manifest.validation.SemanticManifestValidati
 import cc.monomer.metricflow.domain.manifest.validation.ValidationError
 import cc.monomer.metricflow.domain.manifest.validation.ValidationIssue
 import cc.monomer.metricflow.domain.manifest.validation.ValidationWarning
-import cc.monomer.metricflow.domain.sql.plan.expr.SqlScalarExpressionParser
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlStringExpression
 
 /**
  * Validates `DERIVED` metrics: the metric must list its input metrics, each input must exist,
@@ -159,7 +159,7 @@ object DerivedMetricRule : SemanticManifestValidationRule {
             )
         } else {
             val referencedNames = try {
-                SqlScalarExpressionParser.referencedColumnNames(expr)
+                SqlStringExpression.referencedColumnNames(expr)
             } catch (error: IllegalArgumentException) {
                 issues.add(
                     ValidationError(

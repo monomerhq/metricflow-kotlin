@@ -37,18 +37,26 @@ object SqlPlanRelationCollector {
             node: SqlSelectStatementNode,
             outerCtes: SqlCteAliasMapping,
         ): Set<SqlTable> {
-            // A SELECT's local aliases shadow an outer alias in all nested plan branches.
+            // A SELECT's local aliases shadow an outer alias in the main SELECT. CTE bodies
+            // use the SQL declaration order: each body sees inherited aliases and only the
+            // declarations that precede it. A later CTE name is therefore a physical relation
+            // when referenced by an earlier body rather than an unresolved derived relation.
             // SqlCteAliasMapping is the same lexical map used by column-pruning.
-            val visibleCtes = outerCtes.merge(
+            val mainSelectCtes = outerCtes.merge(
                 SqlCteAliasMapping.create(node.cteSources.associateBy { it.cteAlias }),
             )
             val relations = LinkedHashSet<SqlTable>()
-            relations.addAll(collectNode(node.fromSource, visibleCtes))
+            relations.addAll(collectNode(node.fromSource, mainSelectCtes))
             for (join in node.joinDescs) {
-                relations.addAll(collectNode(join.rightSource, visibleCtes))
+                relations.addAll(collectNode(join.rightSource, mainSelectCtes))
             }
-            for (cte in node.cteSources) {
-                relations.addAll(collectNode(cte.selectStatement, visibleCtes))
+            val previousCtes = node.cteSources.asSequence()
+                .runningFold(outerCtes) { visibleCtes, cte ->
+                    visibleCtes.merge(SqlCteAliasMapping.create(mapOf(cte.cteAlias to cte)))
+                }
+                .toList()
+            for ((index, cte) in node.cteSources.withIndex()) {
+                relations.addAll(collectNode(cte.selectStatement, previousCtes[index]))
             }
             return relations
         }

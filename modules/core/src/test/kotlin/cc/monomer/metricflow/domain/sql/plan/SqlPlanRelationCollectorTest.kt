@@ -67,6 +67,29 @@ class SqlPlanRelationCollectorTest {
     }
 
     @Test
+    fun `retains a forward CTE reference as a physical relation`() {
+        val forwardReference = SqlTable(schemaName = null, tableName = "later")
+        val laterPhysical = SqlTable(schemaName = "analytics", tableName = "events")
+        val first = SqlCteNode.create(
+            selectStatement = select(SqlTableNode.create(forwardReference)),
+            cteAlias = "first",
+        )
+        val later = SqlCteNode.create(
+            selectStatement = select(SqlTableNode.create(laterPhysical)),
+            cteAlias = "later",
+        )
+        val outer = select(
+            fromSource = SqlTableNode.create(SqlTable(null, "first")),
+            ctes = listOf(first, later),
+        )
+
+        assertEquals(
+            linkedSetOf(forwardReference, laterPhysical),
+            SqlPlanRelationCollector.collect(SqlPlan(outer)),
+        )
+    }
+
+    @Test
     fun `fails closed for opaque query text`() {
         val plan = SqlPlan(
             select(
