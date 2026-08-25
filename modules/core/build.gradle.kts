@@ -15,7 +15,10 @@ plugins {
 // gRPC server) only.
 
 dependencies {
-    // No project deps — `:core` is the bottom of the dependency graph for the library.
+    // Scalar semantic expressions are validated with the maintained JSqlParser AST. The
+    // original expression text remains the render source; the parser is a construction-time
+    // shape gate, not a second SQL renderer.
+    implementation(libs.jsqlparser)
 }
 
 // Several of the absorbed test suites (manifest model round-trip, lookup parity,

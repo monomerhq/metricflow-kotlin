@@ -6,7 +6,9 @@ import cc.monomer.metricflow.common.dag.StaticIdPrefix
 import cc.monomer.metricflow.domain.spec.bind.SqlBindParameterSet
 
 /**
- * A raw SQL fragment in string form — opaque to the optimizer (no structural information).
+ * A SQL scalar fragment kept in string form for dialect rendering. The optimizer still treats
+ * it as opaque, but construction validates it with [SqlScalarExpressionParser] so it cannot
+ * carry a query, relation-producing expression, or trailing statement into the plan.
  *
  * Port of `metricflow_semantics.sql.sql_exprs.SqlStringExpression`.
  *
@@ -19,6 +21,12 @@ class SqlStringExpression(
     override val requiresParenthesis: Boolean,
     val usedColumns: List<String>?,
 ) : SqlExpressionNode(emptyList()) {
+
+    init {
+        // Keep the original text for dialect rendering, but never allow an opaque query or
+        // trailing statement to enter a semantic SQL plan.
+        SqlScalarExpressionParser.referencedColumnNames(sqlExpr)
+    }
 
     override val description: String get() = "String SQL Expression: $sqlExpr"
 
@@ -58,11 +66,13 @@ class SqlStringExpression(
             bindParameterSet: SqlBindParameterSet,
             requiresParenthesis: Boolean,
             usedColumns: List<String>?,
-        ): SqlStringExpression = SqlStringExpression(
-            sqlExpr = sqlExpr,
-            bindParameterSet = bindParameterSet,
-            requiresParenthesis = requiresParenthesis,
-            usedColumns = usedColumns,
-        )
+        ): SqlStringExpression {
+            return SqlStringExpression(
+                sqlExpr = sqlExpr,
+                bindParameterSet = bindParameterSet,
+                requiresParenthesis = requiresParenthesis,
+                usedColumns = usedColumns,
+            )
+        }
     }
 }

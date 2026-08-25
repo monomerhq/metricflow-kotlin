@@ -61,22 +61,8 @@ data class TimeSpineSource(
 
             for (timeSpine in semanticManifest.projectConfiguration.timeSpines) {
                 val grain = timeSpine.primaryColumn.timeGranularity
-                // Python's `NodeRelation.__create_default_relation_name` Pydantic validator
-                // auto-builds `relation_name` from `db + schema + alias` when the JSON omits
-                // it. The Kotlin manifest model (W1) explicitly skipped that quirk; we
-                // reconstruct on demand here so the time-spine source can be built from a
-                // bare `(schema, alias)` node-relation (e.g. `minimal_valid_manifest`).
-                val relationName = timeSpine.nodeRelation.relationName.takeIf { it.isNotEmpty() }
-                    ?: buildString {
-                        timeSpine.nodeRelation.database?.takeIf { it.isNotEmpty() }?.let {
-                            append(it); append('.')
-                        }
-                        append(timeSpine.nodeRelation.schemaName)
-                        append('.')
-                        append(timeSpine.nodeRelation.alias)
-                    }
                 timeSpineSources[grain] = TimeSpineSource(
-                    sqlTable = SqlTable.fromString(relationName),
+                    sqlTable = SqlTable.fromNodeRelation(timeSpine.nodeRelation),
                     baseColumn = timeSpine.primaryColumn.name,
                     baseGranularity = timeSpine.primaryColumn.timeGranularity,
                     customGranularities = timeSpine.customGranularities.map { custom ->
