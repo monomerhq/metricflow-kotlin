@@ -20,8 +20,10 @@ import cc.monomer.metricflow.domain.spec.DunderColumnAssociationResolver
 import cc.monomer.metricflow.domain.spec.MetricFlowQuerySpec
 import cc.monomer.metricflow.domain.spec.InstanceSpecSet
 import cc.monomer.metricflow.domain.sql.optimizer.SqlOptimizationLevel
+import cc.monomer.metricflow.domain.sql.plan.SqlPlanRelationCollector
 import cc.monomer.metricflow.domain.sql.render.SqlPlanRenderer
 import cc.monomer.metricflow.domain.sql.render.SqlEngine
+import cc.monomer.metricflow.domain.spec.bind.SqlTable
 
 /**
  * Wires the explain chain: dataset construction → dataflow plan → SQL plan → SQL string.
@@ -158,7 +160,7 @@ internal class ExplainPipeline(private val engine: MetricFlowEngine) {
         dialect: SqlEngine,
         outputSelectionSpecs: InstanceSpecSet?,
         orderOutputColumnsByInputOrder: Boolean,
-    ): String {
+    ): RenderedSql {
         // Eagerly construct the dataset / source-node-set / builder inside the
         // initializer ID-scope so that per-model `_src_*` aliases land at 10000+. After
         // this returns, the lazy slots are populated and we can switch into the query
@@ -177,7 +179,7 @@ internal class ExplainPipeline(private val engine: MetricFlowEngine) {
         dialect: SqlEngine,
         outputSelectionSpecs: InstanceSpecSet?,
         orderOutputColumnsByInputOrder: Boolean,
-    ): String {
+    ): RenderedSql {
         val optimizations = DataflowPlanOptimization.enabledOptimizations()
         val dataflowPlan = dataflowPlanBuilder.buildPlan(
             querySpec = querySpec,
@@ -204,7 +206,11 @@ internal class ExplainPipeline(private val engine: MetricFlowEngine) {
             outputColumnOrderer = orderer,
         )
         val renderer: SqlPlanRenderer = engine.sqlPlanRendererRegistry.rendererFor(dialect)
-        return renderer.renderSqlPlan(sqlPlanResult.sqlPlan).sql
+        val sqlPlan = sqlPlanResult.sqlPlan
+        return RenderedSql(
+            sql = renderer.renderSqlPlan(sqlPlan).sql,
+            usedRelations = SqlPlanRelationCollector.collect(sqlPlan),
+        )
     }
 
     companion object {
@@ -223,3 +229,9 @@ internal class ExplainPipeline(private val engine: MetricFlowEngine) {
         private const val QUERY_ID_START: Int = 0
     }
 }
+
+/** SQL plus the physical relations proven by the same optimized plan. */
+internal data class RenderedSql(
+    val sql: String,
+    val usedRelations: Set<SqlTable>,
+)

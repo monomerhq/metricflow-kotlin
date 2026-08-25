@@ -245,17 +245,18 @@ class MetricFlowEngine(
 
         // Step 2-4: build the dataflow plan, convert to SQL plan, render.
         val pipeline = explainPipeline
-        val sql = pipeline.renderSql(
+        val renderedSql = pipeline.renderSql(
             querySpec = querySpec,
             dialect = request.dialect,
             outputSelectionSpecs = null,
             orderOutputColumnsByInputOrder = request.orderOutputColumnsByInputOrder,
         )
         return MetricFlowExplainResult(
-            sql = sql,
+            sql = renderedSql.sql,
             querySpec = querySpec,
             queriedSemanticModels = queryResolution.queriedSemanticModels,
             outputSqlTable = null,
+            usedRelations = renderedSql.usedRelations,
         )
     }
 
@@ -330,17 +331,18 @@ class MetricFlowEngine(
         )
 
         val pipeline = explainPipeline
-        val sql = pipeline.renderSql(
+        val renderedSql = pipeline.renderSql(
             querySpec = querySpec,
             dialect = request.dialect,
             outputSelectionSpecs = outputSelectionSpecs,
             orderOutputColumnsByInputOrder = false,
         )
         return MetricFlowExplainResult(
-            sql = sql,
+            sql = renderedSql.sql,
             querySpec = querySpec,
             queriedSemanticModels = queryResolution.queriedSemanticModels,
             outputSqlTable = null,
+            usedRelations = renderedSql.usedRelations,
         )
     }
 
@@ -630,9 +632,10 @@ data class GroupByListing(
  *
  * Port of `metricflow.engine.metricflow_engine.MetricFlowExplainResult`. The Python record
  * carries an `ExecutionPlan` (the task we **don't** port — see CLAUDE.md scope clause); the
- * Kotlin equivalent collapses that to a single `sql` string plus optional `outputSqlTable`
- * since SQL execution is out of scope. The `queriedSemanticModels` field mirrors what
- * Python's `MetricFlowEngine.explain` exposes via `query_spec.queried_semantic_models`.
+ * Kotlin keeps the rendered `sql` alongside the structured physical relations proven by the
+ * same optimized SQL plan. The relation set is intentionally not reconstructed from SQL text.
+ * The `queriedSemanticModels` field mirrors what Python's `MetricFlowEngine.explain` exposes
+ * via `query_spec.queried_semantic_models`.
  *
  */
 data class MetricFlowExplainResult(
@@ -640,6 +643,7 @@ data class MetricFlowExplainResult(
     val querySpec: cc.monomer.metricflow.domain.spec.MetricFlowQuerySpec,
     val queriedSemanticModels: List<cc.monomer.metricflow.domain.manifest.model.references.SemanticModelReference>,
     val outputSqlTable: cc.monomer.metricflow.domain.spec.bind.SqlTable?,
+    val usedRelations: Set<cc.monomer.metricflow.domain.spec.bind.SqlTable>,
 )
 
 /**

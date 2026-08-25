@@ -2080,13 +2080,7 @@ class DataflowNodeToSqlSubqueryVisitor(
             sqlFunction = SqlFunction.COALESCE,
             sqlFunctionArgs = listOf(
                 ref,
-                SqlStringExpression.create(
-                    sqlExpr = nullFillValue.toString(),
-                    bindParameterSet =
-                        cc.monomer.metricflow.domain.spec.bind.SqlBindParameterSet.EMPTY,
-                    requiresParenthesis = false,
-                    usedColumns = null,
-                ),
+                SqlIntegerExpression.create(nullFillValue),
             ),
         )
     }

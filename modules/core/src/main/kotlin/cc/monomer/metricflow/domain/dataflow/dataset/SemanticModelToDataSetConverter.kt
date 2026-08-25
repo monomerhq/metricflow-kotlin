@@ -162,22 +162,8 @@ class SemanticModelToDataSetConverter(
             allSelectColumns.addAll(entitySelectColumns)
         }
 
-        // Python's `NodeRelation.__create_default_relation_name` Pydantic validator
-        // auto-builds `relation_name` from `db + schema + alias` when the JSON omits it. The
-        // Kotlin manifest model (W1) explicitly skipped that quirk; we reconstruct the
-        // relation name on demand here so the converter handles bare `schema/alias`-style
-        // manifests (e.g. the `minimal_valid_manifest`) without a manifest-model rewrite.
-        val relationName = semanticModel.nodeRelation.relationName.takeIf { it.isNotEmpty() }
-            ?: buildString {
-                semanticModel.nodeRelation.database?.takeIf { it.isNotEmpty() }?.let {
-                    append(it); append('.')
-                }
-                append(semanticModel.nodeRelation.schemaName)
-                append('.')
-                append(semanticModel.nodeRelation.alias)
-            }
         val fromSource = SqlTableNode.create(
-            sqlTable = SqlTable.fromString(relationName),
+            sqlTable = SqlTable.fromNodeRelation(semanticModel.nodeRelation),
         )
 
         val selectStatement = SqlSelectStatementNode.create(

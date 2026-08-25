@@ -32,6 +32,7 @@ import cc.monomer.metricflow.domain.sql.plan.expr.SqlColumnReferenceExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlExpressionNode
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlFunction
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlFunctionExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlIntegerExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlStringExpression
 import cc.monomer.metricflow.domain.manifest.model.enums.AggregationType
 import cc.monomer.metricflow.domain.spec.bind.SqlBindParameterSet
@@ -444,12 +445,7 @@ class CreateSelectColumnForCombineOutputNode(
                 sqlFunction = SqlFunction.COALESCE,
                 sqlFunctionArgs = listOf(
                     selectExpression,
-                    SqlStringExpression.create(
-                        sqlExpr = fillNullsWith.toString(),
-                        bindParameterSet = SqlBindParameterSet.EMPTY,
-                        requiresParenthesis = false,
-                        usedColumns = null,
-                    ),
+                    SqlIntegerExpression.create(fillNullsWith),
                 ),
             )
         }

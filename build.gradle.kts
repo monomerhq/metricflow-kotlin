@@ -20,7 +20,7 @@ plugins {
 }
 
 group = "cc.monomer.metricflow"
-version = "0.2.2"
+version = "0.2.3"
 
 allprojects {
     group = rootProject.group

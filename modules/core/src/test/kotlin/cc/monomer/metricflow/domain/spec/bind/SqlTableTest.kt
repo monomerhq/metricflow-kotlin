@@ -54,14 +54,15 @@ class SqlTableTest {
     }
 
     @Test
-    fun `fromNodeRelation parses the NodeRelation relation name`() {
+    fun `fromNodeRelation uses structured relation fields`() {
         val nodeRelation = NodeRelation(
             alias = "events",
             schemaName = "ana",
-            database = null,
-            relationName = "ana.events",
+            database = "warehouse",
+            relationName = "wrong.legacy.value",
         )
         val table = SqlTable.fromNodeRelation(nodeRelation)
+        assertEquals("warehouse", table.dbName)
         assertEquals("ana", table.schemaName)
         assertEquals("events", table.tableName)
     }

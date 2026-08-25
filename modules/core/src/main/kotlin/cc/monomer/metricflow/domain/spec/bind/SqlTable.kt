@@ -95,6 +95,10 @@ data class SqlTable(
 
         /** Convenience to build a [SqlTable] from a manifest [NodeRelation]. */
         fun fromNodeRelation(nodeRelation: NodeRelation): SqlTable =
-            fromString(nodeRelation.relationName)
+            SqlTable(
+                schemaName = nodeRelation.schemaName,
+                tableName = nodeRelation.alias,
+                dbName = nodeRelation.database,
+            )
     }
 }

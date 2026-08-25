@@ -101,7 +101,12 @@ generally do not construct.
 - `OrderBySpec`, `InstanceSpecSet`
 
 ### Bind layer (`...spec.bind`)
-- `SqlTable` (returned in `MetricFlowExplainResult.outputSqlTable`)
+- `SqlTable` (returned in `MetricFlowExplainResult.outputSqlTable` and
+  `MetricFlowExplainResult.usedRelations`)
+
+`MetricFlowExplainResult.usedRelations` is the set of physical relations collected from the
+same optimized SQL plan that produced `sql`. Consumers must not derive relation provenance by
+parsing the rendered SQL string.
 
 ---
 
