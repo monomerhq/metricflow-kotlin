@@ -42,14 +42,16 @@ metricflow-kotlin 포팅 단일 진척 파일. 모든 에이전트(오케스트�
 - AST 트레이서 `docs/scripts/reach.py` (재현 가능)
 - 측정 결과: 도달 가능 60,346 LOC / 477 files; 실행 제외 89 LOC; 기타 미도달 7,231 LOC
 
-**Current**: Phase 5b/6 patch release candidate `0.2.2` is verified. The in-process engine is
+**Current**: Phase 5b/6 patch release candidate `0.2.3` is verified. The in-process engine is
 transport-free, gRPC is optional, time-spine runtime parity is complete, and metric
 dependency evaluation rejects cycles or paths deeper than 100 metric levels through the
 typed `MetricDefinitionDependencyError`, including before recursive manifest transformation.
-The immutable `0.2.1` release remains published but is superseded for Product activation by
+This patch also returns structured physical-relation provenance from the same optimized SQL plan
+and validates scalar SQL expressions with a maintained AST gate without reparsing rendered SQL.
+The immutable `0.2.2` release remains published but is superseded for Product activation by
 this correctness patch. The deterministic Monomer Maven bundle and its separate release
 evidence pass the 136-case oracle and public repository gates.
-**Next**: publish/tag `0.2.2`, then pin its immutable artifact set in Monomer and map the typed
+**Next**: publish/tag `0.2.3`, then pin its immutable artifact set in Monomer and map the typed
 dependency error at the Product adapter boundary.
 
 ## 진척 표
@@ -88,7 +90,7 @@ dependency error at the Product adapter boundary.
 | 3 MD1 | metric dependency depth parity | done | 1 | 8129708 | root=1 기준 100단계 허용, 101단계·cycle typed rejection; 모든 metric-scoped engine entry guard |
 | 5a | Step 2: internal visibility sweep | not started | — | — | ~436 .kt 파일, docs/PUBLIC_API.md 대조 |
 | 5b | Step 6: gRPC split (engine → core + grpc-server) | done | 1 | pending | `SqlPlanRendererRegistry` seam; engine runtime guard |
-| 6 | Maven publish + BOM + deterministic Monomer bundle | in-progress | 1 | b58954f | immutable `0.2.1` published; transformer dependency guard를 포함한 `0.2.2` patch와 Monomer pin 대기 |
+| 6 | Maven publish + BOM + deterministic Monomer bundle | in-progress | 1 | b58954f | immutable `0.2.2` published; SQL-plan provenance와 scalar-expression gate를 포함한 `0.2.3` patch와 Monomer pin 대기 |
 | 4 | Integration + examples | not started | — | — | |
 | 5 | (선택) cutover | n/a | — | — | 이 프로젝트 범위 밖 |
 
