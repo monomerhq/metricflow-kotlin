@@ -14,13 +14,6 @@ plugins {
 // in any heavy runtime such as gRPC or protobuf. Those belong to `:engine` (the facade +
 // gRPC server) only.
 
-dependencies {
-    // Scalar semantic expressions are validated with the maintained JSqlParser AST. The
-    // original expression text remains the render source; the parser is a construction-time
-    // shape gate, not a second SQL renderer.
-    implementation(libs.jsqlparser)
-}
-
 // Several of the absorbed test suites (manifest model round-trip, lookup parity,
 // validation parity, query, semantic-graph, etc.) read corpus fixtures via a system
 // property pointing at the repo root. We surface it once at the merged module level.
