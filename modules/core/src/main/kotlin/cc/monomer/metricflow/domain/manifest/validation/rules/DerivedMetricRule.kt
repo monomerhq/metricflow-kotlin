@@ -11,7 +11,6 @@ import cc.monomer.metricflow.domain.manifest.validation.SemanticManifestValidati
 import cc.monomer.metricflow.domain.manifest.validation.ValidationError
 import cc.monomer.metricflow.domain.manifest.validation.ValidationIssue
 import cc.monomer.metricflow.domain.manifest.validation.ValidationWarning
-import cc.monomer.metricflow.domain.sql.plan.expr.SqlStringExpression
 
 /**
  * Validates `DERIVED` metrics: the metric must list its input metrics, each input must exist,
@@ -158,21 +157,9 @@ object DerivedMetricRule : SemanticManifestValidationRule {
                 ),
             )
         } else {
-            val referencedNames = try {
-                SqlStringExpression.referencedColumnNames(expr)
-            } catch (error: IllegalArgumentException) {
-                issues.add(
-                    ValidationError(
-                        context = ctx,
-                        message = "Invalid scalar SQL expression for derived metric " +
-                            "'${metric.name}': ${error.message}",
-                    ),
-                )
-                return issues
-            }
             for (im in metric.typeParams.metrics ?: emptyList()) {
                 val name = im.alias ?: im.name
-                if (name !in referencedNames) {
+                if (!expr.contains(name)) {
                     issues.add(
                         ValidationWarning(
                             context = ctx,
