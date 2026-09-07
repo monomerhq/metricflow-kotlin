@@ -1,0 +1,24 @@
+{
+  "case_id": "explain__partitioned_multi_hop__txn_count_by_customer_name",
+  "subcommand": "explain",
+  "manifest_id": "partitioned_multi_hop_join_manifest",
+  "args": {
+    "metric_names": [
+      "txn_count"
+    ],
+    "group_by_names": [
+      "account_id__customer_id__customer_name"
+    ]
+  },
+  "dialect_set": [
+    "Trino",
+    "BigQuery",
+    "Snowflake",
+    "Databricks",
+    "Redshift",
+    "DuckDB",
+    "Postgres"
+  ],
+  "source_test": "tests_metricflow/query_rendering/test_query_rendering.py::test_multihop_node",
+  "notes": "Two-hop join with partition equality on both bridge/customer and fact/bridge joins."
+}

@@ -42,18 +42,40 @@ metricflow-kotlin 포팅 단일 진척 파일. 모든 에이전트(오케스트�
 - AST 트레이서 `docs/scripts/reach.py` (재현 가능)
 - 측정 결과: 도달 가능 60,346 LOC / 477 files; 실행 제외 89 LOC; 기타 미도달 7,231 LOC
 
-**Current**: Phase 5b/6 patch release candidate `0.2.4` is verified. The in-process engine is
-transport-free, gRPC is optional, time-spine runtime parity is complete, and metric
-dependency evaluation rejects cycles or paths deeper than 100 metric levels through the
-typed `MetricDefinitionDependencyError`, including before recursive manifest transformation.
-This patch also returns structured physical-relation provenance from the same optimized SQL plan.
-SQL string expressions remain opaque, matching the Python MetricFlow model; no dialect-agnostic
-expression parser or shape gate is part of the engine. The immutable `0.2.3` release remains
-published but is superseded for Product activation by this parity patch. The deterministic
-Monomer Maven bundle and its separate release evidence pass the 136-case oracle and public
-repository gates.
-**Next**: publish/tag `0.2.4`, then pin its immutable artifact set in Monomer and map the typed
-dependency error at the Product adapter boundary.
+**Current**: `0.2.5`가 게시되었다 (`57d464cd5bc7c18f9c9140e9ea7f83272463ba4e`).
+Metric 정의·입력 filter와 ratio 입력 identity 수정은 전체 테스트, 136개 corpus,
+public repository 및 Monomer bundle 검증을 통과했다.
+
+2026-09-08 — **multi-hop JOIN runtime 포팅 보완 검증 완료, 0.2.6 게시 준비**.
+`DataflowPlanBuilder`의 단일 source 탐색과 `PreJoinNodeProcessor.addMultiHopJoins` stub을
+원본 최대 두 hop JOIN 구성으로 보완했다. 양쪽 partition 조건과 cardinality 검증,
+중간 Model provenance를 보존한다. Metric JOIN에는 원본처럼 metric query source 집합을 쓴다.
+Dimension·TimeDimension·Entity filter의 공식 `entity_path` 인자도 처리한다.
+
+- 기존 corpus 136개 중 multi-hop 관련 14개는 metadata·목록 사례이며 실제 multi-hop explain은
+  0개였다. 두 hop SQL 4개와 join 없는 대조 2개를 추가해 142개 모두 PASS했다.
+- `./gradlew test verifyPublicRepository verifyMonomerProductBundle --no-daemon --console=plain` PASS:
+  JUnit 763개 중 759 PASS, 기존 hand-written minimal fixture Python parity 4개 SKIP, 실패 0.
+  신규 6개 SQL 사례는 각 7개 dialect를 비교하며, query/stored filter-only는 출력 차원 없이
+  account_month_txns → bridge_table → customer_table 세 Model을 통과한다.
+- 독립 메모리 fixture에서 Python/Kotlin 생성 SQL 모두 A=90, B=60, C=50, NULL=7, 합계207.
+  두 partition 조건을 하나씩 제거하면 407/357로 오집계되어 fixture가 누락을 검출한다.
+- Kotlin differential command는 빈 선택 및 UNIMPLEMENTED를 성공으로 처리하지 않는다.
+  Python integrity command도 일부 PASS만으로 성공하지 않으며, 잘못된 SQL 기준값을 섞는
+  실제 oracle 회귀로 검증했다.
+- Python 원본 재실행 raw 비교는 507/508이다. 기존 `list_group_bys__simple__views`의 동일한
+  `user` entity 두 항목만 hash seed에 따라 순서가 바뀐다. 전체 항목·다른 필드는 동일하며
+  이미 존재하는 Kotlin `(name, semantic_model_name)` 정렬 비교는 142/142 통과한다.
+  신규 SQL 42개는 raw 비교 모두 PASS다. SQL normalizer 변경·expected 완화·quarantine 없음.
+
+아래 W11–W15 완료 기록은 당시 선택한 corpus의 통과 기록이며 전체 runtime 포팅 완료의
+근거가 아니다. `Metric(...)` filter, min/max 및 기존 explicit unsupported 경로까지 포팅이
+완료됐다는 주장은 하지 않는다. 엔진은 warehouse에 연결하거나 실행하지 않는다.
+
+fresh evaluator는 실제 diff·JUnit·SQL·수치 증거를 검토해 중대한 finding이 없음을 확인했다.
+
+**Next**: 검증된 immutable 0.2.6을 게시하고 Monomer에서 다단계 집계와
+중간 Model 권한, query/stored filter-only를 실제 Product 경로로 검증한다.
 
 ## 진척 표
 

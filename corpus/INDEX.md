@@ -1,6 +1,6 @@
 # Corpus index
 
-Total cases: 136
+Total cases: 142
 Generated from disk by scanning `corpus/<case>/meta.json`.
 
 | case_id | subcommand | manifest | dialects | source |
@@ -9,6 +9,12 @@ Generated from disk by scanning `corpus/<case>/meta.json`.
 | `entities_for_metrics__simple__bookings_views` | `entities_for_metrics` | `simple_manifest` |  | (derived) |
 | `entities_for_metrics__simple_multi_hop_join__txn_count` | `entities_for_metrics` | `multi_hop_join_manifest` |  | (derived) |
 | `explain__minimal_fixture__bookings_by_metric_time` | `explain` | `minimal_valid_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | python_oracle/tests/fixtures/minimal_valid_manifest.json |
+| `explain__multi_hop__txn_count_by_customer_name` | `explain` | `multi_hop_join_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_query_rendering.py::test_multihop_node |
+| `explain__multi_hop__txn_count_by_metric_time` | `explain` | `multi_hop_join_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__multi_hop__txn_count_no_groupby` | `explain` | `multi_hop_join_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__partitioned_multi_hop__filtered_txn_count_stored_filter` | `explain` | `partitioned_multi_hop_join_metric_filter_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
+| `explain__partitioned_multi_hop__txn_count_by_customer_name` | `explain` | `partitioned_multi_hop_join_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | tests_metricflow/query_rendering/test_query_rendering.py::test_multihop_node |
+| `explain__partitioned_multi_hop__txn_count_with_customer_name_query_filter` | `explain` | `partitioned_multi_hop_join_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
 | `explain__simple__average_booking_value` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
 | `explain__simple__bookers_by_metric_time` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |
 | `explain__simple__booking_fees_derived` | `explain` | `simple_manifest` | Trino,BigQuery,Snowflake,Databricks,Redshift,DuckDB,Postgres | (derived) |

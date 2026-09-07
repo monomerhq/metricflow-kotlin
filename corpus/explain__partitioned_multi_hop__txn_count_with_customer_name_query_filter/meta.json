@@ -1,0 +1,24 @@
+{
+  "case_id": "explain__partitioned_multi_hop__txn_count_with_customer_name_query_filter",
+  "subcommand": "explain",
+  "manifest_id": "partitioned_multi_hop_join_manifest",
+  "args": {
+    "metric_names": [
+      "txn_count"
+    ],
+    "where_constraints": [
+      "{{ Dimension('customer_id__customer_name', entity_path=['account_id']) }} IS NOT NULL"
+    ]
+  },
+  "dialect_set": [
+    "Trino",
+    "BigQuery",
+    "Snowflake",
+    "Databricks",
+    "Redshift",
+    "DuckDB",
+    "Postgres"
+  ],
+  "source_test": "",
+  "notes": "Query-only two-hop customer dimension filter; the rendered alias is account_id__customer_id__customer_name."
+}

@@ -10,38 +10,13 @@ import cc.monomer.metricflow.domain.spec.TimeDimensionSpec
 import cc.monomer.metricflow.domain.spec.naming.StructuredLinkableSpecName
 
 /**
- * Minimal Jinja-template renderer for the where-filter call-parameter sets that metricflow
- * uses: `{{ Dimension(...) }}`, `{{ TimeDimension(...) }}`, `{{ Entity(...) }}`, and
- * `{{ Metric(...) }}` (plus chained `.grain(...)` / `.date_part(...)` calls).
+ * Renders constrained where-filter object calls into column names and referenced specs.
  *
- * **Not a general Jinja sandbox.** Port of just enough of Python's `WhereFilterSpecFactory` +
- * the four `WhereFilter*` factory classes to render the corpus's single where-filter case
- * (`bookings_with_where`). The Python pipeline uses Jinja2 with a custom undefined hook and
- * registers four callable objects; we replace the Jinja sandbox with a hand-written tokenizer
- * + AST + evaluator over the constrained grammar:
- *
- * ```
- * template     := (LITERAL | '{{' expr '}}')*
- * expr         := call ('.' method '(' args ')')*
- * call         := IDENT '(' args ')'
- * args         := (literal (',' literal)*)?
- * literal      := STRING | '[' STRING (',' STRING)* ']'   // Python-style single-quoted strings
- * IDENT        := 'Dimension' | 'TimeDimension' | 'Entity' | 'Metric'
- * method       := 'grain' | 'date_part' | 'descending' | 'alias'
- * ```
- *
- * The renderer's [render] returns the rendered SQL plus the set of [LinkableInstanceSpec]s
- * referenced (so the column-pruner knows which columns to keep). For the corpus's single case:
- *
- * - Input: `{{ Dimension('booking__is_instant') }} = true`
- * - Output: `whereSql = "booking__is_instant = true"`, `usedSpecs = [DimensionSpec(is_instant, [booking])]`
- *
- * This is a **stopgap** for the W15 final-wave pass — see
- * [WhereFilterSpecFactory] KDoc for the full-Jinja porting path. The grammar
- * captured here covers every `tests_metricflow` corpus snapshot that lands in
- * the Kotlin diff-runner today (1 case); broader use of the renderer in
- * future corpus additions should grow this grammar deliberately and add a
- * unit test per call-parameter shape.
+ * Ports the Dimension, TimeDimension and Entity argument binding from upstream
+ * `parsing/text_input/rendering_helper.py` and entity-path composition from
+ * `parsing/where_filter/parameter_set_factory.py`. Positional and named arguments
+ * support string, string-list and None literals; this is not a general Jinja runtime.
+ * Grain and date-part method chains preserve their existing rendering behavior.
  */
 internal class WhereFilterTemplateRenderer(
     private val columnAssociationResolver: ColumnAssociationResolver,
@@ -88,50 +63,53 @@ internal class WhereFilterTemplateRenderer(
         return columnAssociationResolver.resolveSpec(spec).columnName
     }
 
-    /**
-     * Convert a parsed [CallNode] tree to a [LinkableInstanceSpec]. Supports the four primary
-     * call kinds — Dimension, TimeDimension, Entity, Metric — with optional chained `.grain(...)`
-     * and `.date_part(...)` modifiers (the only modifiers metricflow renders in the corpus).
-     */
+    /** Binds each call's arguments before resolving its entity path and time modifiers. */
     private fun buildLinkableSpec(call: CallNode): LinkableInstanceSpec {
+        val parameterNames = when (call.head) {
+            "Dimension" -> listOf("name", "entity_path")
+            "TimeDimension" -> listOf(
+                "time_dimension_name", "time_granularity_name", "entity_path", "descending", "date_part_name",
+            )
+            "Entity" -> listOf("entity_name", "entity_path")
+            else -> throw NotImplementedError("Unsupported where-filter call '${call.head}'.")
+        }
+        val arguments = bindArguments(call.args, parameterNames)
+        require("descending" !in arguments) { "Where-filter descending is not supported." }
+        val rawName = (arguments[parameterNames.first()] as? LiteralNode.StringLit)?.value
+            ?: throw IllegalArgumentException("${call.head}(...) requires a string name.")
+        val entityPath = when (val path = arguments["entity_path"]) {
+            null -> emptyList()
+            is LiteralNode.ListLit -> path.items.map { EntityReference(it) }
+            else -> throw IllegalArgumentException("entity_path must be a list of strings.")
+        }
+        val suppliedGrain = optionalString(arguments, "time_granularity_name")
         var timeGrain: String? = null
-        var datePart: String? = null
+        var datePart: String? = optionalString(arguments, "date_part_name")
         for (chain in call.chain) {
             when (chain.method) {
                 "grain" -> {
-                    require(chain.args.size == 1 && chain.args[0] is LiteralNode.StringLit) {
+                    require(chain.args.size == 1 && chain.args[0].name == null && chain.args[0].value is LiteralNode.StringLit) {
                         "grain() requires a single string argument: $chain"
                     }
-                    timeGrain = (chain.args[0] as LiteralNode.StringLit).value.lowercase()
+                    timeGrain = (chain.args[0].value as LiteralNode.StringLit).value.lowercase()
                 }
                 "date_part" -> {
-                    require(chain.args.size == 1 && chain.args[0] is LiteralNode.StringLit) {
+                    require(chain.args.size == 1 && chain.args[0].name == null && chain.args[0].value is LiteralNode.StringLit) {
                         "date_part() requires a single string argument: $chain"
                     }
-                    datePart = (chain.args[0] as LiteralNode.StringLit).value.lowercase()
+                    datePart = (chain.args[0].value as LiteralNode.StringLit).value.lowercase()
                 }
                 else -> throw NotImplementedError(
-                    "Where-filter template method '.${chain.method}(...)' is not supported by the W15 " +
-                        "minimal renderer. See WhereFilterTemplateRenderer KDoc.",
+                    "Unsupported where-filter template method '.${chain.method}(...)'.",
                 )
             }
         }
 
         when (call.head) {
             "Dimension" -> {
-                require(call.args.isNotEmpty() && call.args[0] is LiteralNode.StringLit) {
-                    "Dimension(...) requires a string first argument: $call"
-                }
-                val rawName = (call.args[0] as LiteralNode.StringLit).value
                 val structured = StructuredLinkableSpecName.fromName(rawName, customGrainNames.toList())
-                val entityLinks = structured.entityLinkNames.map { EntityReference(it) }
-                // Corpus check: `Dimension('booking__is_instant')` becomes a DimensionSpec.
-                // For time dimensions like Dimension('booking__ds'), we'd return a TimeDimensionSpec;
-                // the corpus's single case has a non-time dimension so we don't need that branch yet.
-                // Once a time-dim case lands, switch on `is structured.timeGranularityName != null`.
+                val entityLinks = entityPath + structured.entityLinkNames.map { EntityReference(it) }
                 return if (timeGrain != null || datePart != null || structured.timeGranularityName != null) {
-                    // Time dim path — only the corpus case exercises plain Dimension(non-time) today,
-                    // but future cases that say Dimension('ds__day') route here.
                     val grain = timeGrain
                         ?: structured.timeGranularityName
                         ?: throw IllegalStateException("Time-dimension where-filter without grain: $call")
@@ -150,22 +128,14 @@ internal class WhereFilterTemplateRenderer(
                 }
             }
             "TimeDimension" -> {
-                require(call.args.isNotEmpty() && call.args[0] is LiteralNode.StringLit) {
-                    "TimeDimension(...) requires a string first argument: $call"
-                }
-                val rawName = (call.args[0] as LiteralNode.StringLit).value
                 val structured = StructuredLinkableSpecName.fromName(rawName, customGrainNames.toList())
-                val entityLinks = structured.entityLinkNames.map { EntityReference(it) }
-                // Second positional argument is the grain.
-                val grain = if (call.args.size >= 2) {
-                    require(call.args[1] is LiteralNode.StringLit) {
-                        "TimeDimension(...) second arg must be a string grain: $call"
-                    }
-                    (call.args[1] as LiteralNode.StringLit).value.lowercase()
-                } else {
-                    timeGrain ?: structured.timeGranularityName
-                        ?: throw IllegalArgumentException("TimeDimension('$rawName') requires a grain.")
+                val entityLinks = entityPath + structured.entityLinkNames.map { EntityReference(it) }
+                require(suppliedGrain == null || structured.timeGranularityName == null ||
+                    suppliedGrain == structured.timeGranularityName) {
+                    "TimeDimension name and argument specify different grains."
                 }
+                val grain = timeGrain ?: suppliedGrain ?: structured.timeGranularityName
+                    ?: throw IllegalArgumentException("TimeDimension('$rawName') requires a grain.")
                 return buildTimeDimensionSpec(
                     elementName = structured.elementName,
                     entityLinks = entityLinks,
@@ -174,27 +144,41 @@ internal class WhereFilterTemplateRenderer(
                 )
             }
             "Entity" -> {
-                require(call.args.isNotEmpty() && call.args[0] is LiteralNode.StringLit) {
-                    "Entity(...) requires a string first argument: $call"
-                }
-                val rawName = (call.args[0] as LiteralNode.StringLit).value
+                require(call.chain.isEmpty()) { "Entity does not support time modifiers." }
                 val parts = rawName.split(DUNDER)
                 return EntitySpec(
                     elementName = parts.last(),
-                    entityLinks = parts.dropLast(1).map { EntityReference(it) },
+                    entityLinks = entityPath + parts.dropLast(1).map { EntityReference(it) },
                     alias = null,
                 )
             }
-            "Metric" -> throw NotImplementedError(
-                "Where-filter Metric(...) is not yet supported by the W15 minimal renderer " +
-                    "(no corpus case exercises it). See WhereFilterTemplateRenderer KDoc.",
-            )
-            else -> throw NotImplementedError(
-                "Unknown where-filter template head '${call.head}'. Supported: " +
-                    "Dimension, TimeDimension, Entity, Metric.",
-            )
+            else -> throw NotImplementedError("Unsupported where-filter call '${call.head}'.")
         }
     }
+
+    private fun bindArguments(args: List<ArgumentNode>, names: List<String>): Map<String, LiteralNode> {
+        val bound = linkedMapOf<String, LiteralNode>()
+        var namedSeen = false
+        for ((index, argument) in args.withIndex()) {
+            val name = argument.name ?: run {
+                require(!namedSeen) { "Positional argument cannot follow a named argument." }
+                require(index < names.size) { "Too many arguments; expected ${names.joinToString()}." }
+                names[index]
+            }
+            if (argument.name != null) namedSeen = true
+            require(name in names) { "Unknown argument '$name'." }
+            require(name !in bound) { "Duplicate argument '$name'." }
+            bound[name] = argument.value
+        }
+        return bound
+    }
+
+    private fun optionalString(arguments: Map<String, LiteralNode>, name: String): String? =
+        when (val argument = arguments[name]) {
+            null, LiteralNode.NoneLit -> null
+            is LiteralNode.StringLit -> argument.value.lowercase()
+            else -> throw IllegalArgumentException("$name must be a string or None.")
+        }
 
     private fun buildTimeDimensionSpec(
         elementName: String,
@@ -294,18 +278,22 @@ internal class WhereFilterTemplateRenderer(
             return source.substring(start, pos)
         }
 
-        private fun parseArgs(): List<LiteralNode> {
-            val args = mutableListOf<LiteralNode>()
-            skipWhitespace()
-            if (pos < source.length && source[pos] == ')') return args
-            args.add(parseLiteral())
+        private fun parseArgs(): List<ArgumentNode> {
+            val args = mutableListOf<ArgumentNode>()
             while (true) {
                 skipWhitespace()
-                if (pos >= source.length || source[pos] != ',') break
+                if (pos < source.length && source[pos] == ')') return args
+                val name = if (pos < source.length && (source[pos].isLetter() || source[pos] == '_') &&
+                    !source.startsWith("None", pos)) {
+                    val identifier = parseIdentifier()
+                    expect('=')
+                    identifier
+                } else null
+                args.add(ArgumentNode(name, parseLiteral()))
+                skipWhitespace()
+                if (pos >= source.length || source[pos] != ',') return args
                 pos += 1
-                args.add(parseLiteral())
             }
-            return args
         }
 
         private fun parseLiteral(): LiteralNode {
@@ -314,6 +302,11 @@ internal class WhereFilterTemplateRenderer(
             return when (source[pos]) {
                 '\'', '"' -> LiteralNode.StringLit(parseString())
                 '[' -> parseList()
+                'N' -> {
+                    require(source.startsWith("None", pos)) { "Expected None at $pos." }
+                    pos += 4
+                    LiteralNode.NoneLit
+                }
                 else -> throw IllegalArgumentException(
                     "Unexpected token at $pos in '$source': expected a string or list literal.",
                 )
@@ -321,6 +314,8 @@ internal class WhereFilterTemplateRenderer(
         }
 
         private fun parseString(): String {
+            skipWhitespace()
+            require(pos < source.length && source[pos] in "\"'") { "Expected a string literal at $pos in '$source'." }
             val quote = source[pos]
             pos += 1
             val start = pos
@@ -345,6 +340,7 @@ internal class WhereFilterTemplateRenderer(
                     if (pos >= source.length || source[pos] != ',') break
                     pos += 1
                     skipWhitespace()
+                    if (pos < source.length && source[pos] == ']') break
                     items.add(parseString())
                 }
             }
@@ -367,13 +363,16 @@ internal class WhereFilterTemplateRenderer(
     }
 
     /** A function-call AST node: `IDENT(args).method1(args).method2(args)...`. */
-    private data class CallNode(val head: String, val args: List<LiteralNode>, val chain: List<MethodCall>)
+    private data class CallNode(val head: String, val args: List<ArgumentNode>, val chain: List<MethodCall>)
 
     /** A `.method(args)` chain segment. */
-    private data class MethodCall(val method: String, val args: List<LiteralNode>)
+    private data class MethodCall(val method: String, val args: List<ArgumentNode>)
+
+    private data class ArgumentNode(val name: String?, val value: LiteralNode)
 
     /** A literal in an argument list — either a string or a list of strings. */
     private sealed interface LiteralNode {
+        data object NoneLit : LiteralNode
         data class StringLit(val value: String) : LiteralNode
         data class ListLit(val items: List<String>) : LiteralNode
     }

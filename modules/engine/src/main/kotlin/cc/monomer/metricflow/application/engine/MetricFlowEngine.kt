@@ -23,17 +23,13 @@ import cc.monomer.metricflow.domain.semantic_graph.attribute_resolution.GroupByI
  * SQL-execution methods (`query`, `get_dimension_values`) which are out of
  * scope for the Kotlin port.
  *
- * ## Resolver caveats
+ * ## Discovery and SQL planning
  *
- * The W7c resolver is the **first-pass BFS reachability** variant — see
  * [cc.monomer.metricflow.domain.semantic_graph.attribute_resolution.SemanticGraphGroupByItemSetResolver]
- * for the scope note. It walks every attribute reachable from the metric's
- * semantic graph node and materialises one annotated spec per attribute. The
- * production-grade weighted-DFS resolver (the multi-hop / ambiguity case) is
- * deferred. For most explain-style and entity-filter style cases the simple
- * variant is correct; for unrelated multi-hop manifests the metric-filtered
- * `listDimensions` / `listGroupBys` may return a superset of what Python
- * emits. We surface this as a known caveat rather than a silent stub.
+ * uses path-aware DFS recipes to resolve available items within the entity-link limits.
+ * Discovery returns metadata; explain must also construct and render the corresponding
+ * dataflow joins. Passing discovery cases alone does not establish SQL-planning parity.
+ * Resolver-specific limitations are documented on the resolver itself.
  *
  * The facade keeps construction cheap: every call rebuilds the lookups only on
  * first use of the semantic graph (the graph is `lazy`), so RPCs that only
@@ -52,7 +48,7 @@ class MetricFlowEngine(
     val semanticManifestLookup: SemanticManifestLookup = SemanticManifestLookup(semanticManifest)
 
     /**
-     * Composition root for the semantic graph + the BFS resolver. Construction
+     * Composition root for the semantic graph and path-aware resolver. Construction
      * is `lazy` inside; we hold the wrapper eagerly so callers can reach it
      * through the engine for advanced flows.
      */
@@ -72,7 +68,7 @@ class MetricFlowEngine(
     /**
      * List the manifest's metrics in `defaultSearchAndSortAttribute` (name) order.
      *
-     * When [includeDimensions] is true, the simple BFS resolver is consulted
+     * When [includeDimensions] is true, the semantic graph resolver is consulted
      * for each metric to materialise the available dimension list. When
      * false the dimension list is empty.
      *

@@ -1,5 +1,8 @@
 package cc.monomer.metricflow.domain.dataflow.builder
 
+import cc.monomer.metricflow.domain.dataflow.validation.JoinDataflowOutputValidator
+import cc.monomer.metricflow.domain.plan_conversion.node_processor.PreJoinNodeProcessor
+import cc.monomer.metricflow.domain.plan_conversion.instance_transforms.CreateValidityWindowJoinDescription
 import cc.monomer.metricflow.common.dag.DagId
 import cc.monomer.metricflow.common.dag.SequentialIdGenerator
 import cc.monomer.metricflow.common.dag.StaticIdPrefix
@@ -1040,92 +1043,71 @@ class DataflowPlanBuilder(
     }
 
     /**
-     * For specs that need a join, build a `JoinOnEntities` chain on top of the metric-time
-     * transform.
-     *
-     * Each join spec is matched against candidate `ReadSqlSourceNode`s from
-     * [sourceNodeSet.sourceNodesForGroupByItemQueries] by finding one whose InstanceSet exposes
-     * the queried spec (matched on elementName + entity-link tail beyond the leading link).
-     *
-     * Port of the entity-link satisfaction subset of `NodeEvaluatorForLinkableInstances` — we
-     * skip the full evaluator (1500 LOC of search-space pruning) and instead do a direct
-     * single-hop match per spec, which covers the W14c corpus surface (single-hop joins like
-     * `bookings_by_listing_country`).
+     * Satisfy linked specs using the upstream candidate coverage ordering. Two-hop candidates
+     * are right-side subplans, so intermediate entities and partition constraints remain intact.
      */
     private fun buildJoinNodeFor(
         transformNode: MetricTimeDimensionTransformNode,
         joinSpecs: List<LinkableInstanceSpec>,
         localSpecs: List<LinkableInstanceSpec>,
     ): Pair<DataflowPlanNode, List<LinkableInstanceSpec>> {
-        val joinTargets = mutableListOf<JoinDescription>()
-        val resolvedSpecs = mutableListOf<LinkableInstanceSpec>()
-        resolvedSpecs.addAll(localSpecs)
-
-        // Group join specs by leading entity link — each unique leading link becomes one join
-        // target. This mirrors Python's `JoinLinkableInstancesRecipe` grouping.
-        val byLeadingLink = joinSpecs.groupBy { spec -> spec.entityLinks.firstOrNull() }
-
-        for ((leadingLink, specGroup) in byLeadingLink) {
-            checkNotNull(leadingLink) {
-                "Empty leading entity-link for join spec; should have been handled as local."
-            }
-            // Find a read source node whose model contains the right-side specs reachable
-            // through the leading link's entity reference (i.e. the model's primary entity is
-            // the leading link).
-            val rightReadNode = findReadSourceForEntity(
-                entityName = leadingLink.elementName,
-                requiredSpecs = specGroup,
-            ) ?: throw NotImplementedError(
-                "Could not satisfy join target for leading entity-link '$leadingLink' with " +
-                    "queried specs ${specGroup.map { it.dunderName }}. Multi-hop joins or " +
-                    "missing source models are W15 scope.",
-            )
-            joinTargets.add(
-                JoinDescription(
-                    joinNode = rightReadNode,
-                    joinOnEntity = leadingLink,
-                    joinType = SqlJoinType.LEFT_OUTER,
-                    joinOnPartitionDimensions = emptyList(),
-                    joinOnPartitionTimeDimensions = emptyList(),
-                    validityWindow = null,
-                ),
-            )
-            resolvedSpecs.addAll(specGroup)
-        }
-
-        val joinNode = JoinOnEntitiesNode(leftNode = transformNode, joinTargets = joinTargets)
-        return joinNode to resolvedSpecs
-    }
-
-    /**
-     * Find a `ReadSqlSourceNode` from [sourceNodeSet] whose model has [entityName] as a primary
-     * (or unique) entity and whose InstanceSet exposes all [requiredSpecs] modulo the leading
-     * entity-link. Returns null if no suitable model is found.
-     */
-    private fun findReadSourceForEntity(
-        entityName: String,
-        requiredSpecs: List<LinkableInstanceSpec>,
-    ): ReadSqlSourceNode? {
-        // Strip the leading entity-link from each required spec to compare against the source
-        // model's emission (which uses local entity-links only).
-        val strippedKeys = requiredSpecs.map { spec ->
-            spec.elementName to spec.entityLinks.drop(1).map { it.elementName }
-        }.toSet()
-
-        for (node in sourceNodeSet.sourceNodesForGroupByItemQueries) {
-            if (node !is ReadSqlSourceNode) continue
-            val ds = node.dataSet as? SqlDataSet ?: continue
-            val localKeys = collectLocalLinkableKeys(ds.instanceSet.specSet)
-            if (strippedKeys.all { it in localKeys }) {
-                // Verify this model has the entityName as a (primary or unique) entity by
-                // checking the entity instances at empty entity-links.
-                val hasEntity = ds.instanceSet.entityInstances.any { ei ->
-                    ei.spec.entityLinks.isEmpty() && ei.spec.elementName == entityName
+        val nodes = PreJoinNodeProcessor(semanticModelLookup, nodeOutputResolver).addMultiHopJoins(
+            desiredLinkableSpecs = joinSpecs,
+            nodes = sourceNodeSet.sourceNodesForMetricQueries,
+            joinType = SqlJoinType.LEFT_OUTER,
+        )
+        val leftInstances = nodeOutputResolver.getOutputDataSet(transformNode).instanceSet
+        val joinValidator = JoinDataflowOutputValidator(semanticModelLookup)
+        val partitionResolver = PartitionJoinResolver(semanticModelLookup)
+        val candidates = mutableListOf<JoinLinkableInstancesRecipe>()
+        for (rightNode in nodes) {
+            val rightInstances = nodeOutputResolver.getOutputDataSet(rightNode).instanceSet
+            for (entity in rightInstances.specSet.entitySpecs.filter { it.entityLinks.isEmpty() }) {
+                if (leftInstances.entityInstances.none {
+                        it.spec.entityLinks.isEmpty() && it.spec.reference == entity.reference
+                    }
+                ) continue
+                val satisfiable = joinSpecs.filter {
+                    it.entityLinks.firstOrNull() == entity.reference &&
+                        it.withoutFirstEntityLink() in rightInstances.specSet.linkableSpecs
                 }
-                if (hasEntity) return node
+                if (satisfiable.isEmpty()) continue
+                if (!joinValidator.isValidInstanceSetJoin(
+                        leftInstances,
+                        rightInstances,
+                        entity.reference,
+                        rightNode.aggregatedToElements.map { it.reference }.toSet() == setOf(entity.reference),
+                    )
+                ) continue
+                candidates += JoinLinkableInstancesRecipe(
+                    nodeToJoin = rightNode,
+                    joinOnEntity = entity.reference,
+                    satisfiableLinkableSpecs = satisfiable,
+                    joinType = SqlJoinType.LEFT_OUTER,
+                    joinOnPartitionDimensions = partitionResolver.resolvePartitionDimensionJoins(
+                        leftInstances.specSet, rightInstances.specSet,
+                    ),
+                    joinOnPartitionTimeDimensions = partitionResolver.resolvePartitionTimeDimensionJoins(
+                        leftInstances.specSet, rightInstances.specSet,
+                    ),
+                    validityWindow = CreateValidityWindowJoinDescription(semanticModelLookup).transform(rightInstances),
+                )
             }
         }
-        return null
+        val remainingSpecs = joinSpecs.toMutableSet()
+        val joinTargets = mutableListOf<JoinDescription>()
+        var rankedCandidates = candidates.sortedByDescending { it.satisfiableLinkableSpecs.size }
+        while (remainingSpecs.isNotEmpty()) {
+            val next = rankedCandidates.firstOrNull()
+            checkNotNull(next) { "Could not satisfy entity joins for ${remainingSpecs.map { it.dunderName }}" }
+            joinTargets += next.joinDescription
+            remainingSpecs.removeAll(next.satisfiableLinkableSpecs.toSet())
+            rankedCandidates = rankedCandidates.drop(1).map { candidate ->
+                candidate.copy(satisfiableLinkableSpecs = candidate.satisfiableLinkableSpecs.filter { it in remainingSpecs })
+            }.filter { it.satisfiableLinkableSpecs.isNotEmpty() }
+                .sortedByDescending { it.satisfiableLinkableSpecs.size }
+        }
+        return JoinOnEntitiesNode(leftNode = transformNode, joinTargets = joinTargets) to (localSpecs + joinSpecs)
     }
 
     /**

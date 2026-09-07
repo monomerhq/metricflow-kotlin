@@ -1,5 +1,13 @@
 package cc.monomer.metricflow.domain.plan_conversion.node_processor
 
+import cc.monomer.metricflow.common.errors.FeatureNotSupportedError
+import cc.monomer.metricflow.domain.dataflow.nodes.JoinDescription
+import cc.monomer.metricflow.domain.dataflow.nodes.JoinOnEntitiesNode
+import cc.monomer.metricflow.domain.dataflow.nodes.SelectorNode
+import cc.monomer.metricflow.domain.dataflow.validation.JoinDataflowOutputValidator
+import cc.monomer.metricflow.domain.lookup.MAX_JOIN_HOPS
+import cc.monomer.metricflow.domain.manifest.model.references.EntityReference
+import cc.monomer.metricflow.domain.spec.InstanceSpecSet
 import cc.monomer.metricflow.common.time.TimeRangeConstraint
 import cc.monomer.metricflow.domain.dataflow.DataflowPlanNode
 import cc.monomer.metricflow.domain.dataflow.builder.PartitionJoinResolver
@@ -35,26 +43,15 @@ import cc.monomer.metricflow.domain.spec.where.WhereFilterSpec
  * </ConstrainTimeRangeNode>
  * ```
  *
- * **Status — partial port.** [applyMatchingFilterPredicates] is fully ported and operates only
- * on the dataflow graph + spec set, so it lands here. The multi-hop logic
- * ([addMultiHopJoins], [getCandidateNodesForMultiHop]) and node-pruning helper
- * ([removeUnnecessaryNodes]) call into [DataflowNodeToSqlSubqueryVisitor.getOutputDataSet],
- * whose body is forward-deferred (see [DataflowNodeToSqlSubqueryVisitor]). These methods raise
- * [NotImplementedError] until the visitor body lands; the public signatures are stable so the
- * `:application:engine` facade can wire through them now.
  */
 class PreJoinNodeProcessor(
     semanticModelLookup: SemanticModelLookup,
-    /**
-     * The W9c output-data-set resolver. Forward reference — body deferred (see class KDoc).
-     */
-    @Suppress("UNUSED_PARAMETER")
     nodeDataSetResolver: DataflowNodeToSqlSubqueryVisitor,
 ) {
     private val nodeDataSetResolver: DataflowNodeToSqlSubqueryVisitor = nodeDataSetResolver
     private val partitionResolver = PartitionJoinResolver(semanticModelLookup)
     private val semanticModelLookup = semanticModelLookup
-    // private val joinEvaluator = JoinDataflowOutputValidator(semanticModelLookup)  // not yet ported
+    private val joinEvaluator = JoinDataflowOutputValidator(semanticModelLookup)
 
     /**
      * Add filter predicate nodes to the input nodes as appropriate.
@@ -163,23 +160,79 @@ class PreJoinNodeProcessor(
     }
 
     /**
-     * Assemble all possible multi-hop joins for the given desired linkable specs.
-     *
-     * Port of `add_multi_hop_joins`. Status — deferred: depends on
-     * [JoinDataflowOutputValidator][cc.monomer.metricflow.domain.lookup] (`metricflow/validation/dataflow_join_validator.py`,
-     * not yet ported in `:domain:lookup`) and on the W10 body of
-     * [DataflowNodeToSqlSubqueryVisitor]. The public signature is preserved so call sites can
-     * wire to it now.
+     * Materialize two-source candidates for the upstream two-hop limit, deduplicated by lineage.
+     * The first source must carry both path entities; the second supplies the requested element.
      */
     fun addMultiHopJoins(
         desiredLinkableSpecs: List<LinkableInstanceSpec>,
         nodes: List<DataflowPlanNode>,
         joinType: SqlJoinType,
     ): List<DataflowPlanNode> {
-        throw NotImplementedError(
-            "PreJoinNodeProcessor.addMultiHopJoins depends on JoinDataflowOutputValidator " +
-                "(unported in :domain:lookup) and on the W10 visitor body. Tracked for W10.",
-        )
+        val candidates = LinkedHashMap<MultiHopJoinCandidateLineage, DataflowPlanNode>()
+        for (spec in desiredLinkableSpecs) {
+            if (spec.entityLinks.size > MAX_JOIN_HOPS) {
+                throw FeatureNotSupportedError(
+                    "Multi-hop joins with more than $MAX_JOIN_HOPS entity links not yet supported. Got: $spec",
+                )
+            }
+            if (spec.entityLinks.size != 2) continue
+            val firstEntity = spec.entityLinks[0]
+            val secondEntity = spec.entityLinks[1]
+            for (firstNode in nodes) {
+                if (!nodeContainsEntity(firstNode, firstEntity) || !nodeContainsEntity(firstNode, secondEntity)) continue
+                val firstInstances = nodeDataSetResolver.getOutputDataSet(firstNode).instanceSet
+                for (secondNode in nodes) {
+                    if (firstNode.nodeId == secondNode.nodeId || !nodeContainsEntity(secondNode, secondEntity)) continue
+                    val secondInstances = nodeDataSetResolver.getOutputDataSet(secondNode).instanceSet
+                    if (secondInstances.specSet.allSpecs.none { it.elementName == spec.elementName }) continue
+                    if (!joinEvaluator.isValidInstanceSetJoin(
+                            firstInstances,
+                            secondInstances,
+                            secondEntity,
+                            secondNode.aggregatedToElements.map { it.reference }.toSet() == setOf(secondEntity),
+                        )
+                    ) continue
+                    val lineage = MultiHopJoinCandidateLineage(firstNode, secondNode, secondEntity)
+                    if (lineage in candidates) continue
+                    val selector = SelectorNode(
+                        parentNode = secondNode,
+                        includeSpecs = InstanceSpecSet.createFromSpecs(secondInstances.specSet.linkableSpecs),
+                        replaceDescription = null,
+                        distinct = false,
+                    )
+                    candidates[lineage] = JoinOnEntitiesNode(
+                        leftNode = firstNode,
+                        joinTargets = listOf(
+                            JoinDescription(
+                                joinNode = selector,
+                                joinOnEntity = secondEntity,
+                                joinType = joinType,
+                                joinOnPartitionDimensions = partitionResolver.resolvePartitionDimensionJoins(
+                                    firstInstances.specSet, secondInstances.specSet,
+                                ),
+                                joinOnPartitionTimeDimensions = partitionResolver.resolvePartitionTimeDimensionJoins(
+                                    firstInstances.specSet, secondInstances.specSet,
+                                ),
+                                validityWindow = null,
+                            ),
+                        ),
+                    )
+                }
+            }
+        }
+        return candidates.values.toList() + nodes
+    }
+
+    private fun nodeContainsEntity(node: DataflowPlanNode, entityReference: EntityReference): Boolean {
+        for (instance in nodeDataSetResolver.getOutputDataSet(node).instanceSet.entityInstances) {
+            if (instance.spec.reference != entityReference) continue
+            check(instance.definedFrom.size == 1) { "Multiple items in definedFrom not yet supported" }
+            checkNotNull(semanticModelLookup.getEntityInSemanticModel(instance.definedFrom.single())) {
+                "Invalid SemanticModelElementReference ${instance.definedFrom.single()}"
+            }
+            return true
+        }
+        return false
     }
 
     /**

@@ -4,16 +4,15 @@ import java.io.File
 import kotlin.system.exitProcess
 
 /**
- * W10 diff-runner entry point.
+ * Differential corpus entry point.
  *
  * Iterates `corpus/<case>/`, invokes the Kotlin engine in-process (no gRPC —
  * the wire shape is tested separately by the engine module's smoke tests),
  * and prints per-case `PASS | FAIL | UNIMPLEMENTED | ERROR`.
  *
  * Exit code:
- * - `0` when no case ends in `FAIL` or `ERROR`. `UNIMPLEMENTED` is acceptable
- *   because the explain path is deferred to a post-W10 wave.
- * - non-zero when any case ends in `FAIL` or `ERROR`.
+ * - `0` when at least one selected case ran and every case passed.
+ * - non-zero for an empty selection or any incomplete, failed, or erroneous case.
  */
 fun main(args: Array<String>) {
     val corpusDir = File("corpus").canonicalFile
@@ -40,7 +39,8 @@ fun main(args: Array<String>) {
 
     printReport(results)
 
-    val hasFailure = results.any { it.outcome == CaseOutcome.FAIL || it.outcome == CaseOutcome.ERROR }
+    val hasFailure = results.isEmpty() || results.any { it.outcome != CaseOutcome.PASS }
+    if (results.isEmpty()) System.err.println("ERROR: no corpus case matched the selection")
     exitProcess(if (hasFailure) 1 else 0)
 }
 
@@ -71,11 +71,11 @@ private fun printReport(results: List<CaseResult>) {
     println("ERROR         : $errors")
     println("TOTAL         : ${results.size}")
 
-    if (fails > 0 || errors > 0) {
+    if (fails > 0 || errors > 0 || unimpl > 0) {
         println()
-        println("== First ${MAX_FAILURE_SAMPLE} failures / errors ==")
+        println("== First ${MAX_FAILURE_SAMPLE} incomplete / failed cases ==")
         results.asSequence()
-            .filter { it.outcome == CaseOutcome.FAIL || it.outcome == CaseOutcome.ERROR }
+            .filter { it.outcome != CaseOutcome.PASS }
             .take(MAX_FAILURE_SAMPLE)
             .forEach { println("  [${it.outcome}] ${it.caseId}: ${it.detail}") }
     }

@@ -243,7 +243,7 @@ def _write_csv(results: List[CaseResult]) -> pathlib.Path:
     REPORTS.mkdir(parents=True, exist_ok=True)
     out = REPORTS / "corpus_integrity.csv"
     with out.open("w", newline="") as fh:
-        w = csv.writer(fh)
+        w = csv.writer(fh, lineterminator="\n")
         w.writerow(["case_id", "subcommand", "manifest", "dialect", "status", "detail", "diff_chars"])
         for r in results:
             w.writerow([r.case_id, r.subcommand, r.manifest, r.dialect, r.status, r.detail, r.diff_chars])
@@ -308,7 +308,7 @@ def _write_markdown(
     lines.append(f"- ERROR: {by_status.get('ERROR', 0)}")
     lines.append(f"- SKIP: {by_status.get('SKIP', 0)}")
     lines.append("")
-    lines.append(f"**Achieves ≥80% PASS target: {'YES' if pass_rate >= 80 else 'NO'}**")
+    lines.append(f"**Achieves 100% PASS target: {'YES' if total > 0 and pass_rate == 100 else 'NO'}**")
     lines.append("")
     lines.append("## By subcommand")
     lines.append("")
@@ -411,7 +411,7 @@ def main() -> int:
     passed = sum(1 for r in results if r.status == "PASS")
     pass_rate = (passed / total) * 100 if total else 0.0
     print(f"\n  Pass: {passed}/{total} ({pass_rate:.1f}%)", file=sys.stderr)
-    return 0 if any(r.status == "PASS" for r in results) else 1
+    return 0 if results and all(r.status == "PASS" for r in results) else 1
 
 
 if __name__ == "__main__":

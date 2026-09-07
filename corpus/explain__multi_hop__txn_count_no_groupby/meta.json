@@ -1,0 +1,21 @@
+{
+  "case_id": "explain__multi_hop__txn_count_no_groupby",
+  "subcommand": "explain",
+  "manifest_id": "multi_hop_join_manifest",
+  "args": {
+    "metric_names": [
+      "txn_count"
+    ]
+  },
+  "dialect_set": [
+    "Trino",
+    "BigQuery",
+    "Snowflake",
+    "Databricks",
+    "Redshift",
+    "DuckDB",
+    "Postgres"
+  ],
+  "source_test": "",
+  "notes": ""
+}

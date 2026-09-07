@@ -1,0 +1,21 @@
+{
+  "case_id": "explain__partitioned_multi_hop__filtered_txn_count_stored_filter",
+  "subcommand": "explain",
+  "manifest_id": "partitioned_multi_hop_join_metric_filter_manifest",
+  "args": {
+    "metric_names": [
+      "filtered_txn_count"
+    ]
+  },
+  "dialect_set": [
+    "Trino",
+    "BigQuery",
+    "Snowflake",
+    "Databricks",
+    "Redshift",
+    "DuckDB",
+    "Postgres"
+  ],
+  "source_test": "",
+  "notes": "Stored filter keeps the fact-to-bridge-to-customer intermediate and both partition equality predicates."
+}

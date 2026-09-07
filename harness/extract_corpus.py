@@ -30,6 +30,7 @@ The corpus extractor never mutates ``python_oracle/upstream/`` or
 
 from __future__ import annotations
 
+import copy
 import json
 import pathlib
 import subprocess
@@ -921,6 +922,47 @@ MULTI_HOP_EXPLAIN: Tuple[CorpusCase, ...] = (
 )
 
 
+# Partitioned multi-hop cases use the fixture selected by upstream's
+# ``multihop_dataflow_plan_builder``.  The requests below cover grouped
+# dimensions, a query-only dimension filter, and a stored metric filter while
+# keeping the expected SQL entirely oracle-generated.
+PARTITIONED_MULTI_HOP_EXPLAIN: Tuple[CorpusCase, ...] = (
+    CorpusCase(
+        case_id="explain__partitioned_multi_hop__txn_count_by_customer_name",
+        subcommand="explain",
+        manifest_name="partitioned_multi_hop_join_manifest",
+        args={
+            "metric_names": ["txn_count"],
+            "group_by_names": ["account_id__customer_id__customer_name"],
+        },
+        dialects=DIALECTS_SQL,
+        source_test="tests_metricflow/query_rendering/test_query_rendering.py::test_multihop_node",
+        notes="Two-hop join with partition equality on both bridge/customer and fact/bridge joins.",
+    ),
+    CorpusCase(
+        case_id="explain__partitioned_multi_hop__txn_count_with_customer_name_query_filter",
+        subcommand="explain",
+        manifest_name="partitioned_multi_hop_join_manifest",
+        args={
+            "metric_names": ["txn_count"],
+            "where_constraints": [
+                "{{ Dimension('customer_id__customer_name', entity_path=['account_id']) }} IS NOT NULL",
+            ],
+        },
+        dialects=DIALECTS_SQL,
+        notes="Query-only two-hop customer dimension filter; the rendered alias is account_id__customer_id__customer_name.",
+    ),
+    CorpusCase(
+        case_id="explain__partitioned_multi_hop__filtered_txn_count_stored_filter",
+        subcommand="explain",
+        manifest_name="partitioned_multi_hop_join_metric_filter_manifest",
+        args={"metric_names": ["filtered_txn_count"]},
+        dialects=DIALECTS_SQL,
+        notes="Stored filter keeps the fact-to-bridge-to-customer intermediate and both partition equality predicates.",
+    ),
+)
+
+
 # Derived metrics manifest cases.
 DERIVED_METRICS_EXPLAIN: Tuple[CorpusCase, ...] = (
     CorpusCase(
@@ -1173,6 +1215,7 @@ def all_cases() -> Tuple[CorpusCase, ...]:
         SIMPLE_MANIFEST_EXPLAIN
         + TIME_SPINE_RUNTIME_EXPLAIN
         + MULTI_HOP_EXPLAIN
+        + PARTITIONED_MULTI_HOP_EXPLAIN
         + DERIVED_METRICS_EXPLAIN
         + SIMPLE_LIST_CASES
         + _multi_hop_list_cases()
@@ -1207,6 +1250,31 @@ def _convert_all_manifests() -> List[str]:
             dest = MANIFEST_OUT / f"{fix}.json"
             dest.write_text(src.read_text())
             names.append(fix)
+
+    # The upstream partitioned fixture already contains the multi-hop graph,
+    # but it does not define a fact metric whose stored filter traverses the
+    # two-hop customer dimension. Add this QA-only input without modifying
+    # upstream. The expected SQL is captured by the Python oracle below,
+    # never copied from Kotlin.
+    source = MANIFEST_OUT / "partitioned_multi_hop_join_manifest.json"
+    qa_name = "partitioned_multi_hop_join_metric_filter_manifest"
+    qa_manifest = copy.deepcopy(json.loads(source.read_text()))
+    txn_count = next(metric for metric in qa_manifest["metrics"] if metric["name"] == "txn_count")
+    filtered_txn_count = copy.deepcopy(txn_count)
+    filtered_txn_count["name"] = "filtered_txn_count"
+    filtered_txn_count["filter"] = {
+        "where_filters": [
+            {
+                "where_sql_template": "{{ Dimension('customer_id__customer_name', entity_path=['account_id']) }} IS NOT NULL",
+            }
+        ]
+    }
+    filtered_txn_count["metadata"] = None
+    qa_manifest["metrics"].append(filtered_txn_count)
+    (MANIFEST_OUT / f"{qa_name}.json").write_text(
+        json.dumps(qa_manifest, indent=2, sort_keys=False) + "\n"
+    )
+    names.append(qa_name)
     return names
 
 
