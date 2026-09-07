@@ -331,7 +331,8 @@ class MetricFlowQueryResolver(
             resolutionDag = resolutionDag,
             groupByItemSet = resolveGroupByItemResult.linkableElementSet,
             filterSpecLookup = filterSpecLookup,
-        )
+        ).plus(collectFilterSemanticModels(metricSpecs.map { it.reference }, queryLevelFilterInput.whereFilterIntersection))
+            .distinct().sortedBy { it.semanticModelName }
 
         return MetricFlowQueryResolution(
             querySpec = MetricFlowQuerySpec(
@@ -776,6 +777,45 @@ class MetricFlowQueryResolver(
             .map { SemanticModelReference(it.name) }
             .toSet()
         return collected.filter { it in known }.sortedBy { it.semanticModelName }
+    }
+
+    private fun collectFilterSemanticModels(
+        metricReferences: List<MetricReference>,
+        queryFilters: cc.monomer.metricflow.domain.manifest.model.filter.WhereFilterIntersection,
+    ): List<SemanticModelReference> {
+        val models = linkedSetOf<SemanticModelReference>()
+        val renderer = cc.monomer.metricflow.domain.query.filter.WhereFilterTemplateRenderer(
+            columnAssociationResolver = cc.monomer.metricflow.domain.spec.DunderColumnAssociationResolver(true),
+            customGrainNames = manifestLookup.semanticModelLookup.customGranularityNames.toSet(),
+        )
+        fun collect(
+            references: List<MetricReference>,
+            filters: cc.monomer.metricflow.domain.manifest.model.filter.WhereFilterIntersection?,
+        ) {
+            if (filters == null || filters.whereFilters.isEmpty()) return
+            val available = computeAvailableGroupByItemSet(references)
+            for (filter in filters.whereFilters) {
+                for (spec in renderer.render(filter.whereSqlTemplate).usedSpecs) {
+                    val resolved = available.annotatedSpecs.singleOrNull { it.spec == spec }
+                    requireNotNull(resolved) { "Filter dimension '${spec.dunderName}' is unavailable or ambiguous." }
+                    models.addAll(resolved.derivedFromSemanticModels)
+                }
+            }
+        }
+        collect(metricReferences, queryFilters)
+        val visited = linkedSetOf<MetricReference>()
+        fun visit(reference: MetricReference) {
+            if (!visited.add(reference)) return
+            val metric = manifestLookup.metricLookup.getMetric(reference)
+            collect(listOf(reference), metric.filter)
+            val inputs = metric.inputMetrics + listOfNotNull(metric.typeParams.cumulativeTypeParams?.metric)
+            for (input in inputs) {
+                collect(listOf(input.asReference), input.filter)
+                visit(input.asReference)
+            }
+        }
+        metricReferences.forEach(::visit)
+        return models.sortedBy { it.semanticModelName }
     }
 
     /**

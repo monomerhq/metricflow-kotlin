@@ -72,6 +72,16 @@ warehouse. Port of `metricflow_semantic_interfaces/implementations/*`.
 ### Filters
 - `WhereFilter`, `WhereFilterIntersection`
 
+Simple, ratio, and derived metric definition filters apply before aggregation and
+combine with query and nested input filters using AND. Each input retains its
+own filters and alias; inputs with different filters use separate aggregation
+branches even when they read the same model. Ratio inputs that would share an
+output name receive distinct internal SQL aliases; callers may omit aliases. Filter-only dimensions participate
+in joins and `queriedSemanticModels` without becoming output grouping keys.
+Unavailable or ambiguous filter references fail query resolution. Conversion
+input definition filters are rejected until event-branch filter planning supports
+them; they are never silently discarded.
+
 ### Enums (`...manifest.model.enums`)
 - `DimensionType`, `EntityType`, `MetricType`
 - `AggregationType`, `TimeGranularity`, `DatePart`

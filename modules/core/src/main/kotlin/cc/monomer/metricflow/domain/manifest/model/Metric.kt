@@ -68,6 +68,16 @@ data class Metric(
         }
 }
 
+internal fun Metric.ratioInputsWithDistinctAliases(): Pair<MetricInput, MetricInput> {
+    val numerator = checkNotNull(typeParams.numerator) { "Ratio metric '$name' is missing its numerator." }
+    val denominator = checkNotNull(typeParams.denominator) { "Ratio metric '$name' is missing its denominator." }
+    if (numerator.postAggregationReference != denominator.postAggregationReference) {
+        return numerator to denominator
+    }
+    return numerator.copy(alias = "__metricflow_ratio_numerator") to
+        denominator.copy(alias = "__metricflow_ratio_denominator")
+}
+
 /**
  * The wide payload holding parameters for every supported metric type.
  *

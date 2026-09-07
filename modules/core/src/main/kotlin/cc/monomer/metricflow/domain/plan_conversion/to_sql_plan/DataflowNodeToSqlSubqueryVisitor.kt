@@ -1,5 +1,6 @@
 package cc.monomer.metricflow.domain.plan_conversion.to_sql_plan
 
+import cc.monomer.metricflow.domain.manifest.model.ratioInputsWithDistinctAliases
 import cc.monomer.metricflow.common.dag.SequentialIdGenerator
 import cc.monomer.metricflow.common.dag.StaticIdPrefix
 import cc.monomer.metricflow.common.time.TimeRangeConstraint
@@ -631,12 +632,7 @@ class DataflowNodeToSqlSubqueryVisitor(
             )
             val metricExpr: SqlExpressionNode = when (metric.type) {
                 MetricType.RATIO -> {
-                    val numerator = checkNotNull(metric.typeParams.numerator) {
-                        "Missing numerator for ratio metric, should have been caught in validation."
-                    }
-                    val denominator = checkNotNull(metric.typeParams.denominator) {
-                        "Missing denominator for ratio metric, should have been caught in validation."
-                    }
+                    val (numerator, denominator) = metric.ratioInputsWithDistinctAliases()
                     val numeratorColumn = columnAssociationResolver.resolveSpec(
                         MetricSpec.fromReference(numerator.postAggregationReference),
                     ).columnName

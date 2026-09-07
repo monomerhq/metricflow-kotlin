@@ -38,6 +38,12 @@ import cc.monomer.metricflow.domain.dataflow.optimizer.DataflowPlanOptimization
 import cc.monomer.metricflow.domain.dataflow.optimizer.DataflowPlanOptimizerFactory
 import cc.monomer.metricflow.domain.dataflow.support.NullFillValueMapping
 import cc.monomer.metricflow.domain.lookup.SemanticManifestLookup
+import cc.monomer.metricflow.domain.manifest.model.ratioInputsWithDistinctAliases
+import cc.monomer.metricflow.domain.manifest.model.filter.WhereFilterIntersection
+import cc.monomer.metricflow.domain.query.filter.WhereFilterSpecFactory
+import cc.monomer.metricflow.domain.query.resolution.FilterSpecResolutionLookUp
+import cc.monomer.metricflow.domain.query.resolution.WhereFilterLocation
+import cc.monomer.metricflow.domain.spec.where.WhereFilterSpec
 import cc.monomer.metricflow.domain.manifest.model.enums.MetricType
 import cc.monomer.metricflow.domain.manifest.model.enums.TimeGranularity
 import cc.monomer.metricflow.domain.metric_evaluation.plan.MetricEvaluationPlan
@@ -227,22 +233,37 @@ class DataflowPlanBuilder(
         whereFilterSpecs: List<cc.monomer.metricflow.domain.spec.where.WhereFilterSpec>,
     ): DataflowPlanNode {
         val metric = metricLookup.getMetric(metricSpec.reference)
+        val branchFilters = whereFilterSpecs + metricSpec.whereFilterSpecs + definitionFilters(metricSpec)
         return when (metric.type) {
-            MetricType.SIMPLE -> buildSimpleMetricBranch(querySpec, metricSpec, whereFilterSpecs)
+            MetricType.SIMPLE -> buildSimpleMetricBranch(querySpec, metricSpec, branchFilters)
             MetricType.DERIVED, MetricType.RATIO ->
-                buildDerivedOrRatioBranch(querySpec, metricSpec, metric.type, whereFilterSpecs)
+                buildDerivedOrRatioBranch(querySpec, metricSpec, metric.type, branchFilters)
             MetricType.CUMULATIVE -> buildCumulativeMetricBranch(
                 querySpec = querySpec,
                 metricSpec = metricSpec,
-                whereFilterSpecs = whereFilterSpecs,
+                whereFilterSpecs = branchFilters,
             )
             MetricType.CONVERSION -> buildConversionMetricBranch(
                 querySpec = querySpec,
                 metricSpec = metricSpec,
-                whereFilterSpecs = whereFilterSpecs,
+                whereFilterSpecs = branchFilters,
             )
         }
     }
+
+    private fun renderFilters(
+        intersection: WhereFilterIntersection?,
+        location: WhereFilterLocation,
+    ): List<WhereFilterSpec> = WhereFilterSpecFactory(
+        columnAssociationResolver = columnAssociationResolver,
+        specResolutionLookup = FilterSpecResolutionLookUp.EMPTY,
+        customGrainNames = semanticModelLookup.customGranularityNames.toList(),
+    ).createFromWhereFilterIntersection(location, intersection)
+
+    private fun definitionFilters(metricSpec: MetricSpec): List<WhereFilterSpec> = renderFilters(
+        metricLookup.getMetric(metricSpec.reference).filter,
+        WhereFilterLocation.forMetric(metricSpec.reference),
+    )
 
     /**
      * The SIMPLE-metric pipeline.
@@ -269,12 +290,6 @@ class DataflowPlanBuilder(
         metricSpec: MetricSpec,
         whereFilterSpecs: List<cc.monomer.metricflow.domain.spec.where.WhereFilterSpec>,
     ): DataflowPlanNode {
-        if (metricSpec.whereFilterSpecs.isNotEmpty()) {
-            throw NotImplementedError(
-                "Metric-level where-filter specs are W15 scope, " +
-                    "see _build_simple_metric_recipe + metric_defined_filter_specs path.",
-            )
-        }
         if (metricSpec.offsetWindow != null || metricSpec.offsetToGrain != null) {
             throw NotImplementedError(
                 "Metric offset is W15 scope, see " +
@@ -376,7 +391,9 @@ class DataflowPlanBuilder(
             simpleMetricInputNames = listOf(simpleInput.name),
             outputMetricSpecs = listOf(inputMetricSpec),
             outputComputeMetric = false,
-            whereFilterSpecs = whereFilterSpecs,
+            whereFilterSpecs = whereFilterSpecs +
+                renderFilters(inputMetric.filter, WhereFilterLocation.forInputMetric(inputMetric.asReference)) +
+                definitionFilters(inputMetricSpec),
             sourceNodeOverride = cumulativeSource,
             sourceTimeRangeConstraint = null,
             preAggregationTimeRangeConstraint = originalTimeRangeConstraint,
@@ -440,6 +457,13 @@ class DataflowPlanBuilder(
         }
         val baseInput = manifestObjectLookup.simpleMetricNameToInput[baseMetric.name]
             ?: error("Conversion base '${baseMetric.name}' is not a simple metric input.")
+        if (baseMetric.filter?.whereFilters.orEmpty().isNotEmpty() ||
+            conversionMetric.filter?.whereFilters.orEmpty().isNotEmpty() ||
+            metricLookup.getMetric(baseMetric.asReference).filter?.whereFilters.orEmpty().isNotEmpty() ||
+            metricLookup.getMetric(conversionMetric.asReference).filter?.whereFilters.orEmpty().isNotEmpty()
+        ) {
+            throw NotImplementedError("Conversion input definition filters require event-branch filter planning.")
+        }
         val conversionInput = manifestObjectLookup.simpleMetricNameToInput[conversionMetric.name]
             ?: error("Conversion input '${conversionMetric.name}' is not a simple metric input.")
         val baseTransform = findMetricTimeTransform(
@@ -588,7 +612,7 @@ class DataflowPlanBuilder(
             MetricType.DERIVED -> metric.inputMetrics.map { im ->
                 MetricSpec.create(
                     elementName = im.name,
-                    whereFilterSpecs = emptyList(),
+                    whereFilterSpecs = renderFilters(im.filter, WhereFilterLocation.forInputMetric(im.asReference)),
                     alias = im.alias,
                     offsetWindow = im.offsetWindow?.let {
                         TimeWindow.createFromDsiTimeWindow(count = it.count, granularity = it.granularity)
@@ -597,16 +621,11 @@ class DataflowPlanBuilder(
                 )
             }
             MetricType.RATIO -> {
-                val numerator = checkNotNull(metric.typeParams.numerator) {
-                    "RATIO metric '${metric.name}' missing numerator (caught in validation)."
-                }
-                val denominator = checkNotNull(metric.typeParams.denominator) {
-                    "RATIO metric '${metric.name}' missing denominator (caught in validation)."
-                }
+                val (numerator, denominator) = metric.ratioInputsWithDistinctAliases()
                 listOf(
                     MetricSpec.create(
                         elementName = numerator.name,
-                        whereFilterSpecs = emptyList(),
+                        whereFilterSpecs = renderFilters(numerator.filter, WhereFilterLocation.forInputMetric(numerator.asReference)),
                         alias = numerator.alias,
                         offsetWindow = numerator.offsetWindow?.let {
                             TimeWindow.createFromDsiTimeWindow(it.count, it.granularity)
@@ -615,7 +634,7 @@ class DataflowPlanBuilder(
                     ),
                     MetricSpec.create(
                         elementName = denominator.name,
-                        whereFilterSpecs = emptyList(),
+                        whereFilterSpecs = renderFilters(denominator.filter, WhereFilterLocation.forInputMetric(denominator.asReference)),
                         alias = denominator.alias,
                         offsetWindow = denominator.offsetWindow?.let {
                             TimeWindow.createFromDsiTimeWindow(it.count, it.granularity)
@@ -676,8 +695,10 @@ class DataflowPlanBuilder(
         val modelsUsed = inputInfos.map { it.modelName to it.aggTimeDim }.toSet()
         val singleModel = modelsUsed.size == 1
         val hasOffsets = inputInfos.any { it.metricSpec.hasTimeOffset }
+        val inputFilters = inputInfos.map { it.metricSpec.whereFilterSpecs + definitionFilters(it.metricSpec) }
+        val commonInputFilters = inputFilters.distinct().singleOrNull()
 
-        val baseAggNode: DataflowPlanNode = if (singleModel && !hasOffsets) {
+        val baseAggNode: DataflowPlanNode = if (singleModel && !hasOffsets && commonInputFilters != null) {
             // All input metrics share a model + agg_time_dim. Build a single aggregation that
             // produces both simple-metric outputs at once, then wrap with the derived/ratio
             // ComputeMetricsNode.
@@ -686,7 +707,7 @@ class DataflowPlanBuilder(
                 simpleMetricInputNames = inputInfos.map { it.simpleInputName },
                 outputMetricSpecs = inputInfos.map { it.metricSpec },
                 outputComputeMetric = true,
-                whereFilterSpecs = whereFilterSpecs,
+                whereFilterSpecs = whereFilterSpecs + commonInputFilters.orEmpty(),
             )
         } else {
             // Multi-model: build one branch per input metric, combine via CombineAggregatedOutputsNode.
@@ -696,7 +717,7 @@ class DataflowPlanBuilder(
                     simpleMetricInputNames = listOf(info.simpleInputName),
                     outputMetricSpecs = listOf(info.metricSpec),
                     outputComputeMetric = !info.metricSpec.hasTimeOffset,
-                    whereFilterSpecs = whereFilterSpecs,
+                    whereFilterSpecs = whereFilterSpecs + info.metricSpec.whereFilterSpecs + definitionFilters(info.metricSpec),
                     joinToTimeSpineAfterAggregation =
                         info.metricSpec.standardOffsetWindow != null || info.metricSpec.offsetToGrain != null,
                     offsetWindow = info.metricSpec.standardOffsetWindow,
@@ -812,7 +833,9 @@ class DataflowPlanBuilder(
             }
         }
 
-        val (localSpecs, joinSpecs) = querySpec.linkableSpecs.asTuple
+        val requiredLinkableSpecs = (querySpec.linkableSpecs.asTuple +
+            whereFilterSpecs.flatMap { it.linkableSpecs }).distinct()
+        val (localSpecs, joinSpecs) = requiredLinkableSpecs
             .partition { spec -> isLocallyAvailable(spec, localLinkableKeys) }
 
         var initialSourceNode = sourceNodeOverride ?: transformNode
@@ -888,7 +911,8 @@ class DataflowPlanBuilder(
         val simpleMetricInputSpecs = simpleMetricInputNames.map { name ->
             SimpleMetricInputSpec(elementName = name, fillNullsWith = null)
         }
-        val specsToKeepList = simpleMetricInputSpecs.toList<InstanceSpec>() + allAvailableLinkableSpecs
+        val specsToKeepList = simpleMetricInputSpecs.toList<InstanceSpec>() +
+            allAvailableLinkableSpecs.filter { it in querySpec.linkableSpecs.asTuple }
         val specsToKeepForAggregation = InstanceSpecSet.createFromSpecs(specsToKeepList)
 
         // Mirror Python's `_get_specs_to_keep_before_constraints`: the inner Selector must include
