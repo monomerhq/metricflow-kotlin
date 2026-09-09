@@ -16,7 +16,8 @@ SQL renderer for the BigQuery engine.
 | `doubleDataType` | `FLOAT64` |
 | `timestampDataType` | `DATETIME` (time-zone-agnostic; see Python docstring) |
 | `supportedPercentileFunctionTypes` | only `APPROXIMATE_CONTINUOUS` |
-| `renderGroupByExpr` | references SELECT alias instead of repeating the expression |
+| `renderGroupByExpr` | references SELECT alias instead of repeating the expression, quoting reserved keywords |
+| `visitColumnReferenceExpr` / `visitColumnAliasReferenceExpr` | quote GoogleSQL reserved column names and aliases, including SELECT alias declarations |
 | `visitPercentileExpr` | `APPROX_QUANTILES(arg, denominator)[OFFSET(numerator)]` |
 | `visitCastToTimestampExpr` | cast to `DATETIME` |
 | `visitDateTruncExpr` | `DATETIME_TRUNC(arg, gran)` — opposite arg order from Snowflake/Redshift; ISO prefix for `WEEK` |
@@ -42,3 +43,8 @@ SQL renderer for the BigQuery engine.
 ## Wave
 
 W6.
+
+Generated column aliases and their references quote exact, case-insensitive
+[GoogleSQL reserved keywords](https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/lexical#reserved_keywords).
+The dialect owns this keyword set. Already quoted names, non-keyword identifiers, path expressions,
+and opaque SQL expressions retain their existing spelling.

@@ -7,6 +7,8 @@ import cc.monomer.metricflow.domain.spec.bind.SqlBindParameterSet
 import cc.monomer.metricflow.domain.sql.plan.SqlSelectColumn
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlAddTimeExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlCastToTimestampExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlColumnAliasReferenceExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlColumnReferenceExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlDateTruncExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlExtractExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlGenerateUuidExpression
@@ -56,8 +58,22 @@ open class BigQuerySqlExpressionRenderer : DefaultSqlExpressionRenderer() {
      */
     override fun renderGroupByExpr(groupByColumn: SqlSelectColumn): SqlExpressionRenderResult =
         SqlExpressionRenderResult(
-            sql = groupByColumn.columnAlias,
+            sql = quoteReservedIdentifier(groupByColumn.columnAlias),
             bindParameterSet = groupByColumn.expr.bindParameterSet,
+        )
+
+    override fun visitColumnReferenceExpr(node: SqlColumnReferenceExpression): SqlExpressionRenderResult {
+        val columnName = quoteReservedIdentifier(node.colRef.columnName)
+        return SqlExpressionRenderResult(
+            sql = if (node.shouldRenderTableAlias) "${node.colRef.tableAlias}.$columnName" else columnName,
+            bindParameterSet = SqlBindParameterSet.EMPTY,
+        )
+    }
+
+    override fun visitColumnAliasReferenceExpr(node: SqlColumnAliasReferenceExpression): SqlExpressionRenderResult =
+        SqlExpressionRenderResult(
+            sql = quoteReservedIdentifier(node.columnAlias),
+            bindParameterSet = SqlBindParameterSet.EMPTY,
         )
 
     override fun visitPercentileExpr(node: SqlPercentileExpression): SqlExpressionRenderResult {
@@ -201,3 +217,21 @@ open class BigQuerySqlExpressionRenderer : DefaultSqlExpressionRenderer() {
         }
     }
 }
+
+private fun quoteReservedIdentifier(identifier: String): String =
+    if (identifier.uppercase(java.util.Locale.ROOT) in BIGQUERY_RESERVED_KEYWORDS) "`$identifier`" else identifier
+
+// GoogleSQL identifiers matching a reserved keyword require backticks, even for generated aliases.
+// https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/lexical#reserved_keywords
+private val BIGQUERY_RESERVED_KEYWORDS = setOf(
+    "ALL", "AND", "ANY", "ARRAY", "AS", "ASC", "ASSERT_ROWS_MODIFIED", "AT", "BETWEEN", "BY",
+    "CASE", "CAST", "COLLATE", "CONTAINS", "CREATE", "CROSS", "CUBE", "CURRENT", "DEFAULT", "DEFINE",
+    "DESC", "DISTINCT", "ELSE", "END", "ENUM", "ESCAPE", "EXCEPT", "EXCLUDE", "EXISTS", "EXTRACT",
+    "FALSE", "FETCH", "FOLLOWING", "FOR", "FROM", "FULL", "GRAPH_TABLE", "GROUP", "GROUPING", "GROUPS",
+    "HASH", "HAVING", "IF", "IGNORE", "IN", "INNER", "INTERSECT", "INTERVAL", "INTO", "IS",
+    "JOIN", "LATERAL", "LEFT", "LIKE", "LIMIT", "LOOKUP", "MERGE", "NATURAL", "NEW", "NO",
+    "NOT", "NULL", "NULLS", "OF", "ON", "OR", "ORDER", "OUTER", "OVER", "PARTITION", "PRECEDING",
+    "PROTO", "QUALIFY", "RANGE", "RECURSIVE", "RESPECT", "RIGHT", "ROLLUP", "ROWS", "SELECT", "SET",
+    "SOME", "STRUCT", "TABLESAMPLE", "THEN", "TO", "TREAT", "TRUE", "UNBOUNDED", "UNION", "UNNEST",
+    "USING", "WHEN", "WHERE", "WINDOW", "WITH", "WITHIN",
+)

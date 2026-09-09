@@ -8,6 +8,8 @@ import cc.monomer.metricflow.domain.sql.plan.SqlPlan
 import cc.monomer.metricflow.domain.sql.plan.SqlSelectColumn
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlAddTimeExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlCastToTimestampExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlColumnAliasReferenceExpression
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlColumnReference
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlColumnReferenceExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlDateTruncExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlExtractExpression
@@ -17,6 +19,7 @@ import cc.monomer.metricflow.domain.sql.plan.expr.SqlPercentileExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlPercentileExpressionArgument
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlPercentileFunctionType
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlSubtractTimeIntervalExpression
+import cc.monomer.metricflow.domain.sql.plan.nodes.SqlOrderByDescription
 import cc.monomer.metricflow.domain.sql.plan.nodes.SqlSelectStatementNode
 import cc.monomer.metricflow.domain.sql.plan.nodes.SqlTableNode
 import kotlin.test.Test
@@ -28,6 +31,74 @@ class BigQuerySqlPlanRendererTest {
 
     private val planRenderer = BigQuerySqlPlanRenderer()
     private val exprRenderer = planRenderer.exprRenderer
+
+    @Test
+    fun `reserved aliases stay quoted through nested projection grouping and ordering`() {
+        val source = SqlSelectStatementNode.create(
+            description = "",
+            selectColumns = listOf(SqlSelectColumn.fromColumnReference("events", "event_id").copyWithNewAlias("order")),
+            fromSource = SqlTableNode.create(SqlTable(schemaName = "analytics", tableName = "events")),
+            fromSourceAlias = "events",
+            cteSources = emptyList(),
+            joinDescs = emptyList(),
+            groupBys = emptyList(),
+            orderBys = emptyList(),
+            where = null,
+            limit = null,
+            distinct = false,
+        )
+        val groupColumn = SqlSelectColumn(
+            SqlColumnReferenceExpression(SqlColumnReference("grouped", "order"), false),
+            "order",
+        )
+        val root = SqlSelectStatementNode.create(
+            description = "",
+            selectColumns = listOf(groupColumn),
+            fromSource = source,
+            fromSourceAlias = "grouped",
+            cteSources = emptyList(),
+            joinDescs = emptyList(),
+            groupBys = listOf(groupColumn),
+            orderBys = listOf(SqlOrderByDescription(SqlColumnAliasReferenceExpression("order"), true)),
+            where = null,
+            limit = 3,
+            distinct = false,
+        )
+        assertEquals(
+            """
+            SELECT
+              `order`
+            FROM (
+              SELECT
+                events.event_id AS `order`
+              FROM analytics.events events
+            ) grouped
+            GROUP BY
+              `order`
+            ORDER BY `order` DESC
+            LIMIT 3
+            """.trimIndent(),
+            planRenderer.renderSqlPlan(SqlPlan(root)).sql,
+        )
+    }
+
+    @Test
+    fun `reserved column names are case insensitive while quoted names and paths are preserved`() {
+        for (name in listOf("order", "OrDeR", "GROUP", "qualify", "graph_table")) {
+            assertEquals("`$name`", exprRenderer.renderSqlExpr(SqlColumnAliasReferenceExpression(name)).sql)
+            assertEquals(
+                "events.`$name`",
+                exprRenderer.renderSqlExpr(SqlColumnReferenceExpression.fromColumnReference("events", name)).sql,
+            )
+        }
+        for (name in listOf("event_id", "`order`", "payload.order", "`payload`.order", "order_count")) {
+            assertEquals(name, exprRenderer.renderSqlExpr(SqlColumnAliasReferenceExpression(name)).sql)
+            assertEquals(
+                name,
+                exprRenderer.renderSqlExpr(SqlColumnReferenceExpression(SqlColumnReference("events", name), false)).sql,
+            )
+        }
+    }
 
     @Test
     fun `double data type is FLOAT64`() {

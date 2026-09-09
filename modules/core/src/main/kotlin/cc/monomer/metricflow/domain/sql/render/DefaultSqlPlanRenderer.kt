@@ -5,6 +5,7 @@ import cc.monomer.metricflow.common.util.mfIndent
 import cc.monomer.metricflow.domain.spec.bind.SqlBindParameterSet
 import cc.monomer.metricflow.domain.sql.plan.SqlPlanNode
 import cc.monomer.metricflow.domain.sql.plan.SqlSelectColumn
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlColumnAliasReferenceExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlExpressionNode
 import cc.monomer.metricflow.domain.sql.plan.nodes.SqlCreateTableAsNode
 import cc.monomer.metricflow.domain.sql.plan.nodes.SqlCteNode
@@ -78,7 +79,9 @@ open class DefaultSqlPlanRenderer : SqlPlanRenderer {
             val exprRendered = exprRenderer.renderSqlExpr(selectColumn.expr)
             params = params.merge(exprRendered.bindParameterSet)
 
-            var columnSelectStr = "${exprRendered.sql} AS ${selectColumn.columnAlias}"
+            val aliasRendered = exprRenderer.renderSqlExpr(SqlColumnAliasReferenceExpression(selectColumn.columnAlias))
+            params = params.merge(aliasRendered.bindParameterSet)
+            var columnSelectStr = "${exprRendered.sql} AS ${aliasRendered.sql}"
 
             // Collapse "src.foo AS foo" to "src.foo" when there are no joins (to avoid
             // SQLite ambiguous-column errors on JOIN ambiguity).
