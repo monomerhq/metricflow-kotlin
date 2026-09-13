@@ -34,7 +34,7 @@ import cc.monomer.metricflow.domain.sql.render.SqlRenderingEngine
  * | `renderGroupByExpr` | references the SELECT alias instead of repeating the expression |
  * | `visitPercentileExpr` | uses `APPROX_QUANTILES` with a `Fraction`-driven OFFSET |
  * | `visitCastToTimestampExpr` | overridden so casts use BigQuery's `DATETIME` type |
- * | `visitDateTruncExpr` | `DATETIME_TRUNC(arg, gran)` (opposite arg order from Snowflake/Redshift) |
+ * | `visitDateTruncExpr` | `DATE_TRUNC(arg, gran)` (opposite arg order from Snowflake/Redshift) |
  * | `renderDatePart` | `DOY` → `dayofyear`, `DOW` → `dayofweek` |
  * | `visitExtractExpr` | post-processes `DOW` to renormalise to ISO 1..7 |
  * | `visitSubtractTimeIntervalExpr` | `DATE_SUB(CAST(arg AS DATETIME), INTERVAL count gran)` |
@@ -120,7 +120,7 @@ open class BigQuerySqlExpressionRenderer : DefaultSqlExpressionRenderer() {
         val argRendered = renderSqlExpr(node.arg)
         val prefix = if (node.timeGranularity == TimeGranularity.WEEK) "iso" else ""
         return SqlExpressionRenderResult(
-            sql = "DATETIME_TRUNC(${argRendered.sql}, $prefix${node.timeGranularity.value})",
+            sql = "DATE_TRUNC(${argRendered.sql}, $prefix${node.timeGranularity.value})",
             bindParameterSet = argRendered.bindParameterSet,
         )
     }

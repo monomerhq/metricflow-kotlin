@@ -20,8 +20,8 @@ class MultiHopExplainTest {
         )
 
         assertContains(result.sql, "bridge_table_src_10000.customer_id = customer_table_src_10000.customer_id")
-        assertContains(result.sql, "DATETIME_TRUNC(bridge_table_src_10000.ds_partitioned, day) = DATETIME_TRUNC(customer_table_src_10000.ds_partitioned, day)")
-        assertContains(result.sql, "DATETIME_TRUNC(account_month_txns_src_10000.ds_partitioned, day) = subq_11.ds_partitioned__day")
+        assertContains(result.sql, "DATE_TRUNC(bridge_table_src_10000.ds_partitioned, day) = DATE_TRUNC(customer_table_src_10000.ds_partitioned, day)")
+        assertContains(result.sql, "DATE_TRUNC(account_month_txns_src_10000.ds_partitioned, day) = subq_11.ds_partitioned__day")
         assertEquals(1, Regex("SUM\\(account_month_txns_src_10000\\.txn_count\\)").findAll(result.sql).count(), result.sql)
         assertRelations(result, "account_month_txns", "bridge_table", "customer_table")
         assertSemanticModels(result, "account_month_txns", "bridge_table", "customer_table")
@@ -39,8 +39,8 @@ class MultiHopExplainTest {
 
         assertContains(result.sql, "WHERE account_id__customer_id__customer_name IS NOT NULL")
         assertContains(result.sql, "bridge_table_src_10000.customer_id = customer_table_src_10000.customer_id")
-        assertContains(result.sql, "DATETIME_TRUNC(bridge_table_src_10000.ds_partitioned, day) = DATETIME_TRUNC(customer_table_src_10000.ds_partitioned, day)")
-        assertContains(result.sql, "DATETIME_TRUNC(account_month_txns_src_10000.ds_partitioned, day) = subq_11.ds_partitioned__day")
+        assertContains(result.sql, "DATE_TRUNC(bridge_table_src_10000.ds_partitioned, day) = DATE_TRUNC(customer_table_src_10000.ds_partitioned, day)")
+        assertContains(result.sql, "DATE_TRUNC(account_month_txns_src_10000.ds_partitioned, day) = subq_11.ds_partitioned__day")
         assertEquals(1, Regex("SUM\\(txn_count\\)").findAll(result.sql).count(), result.sql)
         assertRelations(result, "account_month_txns", "bridge_table", "customer_table")
         assertSemanticModels(result, "account_month_txns", "bridge_table", "customer_table")
@@ -55,8 +55,8 @@ class MultiHopExplainTest {
 
         assertContains(result.sql, "WHERE account_id__customer_id__customer_name IS NOT NULL")
         assertContains(result.sql, "bridge_table_src_10000.customer_id = customer_table_src_10000.customer_id")
-        assertContains(result.sql, "DATETIME_TRUNC(bridge_table_src_10000.ds_partitioned, day) = DATETIME_TRUNC(customer_table_src_10000.ds_partitioned, day)")
-        assertContains(result.sql, "DATETIME_TRUNC(account_month_txns_src_10000.ds_partitioned, day) = subq_11.ds_partitioned__day")
+        assertContains(result.sql, "DATE_TRUNC(bridge_table_src_10000.ds_partitioned, day) = DATE_TRUNC(customer_table_src_10000.ds_partitioned, day)")
+        assertContains(result.sql, "DATE_TRUNC(account_month_txns_src_10000.ds_partitioned, day) = subq_11.ds_partitioned__day")
         assertEquals(1, Regex("SUM\\(filtered_txn_count\\)").findAll(result.sql).count(), result.sql)
         assertEquals(1, Regex("account_month_txns_src_10000\\.txn_count").findAll(result.sql).count(), result.sql)
         assertRelations(result, "account_month_txns", "bridge_table", "customer_table")

@@ -21,10 +21,10 @@ INNER JOIN (
   -- Metric Time Dimension 'ds'
   -- Constrain Time Range to [2000-01-01T00:00:00, 2020-01-01T00:00:00]
   SELECT
-    DATETIME_TRUNC(ds, day) AS metric_time__day
+    DATE_TRUNC(ds, day) AS metric_time__day
     , 1 AS __bookings
   FROM mf_corpus_2026_05_11_static.fct_bookings bookings_source_src_10000
-  WHERE DATETIME_TRUNC(ds, day) BETWEEN '2000-01-01' AND '2020-01-01'
+  WHERE DATE_TRUNC(ds, day) BETWEEN '2000-01-01' AND '2020-01-01'
 ) subq_6
 ON
   (subq_6.metric_time__day <= subq_7.metric_time__day)

@@ -12,7 +12,7 @@ LEFT OUTER JOIN (
   -- Join Standard Outputs
   -- Select: ['customer_id__customer_name', 'ds_partitioned__day', 'account_id']
   SELECT
-    DATETIME_TRUNC(bridge_table_src_10000.ds_partitioned, day) AS ds_partitioned__day
+    DATE_TRUNC(bridge_table_src_10000.ds_partitioned, day) AS ds_partitioned__day
     , bridge_table_src_10000.account_id AS account_id
     , customer_table_src_10000.customer_name AS customer_id__customer_name
   FROM mf_corpus_2026_05_11_static.bridge_table bridge_table_src_10000
@@ -22,14 +22,14 @@ LEFT OUTER JOIN (
     (
       bridge_table_src_10000.customer_id = customer_table_src_10000.customer_id
     ) AND (
-      DATETIME_TRUNC(bridge_table_src_10000.ds_partitioned, day) = DATETIME_TRUNC(customer_table_src_10000.ds_partitioned, day)
+      DATE_TRUNC(bridge_table_src_10000.ds_partitioned, day) = DATE_TRUNC(customer_table_src_10000.ds_partitioned, day)
     )
 ) subq_11
 ON
   (
     account_month_txns_src_10000.account_id = subq_11.account_id
   ) AND (
-    DATETIME_TRUNC(account_month_txns_src_10000.ds_partitioned, day) = subq_11.ds_partitioned__day
+    DATE_TRUNC(account_month_txns_src_10000.ds_partitioned, day) = subq_11.ds_partitioned__day
   )
 GROUP BY
   account_id__customer_id__customer_name

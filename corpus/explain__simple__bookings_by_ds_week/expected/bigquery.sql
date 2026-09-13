@@ -10,7 +10,7 @@ FROM (
   -- Select: ['__bookings', 'metric_time__week']
   -- Select: ['__bookings', 'metric_time__week']
   SELECT
-    DATETIME_TRUNC(ds, isoweek) AS metric_time__week
+    DATE_TRUNC(ds, isoweek) AS metric_time__week
     , 1 AS __bookings
   FROM mf_corpus_2026_05_11_static.fct_bookings bookings_source_src_10000
 ) subq_3

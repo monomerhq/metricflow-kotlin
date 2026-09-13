@@ -17,16 +17,16 @@ FROM (
     -- Aggregate Inputs for Simple Metrics
     SELECT
       subq_3.ds AS metric_time__day
-      , DATETIME_TRUNC(subq_3.ds, month) AS metric_time__month
+      , DATE_TRUNC(subq_3.ds, month) AS metric_time__month
       , SUM(revenue_src_10000.revenue) AS __revenue
     FROM mf_corpus_2026_05_11_static.mf_time_spine subq_3
     INNER JOIN
       mf_corpus_2026_05_11_static.fct_revenue revenue_src_10000
     ON
       (
-        DATETIME_TRUNC(revenue_src_10000.created_at, day) <= subq_3.ds
+        DATE_TRUNC(revenue_src_10000.created_at, day) <= subq_3.ds
       ) AND (
-        DATETIME_TRUNC(revenue_src_10000.created_at, day) > DATE_SUB(CAST(subq_3.ds AS DATETIME), INTERVAL 2 month)
+        DATE_TRUNC(revenue_src_10000.created_at, day) > DATE_SUB(CAST(subq_3.ds AS DATETIME), INTERVAL 2 month)
       )
     GROUP BY
       metric_time__day

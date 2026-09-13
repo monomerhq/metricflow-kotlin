@@ -17,7 +17,7 @@ FROM (
     -- Select: ['__bookings', 'metric_time__day']
     -- Select: ['__bookings', 'metric_time__day']
     SELECT
-      DATETIME_TRUNC(ds, day) AS metric_time__day
+      DATE_TRUNC(ds, day) AS metric_time__day
       , 1 AS __bookings
     FROM mf_corpus_2026_05_11_static.fct_bookings bookings_source_src_10000
   ) subq_3
@@ -36,7 +36,7 @@ FULL OUTER JOIN (
     -- Select: ['__listings', 'metric_time__day']
     -- Select: ['__listings', 'metric_time__day']
     SELECT
-      DATETIME_TRUNC(created_at, day) AS metric_time__day
+      DATE_TRUNC(created_at, day) AS metric_time__day
       , 1 AS __listings
     FROM mf_corpus_2026_05_11_static.dim_listings_latest listings_latest_src_10000
   ) subq_9
@@ -57,7 +57,7 @@ FULL OUTER JOIN (
     -- Select: ['__views', 'metric_time__day']
     -- Select: ['__views', 'metric_time__day']
     SELECT
-      DATETIME_TRUNC(ds, day) AS metric_time__day
+      DATE_TRUNC(ds, day) AS metric_time__day
       , 1 AS __views
     FROM mf_corpus_2026_05_11_static.fct_views views_source_src_10000
   ) subq_15

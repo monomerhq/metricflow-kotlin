@@ -6,7 +6,7 @@
 -- Compute Metrics via Expressions
 -- Write to DataTable
 SELECT
-  DATETIME_TRUNC(created_at, day) AS metric_time__day
+  DATE_TRUNC(created_at, day) AS metric_time__day
   , SUM(revenue) AS revenue
 FROM mf_corpus_2026_05_11_static.fct_revenue revenue_src_10000
 GROUP BY

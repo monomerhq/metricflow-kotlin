@@ -6,7 +6,7 @@
 -- Compute Metrics via Expressions
 -- Write to DataTable
 SELECT
-  DATETIME_TRUNC(ds, day) AS metric_time__day
+  DATE_TRUNC(ds, day) AS metric_time__day
   , MAX(booking_value) AS max_booking_value
   , MIN(booking_value) AS min_booking_value
 FROM mf_corpus_2026_05_11_static.fct_bookings bookings_source_src_10000

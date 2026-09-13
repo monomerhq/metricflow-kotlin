@@ -10,7 +10,7 @@ FROM (
   -- Select: ['__bookings', 'metric_time__month']
   -- Select: ['__bookings', 'metric_time__month']
   SELECT
-    DATETIME_TRUNC(ds, month) AS metric_time__month
+    DATE_TRUNC(ds, month) AS metric_time__month
     , 1 AS __bookings
   FROM mf_corpus_2026_05_11_static.fct_bookings bookings_source_src_10000
 ) subq_3

@@ -4,7 +4,7 @@ WITH sma_10009_cte AS (
   -- Read Elements From Semantic Model 'bookings_source'
   -- Metric Time Dimension 'ds'
   SELECT
-    DATETIME_TRUNC(ds, day) AS metric_time__day
+    DATE_TRUNC(ds, day) AS metric_time__day
     , 1 AS __bookings
   FROM mf_corpus_2026_05_11_static.fct_bookings bookings_source_src_10000
 )
@@ -51,7 +51,7 @@ FROM (
         metric_time__day
     ) subq_9
     ON
-      DATETIME_TRUNC(time_spine_src_10006.ds, month) = subq_9.metric_time__day
+      DATE_TRUNC(time_spine_src_10006.ds, month) = subq_9.metric_time__day
   ) subq_15
   ON
     subq_5.metric_time__day = subq_15.metric_time__day

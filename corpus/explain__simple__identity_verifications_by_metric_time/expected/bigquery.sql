@@ -10,7 +10,7 @@ FROM (
   -- Select: ['__identity_verifications', 'metric_time__day']
   -- Select: ['__identity_verifications', 'metric_time__day']
   SELECT
-    DATETIME_TRUNC(ds, day) AS metric_time__day
+    DATE_TRUNC(ds, day) AS metric_time__day
     , 1 AS __identity_verifications
   FROM mf_corpus_2026_05_11_static.fct_id_verifications id_verifications_src_10000
 ) subq_3

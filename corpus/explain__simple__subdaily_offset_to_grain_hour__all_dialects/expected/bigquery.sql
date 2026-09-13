@@ -21,7 +21,7 @@ FROM (
       -- Select: ['__archived_users', 'metric_time__hour']
       -- Select: ['__archived_users', 'metric_time__hour']
       SELECT
-        DATETIME_TRUNC(archived_at, hour) AS metric_time__hour
+        DATE_TRUNC(archived_at, hour) AS metric_time__hour
         , 1 AS __archived_users
       FROM mf_corpus_2026_05_11_static.dim_users users_ds_source_src_10000
     ) subq_3
@@ -29,5 +29,5 @@ FROM (
       metric_time__hour
   ) subq_4
   ON
-    DATETIME_TRUNC(time_spine_src_10005.ts, hour) = subq_4.metric_time__hour
+    DATE_TRUNC(time_spine_src_10005.ts, hour) = subq_4.metric_time__hour
 ) subq_10

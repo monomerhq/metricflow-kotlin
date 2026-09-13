@@ -4,6 +4,10 @@ import cc.monomer.metricflow.common.errors.UnsupportedEngineFeatureError
 import cc.monomer.metricflow.domain.manifest.model.enums.DatePart
 import cc.monomer.metricflow.domain.manifest.model.enums.TimeGranularity
 import cc.monomer.metricflow.domain.spec.bind.SqlTable
+import cc.monomer.metricflow.domain.spec.bind.SqlBindParameter
+import cc.monomer.metricflow.domain.spec.bind.SqlBindParameterSet
+import cc.monomer.metricflow.domain.spec.bind.SqlBindParameterValue
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlStringExpression
 import cc.monomer.metricflow.domain.sql.plan.SqlPlan
 import cc.monomer.metricflow.domain.sql.plan.SqlSelectColumn
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlAddTimeExpression
@@ -192,7 +196,7 @@ class BigQuerySqlPlanRendererTest {
         val col = SqlColumnReferenceExpression.fromColumnReference("events", "created_at")
         val expr = SqlDateTruncExpression.create(timeGranularity = TimeGranularity.DAY, arg = col)
         val result = exprRenderer.renderSqlExpr(expr)
-        assertEquals("DATETIME_TRUNC(events.created_at, day)", result.sql)
+        assertEquals("DATE_TRUNC(events.created_at, day)", result.sql)
     }
 
     @Test
@@ -200,7 +204,27 @@ class BigQuerySqlPlanRendererTest {
         val col = SqlColumnReferenceExpression.fromColumnReference("events", "created_at")
         val expr = SqlDateTruncExpression.create(timeGranularity = TimeGranularity.WEEK, arg = col)
         val result = exprRenderer.renderSqlExpr(expr)
-        assertEquals("DATETIME_TRUNC(events.created_at, isoweek)", result.sql)
+        assertEquals("DATE_TRUNC(events.created_at, isoweek)", result.sql)
+    }
+
+    @Test
+    fun `date trunc preserves opaque operands and binds across the existing grain contract`() {
+        val parameters = SqlBindParameterSet(listOf(SqlBindParameter("source", SqlBindParameterValue.StringValue("2026-08-01"))))
+        for (sourceType in listOf("DATE", "DATETIME", "TIMESTAMP")) {
+            val sourceSql = "CAST(@source AS $sourceType)"
+            val source = SqlStringExpression.create(sourceSql, parameters, false, emptyList())
+            for (grain in TimeGranularity.entries) {
+                val expression = SqlDateTruncExpression.create(grain, source)
+                if (grain in BigQuerySqlExpressionRenderer.BigQueryEngine.unsupportedGranularities) {
+                    assertFailsWith<UnsupportedEngineFeatureError> { exprRenderer.renderSqlExpr(expression) }
+                } else {
+                    val result = exprRenderer.renderSqlExpr(expression)
+                    val renderedGrain = if (grain == TimeGranularity.WEEK) "isoweek" else grain.value
+                    assertEquals("DATE_TRUNC($sourceSql, $renderedGrain)", result.sql)
+                    assertEquals(parameters, result.bindParameterSet)
+                }
+            }
+        }
     }
 
     @Test

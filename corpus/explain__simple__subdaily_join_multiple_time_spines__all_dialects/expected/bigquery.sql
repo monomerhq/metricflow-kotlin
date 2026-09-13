@@ -17,7 +17,7 @@ FROM (
   LEFT OUTER JOIN
     mf_corpus_2026_05_11_static.mf_time_spine subq_7
   ON
-    DATETIME_TRUNC(time_spine_src_10005.ts, day) = subq_7.ds
+    DATE_TRUNC(time_spine_src_10005.ts, day) = subq_7.ds
 ) subq_10
 LEFT OUTER JOIN (
   -- Metric Time Dimension 'archived_at'
@@ -33,8 +33,8 @@ LEFT OUTER JOIN (
     -- Read Elements From Semantic Model 'users_ds_source'
     SELECT
       1 AS __subdaily_join_to_time_spine_metric
-      , DATETIME_TRUNC(archived_at, hour) AS archived_at__hour
-      , DATETIME_TRUNC(archived_at, day) AS archived_at__day
+      , DATE_TRUNC(archived_at, hour) AS archived_at__hour
+      , DATE_TRUNC(archived_at, day) AS archived_at__day
     FROM mf_corpus_2026_05_11_static.dim_users users_ds_source_src_10000
   ) subq_0
   LEFT OUTER JOIN

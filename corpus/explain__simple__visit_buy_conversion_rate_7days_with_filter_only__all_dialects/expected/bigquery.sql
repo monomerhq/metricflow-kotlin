@@ -4,7 +4,7 @@ WITH sma_10019_cte AS (
   -- Read Elements From Semantic Model 'visits_source'
   -- Metric Time Dimension 'ds'
   SELECT
-    DATETIME_TRUNC(ds, day) AS metric_time__day
+    DATE_TRUNC(ds, day) AS metric_time__day
     , user_id AS user
     , referrer_id AS visit__referrer_id
     , 1 AS __visits
@@ -110,7 +110,7 @@ FROM (
         -- Metric Time Dimension 'ds'
         -- Add column with generated UUID
         SELECT
-          DATETIME_TRUNC(ds, day) AS metric_time__day
+          DATE_TRUNC(ds, day) AS metric_time__day
           , user_id AS user
           , 1 AS __buys
           , GENERATE_UUID() AS mf_internal_uuid

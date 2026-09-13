@@ -63,10 +63,24 @@ println(explained.sql)  // ← the rendered Trino SQL
 
 The full public API surface is documented in [`docs/PUBLIC_API.md`](docs/PUBLIC_API.md).
 
+The BigQuery renderer uses `DATE_TRUNC(source_expression, grain)` and `ISOWEEK` for
+week grouping. It preserves opaque source expressions and does not insert a temporal
+cast. A physical `DATE` source therefore returns `DATE` instead of the `DATETIME`
+produced by the earlier `DATETIME_TRUNC` rendering. Date filters should use date
+literals such as `DATE '2026-08-01'`; a text value containing a time component,
+such as `'2026-08-01 00:00:00'`, is not a date literal. Existing explicit `DATETIME`
+casts for time arithmetic and all other dialect renderers are unchanged.
+
+`BigQueryTemporalSqlRegressionTest` compares complete engine plans with the prior
+truncation renderer and writes executable inline-source SQL under
+`build/bigquery-temporal-sql/`. The inline fixture has rows on August 1, 3, and 5,
+2026 and a daily spine covering August 1–5. SQL generation never executes a query.
+
+
 The published namespace is `cc.monomer.metricflow`; there is no compatibility
 artifact for the former private package.
 
-This source tree builds version `0.2.6`. The tag-driven release workflow
+This source tree builds version `0.2.8`. The tag-driven release workflow
 publishes the immutable product bundle, a signed Sigstore attestation for that
 ZIP, and a separately identified materialized SLSA statement for its exact Maven
 artifact set. Local verification produces the same Maven repository layout
