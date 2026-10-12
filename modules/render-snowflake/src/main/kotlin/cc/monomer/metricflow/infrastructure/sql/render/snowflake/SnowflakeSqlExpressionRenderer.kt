@@ -2,7 +2,9 @@ package cc.monomer.metricflow.infrastructure.sql.render.snowflake
 
 import cc.monomer.metricflow.common.errors.UnsupportedEngineFeatureError
 import cc.monomer.metricflow.domain.manifest.model.enums.DatePart
+import cc.monomer.metricflow.domain.manifest.model.enums.TimeGranularity
 import cc.monomer.metricflow.domain.spec.bind.SqlBindParameterSet
+import cc.monomer.metricflow.domain.sql.plan.expr.SqlDateTruncExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlGenerateUuidExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlPercentileExpression
 import cc.monomer.metricflow.domain.sql.plan.expr.SqlPercentileFunctionType
@@ -21,6 +23,7 @@ import cc.monomer.metricflow.domain.sql.render.DialectSqlRenderingEngine
  * | Method | Snowflake divergence |
  * |---|---|
  * | `supportedPercentileFunctionTypes` | `CONTINUOUS`, `DISCRETE`, `APPROXIMATE_CONTINUOUS` |
+ * | `visitDateTruncExpr` | `WEEK` → ISO Monday from `DAYOFWEEKISO`, independent of `WEEK_START` |
  * | `renderDatePart` | `DOW` → `dayofweekiso` |
  * | `visitGenerateUuidExpr` | `UUID_STRING()` |
  * | `visitPercentileExpr` | full `PERCENTILE_CONT`/`PERCENTILE_DISC`/`APPROX_PERCENTILE` support |
@@ -35,6 +38,27 @@ open class SnowflakeSqlExpressionRenderer : DefaultSqlExpressionRenderer() {
             SqlPercentileFunctionType.DISCRETE,
             SqlPercentileFunctionType.APPROXIMATE_CONTINUOUS,
         )
+
+    /**
+     * Truncate to a MetricFlow week, which starts on Monday (ISO 8601) on every engine.
+     *
+     * Snowflake's `DATE_TRUNC('week', x)` starts the week on the account or session `WEEK_START`
+     * day, so its buckets change with warehouse settings. `DAYOFWEEKISO` ignores `WEEK_START` and
+     * `WEEK_OF_YEAR_POLICY`, so the Monday is `DATE_TRUNC('day', x)` moved back by
+     * `DAYOFWEEKISO(x) - 1` days. `DATE_TRUNC` returns the input type and `DATEADD` with a `day`
+     * part keeps a DATE as a DATE and a timestamp as a timestamp, so no cast is introduced.
+     * Every other granularity uses the default `DATE_TRUNC` rendering.
+     */
+    override fun visitDateTruncExpr(node: SqlDateTruncExpression): SqlExpressionRenderResult {
+        if (node.timeGranularity != TimeGranularity.WEEK) return super.visitDateTruncExpr(node)
+        validateGranularityForEngine(node.timeGranularity)
+        val argRendered = renderSqlExpr(node.arg)
+        val argSql = argRendered.sql
+        return SqlExpressionRenderResult(
+            sql = "DATEADD(day, 1 - DAYOFWEEKISO($argSql), DATE_TRUNC('day', $argSql))",
+            bindParameterSet = argRendered.bindParameterSet,
+        )
+    }
 
     override fun renderDatePart(datePart: DatePart): String =
         if (datePart == DatePart.DOW) "dayofweekiso" else super.renderDatePart(datePart)

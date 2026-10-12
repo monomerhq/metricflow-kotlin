@@ -8,6 +8,7 @@ plugins {
 dependencies {
     api(project(":core"))
     testImplementation(project(":render-bigquery"))
+    testImplementation(project(":render-snowflake"))
 }
 
 tasks.named<Test>("test") {

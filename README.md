@@ -76,6 +76,21 @@ truncation renderer and writes executable inline-source SQL under
 `build/bigquery-temporal-sql/`. The inline fixture has rows on August 1, 3, and 5,
 2026 and a daily spine covering August 1–5. SQL generation never executes a query.
 
+The Snowflake renderer truncates weeks to the ISO Monday with
+`DATEADD(day, 1 - DAYOFWEEKISO(x), DATE_TRUNC('day', x))` instead of
+`DATE_TRUNC('week', x)`, whose first weekday follows the account or session `WEEK_START`
+parameter. `DAYOFWEEKISO` ignores `WEEK_START` and `WEEK_OF_YEAR_POLICY`, so Snowflake week
+buckets match the Monday weeks of every other dialect and of the engine's time-constraint
+adjustment. The expression keeps the input type: a `DATE` stays a `DATE` and a timestamp stays
+a timestamp. Accounts with the default `WEEK_START = 0` already started weeks on Monday and get
+the same buckets. Other granularities, `DATEADD(week, n, x)` offsets, and `EXTRACT` date parts
+(`dayofweekiso` for day of week) were already parameter-independent and are unchanged.
+
+`SnowflakeIsoWeekSqlRegressionTest` compares the group-by, time spine, offset window,
+grain-to-date, and offset-to-grain week paths with the prior renderer for `DATE` and
+`TIMESTAMP_NTZ`/`TIMESTAMP_LTZ`/`TIMESTAMP_TZ` sources, and writes the engine SQL plus a
+literal `probe.sql` for manual warehouse checks under `build/snowflake-iso-week-sql/`.
+
 
 The published namespace is `cc.monomer.metricflow`; there is no compatibility
 artifact for the former private package.
