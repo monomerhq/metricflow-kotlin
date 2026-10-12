@@ -80,11 +80,15 @@ truncation renderer and writes executable inline-source SQL under
 The published namespace is `cc.monomer.metricflow`; there is no compatibility
 artifact for the former private package.
 
-This source tree builds version `0.2.8`. The tag-driven release workflow
+This source tree builds version `0.2.9`. The tag-driven release workflow
 publishes the immutable product bundle, a signed Sigstore attestation for that
 ZIP, and a separately identified materialized SLSA statement for its exact Maven
 artifact set. Local verification produces the same Maven repository layout
 before a tag is created.
+
+Version `0.2.9` adds the existing `metricflow-render-duckdb` artifact to the Monomer
+product bundle so consumers can register `SqlEngine.DUCKDB`. SQL rendering
+behavior is unchanged.
 
 ---
 
@@ -113,20 +117,20 @@ planning and rendering orchestration. Consumers choose only the renderer modules
 ## Monomer product bundle
 
 Monomer consumes a deterministic product bundle containing `metricflow-core`,
-`metricflow-engine`, and the six external-DW renderers: BigQuery, Databricks,
-Postgres, Redshift, Snowflake, and Trino. DuckDB and the optional gRPC server
-remain available in this public repository but are intentionally excluded from
-the product bundle.
+`metricflow-engine`, and all seven dialect renderers: BigQuery, Databricks,
+DuckDB, Postgres, Redshift, Snowflake, and Trino. The optional gRPC server remains
+available in this public repository but is intentionally excluded from the
+product bundle.
 
 ```bash
 ./gradlew verifyMonomerProductBundle
-# build/bundles/metricflow-monomer-product-0.2.6.zip
+# build/bundles/metricflow-monomer-product-0.2.9.zip
 ```
 
-The ZIP has exactly one root, `maven-repository/`, and contains the eight Maven
+The ZIP has exactly one root, `maven-repository/`, and contains the nine Maven
 modules plus `maven-repository/.monomer-metricflow-manifest.json`. The marker pins
 the source commit, exact primary-JAR digests, product allowlist, and the canonical
-artifact-set digest; DuckDB, gRPC server, and internal modules are absent.
+artifact-set digest; gRPC server and internal modules are absent.
 
 The build writes SBOM, dependency/license, provenance-input, manifest, and ZIP
 checksum files to `build/release-assets/`; these are separate GitHub Release

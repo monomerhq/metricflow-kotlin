@@ -20,7 +20,7 @@ plugins {
 }
 
 group = "cc.monomer.metricflow"
-version = "0.2.8"
+version = "0.2.9"
 
 allprojects {
     group = rootProject.group
@@ -85,12 +85,13 @@ val monomerProductArtifactIds = listOf(
     "metricflow-engine",
     "metricflow-render-bigquery",
     "metricflow-render-databricks",
+    "metricflow-render-duckdb",
     "metricflow-render-postgres",
     "metricflow-render-redshift",
     "metricflow-render-snowflake",
     "metricflow-render-trino",
 )
-val monomerProductExcludedModules = listOf("internal-diff-runner", "metricflow-render-duckdb")
+val monomerProductExcludedModules = listOf("internal-diff-runner")
 val metricFlowSourceUri = "https://github.com/monomerhq/metricflow-kotlin"
 val monomerProductBundleName = "metricflow-monomer-product-${project.version}"
 
@@ -448,8 +449,7 @@ tasks.register("verifyMonomerProductBundle") {
             paths.filter { Files.isRegularFile(it) }
                 .map { it.toString().replace(File.separatorChar, '/') }
                 .filter {
-                    it.contains("metricflow-render-duckdb") ||
-                        it.contains("metricflow-grpc-server") ||
+                    it.contains("metricflow-grpc-server") ||
                         it.contains("internal-diff-runner")
                 }
                 .toList()
