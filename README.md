@@ -95,7 +95,7 @@ literal `probe.sql` for manual warehouse checks under `build/snowflake-iso-week-
 The published namespace is `cc.monomer.metricflow`; there is no compatibility
 artifact for the former private package.
 
-This source tree builds version `0.2.10`. The tag-driven release workflow
+This source tree builds version `0.2.11`. The tag-driven release workflow
 publishes the immutable product bundle, a signed Sigstore attestation for that
 ZIP, and a separately identified materialized SLSA statement for its exact Maven
 artifact set. Local verification produces the same Maven repository layout
@@ -104,6 +104,10 @@ before a tag is created.
 Version `0.2.9` adds the existing `metricflow-render-duckdb` artifact to the Monomer
 product bundle so consumers can register `SqlEngine.DUCKDB`. SQL rendering
 behavior is unchanged.
+
+Version `0.2.11` supports entity-linked dimensions in cumulative metric filters and
+groupings, and applies non-additive MIN/MAX snapshot selection before aggregation,
+including entity window groupings and ratio inputs.
 
 Version `0.2.10` renders Snowflake week truncation as the ISO Monday, independent of the
 `WEEK_START` and `WEEK_OF_YEAR_POLICY` parameters. SQL for every other dialect is unchanged.
@@ -142,7 +146,7 @@ product bundle.
 
 ```bash
 ./gradlew verifyMonomerProductBundle
-# build/bundles/metricflow-monomer-product-0.2.10.zip
+# build/bundles/metricflow-monomer-product-0.2.11.zip
 ```
 
 The ZIP has exactly one root, `maven-repository/`, and contains the nine Maven

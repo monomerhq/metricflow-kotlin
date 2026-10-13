@@ -9,6 +9,8 @@ dependencies {
     api(project(":core"))
     testImplementation(project(":render-bigquery"))
     testImplementation(project(":render-snowflake"))
+    testImplementation(project(":render-duckdb"))
+    testImplementation("org.duckdb:duckdb_jdbc:1.5.4.0")
 }
 
 tasks.named<Test>("test") {

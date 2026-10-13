@@ -37,9 +37,9 @@ class SemiAdditiveJoinNode(
 
     override val description: String
         get() {
-            val groupBy = queriedTimeDimensionSpec?.elementName
+            val groupBy = queriedTimeDimensionSpec?.elementName ?: "None"
             return "Join on ${aggByFunction.name}(${timeDimensionSpec.elementName}) and " +
-                "${entityReferences.map { it.elementName }} grouping by $groupBy"
+                "${entityReferences.joinToString(prefix = "[", postfix = "]") { "'${it.elementName}'" }} grouping by $groupBy"
         }
 
     override fun idPrefix(): IdPrefix = StaticIdPrefix.DATAFLOW_NODE_SEMI_ADDITIVE_JOIN_ID_PREFIX

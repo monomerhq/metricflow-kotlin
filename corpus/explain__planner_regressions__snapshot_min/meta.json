@@ -1,0 +1,19 @@
+{
+  "case_id": "explain__planner_regressions__snapshot_min",
+  "subcommand": "explain",
+  "manifest_id": "planner_regressions",
+  "args": {
+    "metric_names": [
+      "first"
+    ],
+    "group_by_names": [],
+    "where_constraints": [],
+    "time_constraint_start": "2025-10-13",
+    "time_constraint_end": "2026-10-12"
+  },
+  "dialect_set": [
+    "DuckDB"
+  ],
+  "source_test": "PlannerDuckDbRegressionTest",
+  "notes": "0.2.11 planner regression; immutable upstream oracle baseline."
+}

@@ -1,0 +1,1298 @@
+{
+  "semantic_models": [
+    {
+      "name": "accounts",
+      "defaults": null,
+      "description": null,
+      "node_relation": {
+        "alias": "accounts",
+        "schema_name": "acme",
+        "database": null,
+        "relation_name": "acme.accounts"
+      },
+      "primary_entity": null,
+      "entities": [
+        {
+          "name": "account",
+          "description": null,
+          "type": "primary",
+          "role": null,
+          "expr": "account_id",
+          "metadata": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [],
+      "dimensions": [
+        {
+          "name": "region",
+          "description": null,
+          "type": "categorical",
+          "is_partition": false,
+          "type_params": null,
+          "expr": "region",
+          "metadata": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "label": null,
+      "metadata": null,
+      "config": null
+    },
+    {
+      "name": "daily_account_activity",
+      "defaults": {
+        "agg_time_dimension": "activity_date"
+      },
+      "description": null,
+      "node_relation": {
+        "alias": "daily_account_activity",
+        "schema_name": "acme",
+        "database": null,
+        "relation_name": "acme.daily_account_activity"
+      },
+      "primary_entity": null,
+      "entities": [
+        {
+          "name": "account_day",
+          "description": null,
+          "type": "primary",
+          "role": null,
+          "expr": "row_id",
+          "metadata": null,
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "account",
+          "description": null,
+          "type": "foreign",
+          "role": null,
+          "expr": "account_id",
+          "metadata": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [
+        {
+          "name": "distinct_active_accounts",
+          "agg": "count_distinct",
+          "description": null,
+          "create_metric": null,
+          "expr": "account_id",
+          "agg_params": null,
+          "metadata": null,
+          "non_additive_dimension": null,
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "dimensions": [
+        {
+          "name": "activity_date",
+          "description": null,
+          "type": "time",
+          "is_partition": false,
+          "type_params": {
+            "time_granularity": "day",
+            "validity_params": null
+          },
+          "expr": "activity_date",
+          "metadata": null,
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "plan",
+          "description": null,
+          "type": "categorical",
+          "is_partition": false,
+          "type_params": null,
+          "expr": "plan",
+          "metadata": null,
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "active_users",
+          "description": null,
+          "type": "categorical",
+          "is_partition": false,
+          "type_params": null,
+          "expr": "active_users",
+          "metadata": null,
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "core_actions",
+          "description": null,
+          "type": "categorical",
+          "is_partition": false,
+          "type_params": null,
+          "expr": "core_actions",
+          "metadata": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "label": null,
+      "metadata": null,
+      "config": null
+    },
+    {
+      "name": "monthly_account_mrr",
+      "defaults": {
+        "agg_time_dimension": "snapshot_date"
+      },
+      "description": null,
+      "node_relation": {
+        "alias": "monthly_account_mrr",
+        "schema_name": "acme",
+        "database": null,
+        "relation_name": "acme.monthly_account_mrr"
+      },
+      "primary_entity": null,
+      "entities": [
+        {
+          "name": "account_month",
+          "description": null,
+          "type": "primary",
+          "role": null,
+          "expr": "row_id",
+          "metadata": null,
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "account",
+          "description": null,
+          "type": "foreign",
+          "role": null,
+          "expr": "account_id",
+          "metadata": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [
+        {
+          "name": "account_mrr",
+          "agg": "sum",
+          "description": null,
+          "create_metric": null,
+          "expr": "mrr_usd",
+          "agg_params": null,
+          "metadata": null,
+          "non_additive_dimension": {
+            "name": "snapshot_date",
+            "window_choice": "max",
+            "window_groupings": []
+          },
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "paying_account_count",
+          "agg": "sum",
+          "description": null,
+          "create_metric": null,
+          "expr": "CASE WHEN mrr_usd > 0 THEN 1 ELSE 0 END",
+          "agg_params": null,
+          "metadata": null,
+          "non_additive_dimension": {
+            "name": "snapshot_date",
+            "window_choice": "max",
+            "window_groupings": []
+          },
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "prior_paid_mrr",
+          "agg": "sum",
+          "description": null,
+          "create_metric": null,
+          "expr": "CASE WHEN prior_mrr > 0 THEN prior_mrr ELSE 0 END",
+          "agg_params": null,
+          "metadata": null,
+          "non_additive_dimension": {
+            "name": "snapshot_date",
+            "window_choice": "max",
+            "window_groupings": []
+          },
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "retained_mrr",
+          "agg": "sum",
+          "description": null,
+          "create_metric": null,
+          "expr": "CASE WHEN prior_mrr > 0 THEN mrr_usd ELSE 0 END",
+          "agg_params": null,
+          "metadata": null,
+          "non_additive_dimension": {
+            "name": "snapshot_date",
+            "window_choice": "max",
+            "window_groupings": []
+          },
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "capped_mrr",
+          "agg": "sum",
+          "description": null,
+          "create_metric": null,
+          "expr": "CASE WHEN prior_mrr > 0 THEN LEAST(mrr_usd, prior_mrr) ELSE 0 END",
+          "agg_params": null,
+          "metadata": null,
+          "non_additive_dimension": {
+            "name": "snapshot_date",
+            "window_choice": "max",
+            "window_groupings": []
+          },
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "first_mrr",
+          "agg": "sum",
+          "description": null,
+          "create_metric": null,
+          "expr": "mrr_usd",
+          "agg_params": null,
+          "metadata": null,
+          "non_additive_dimension": {
+            "name": "snapshot_date",
+            "window_choice": "min",
+            "window_groupings": []
+          },
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "all_mrr",
+          "agg": "sum",
+          "description": null,
+          "create_metric": null,
+          "expr": "mrr_usd",
+          "agg_params": null,
+          "metadata": null,
+          "non_additive_dimension": null,
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "dimensions": [
+        {
+          "name": "snapshot_date",
+          "description": null,
+          "type": "time",
+          "is_partition": false,
+          "type_params": {
+            "time_granularity": "day",
+            "validity_params": null
+          },
+          "expr": "month",
+          "metadata": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "label": null,
+      "metadata": null,
+      "config": null
+    },
+    {
+      "name": "irregular_snapshots",
+      "defaults": {
+        "agg_time_dimension": "snapshot_date"
+      },
+      "description": null,
+      "node_relation": {
+        "alias": "irregular_snapshots",
+        "schema_name": "acme",
+        "database": null,
+        "relation_name": "acme.irregular_snapshots"
+      },
+      "primary_entity": null,
+      "entities": [
+        {
+          "name": "snapshot",
+          "description": null,
+          "type": "primary",
+          "role": null,
+          "expr": "row_id",
+          "metadata": null,
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "account",
+          "description": null,
+          "type": "foreign",
+          "role": null,
+          "expr": "account_id",
+          "metadata": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "measures": [
+        {
+          "name": "per_account_last_value",
+          "agg": "sum",
+          "description": null,
+          "create_metric": null,
+          "expr": "value",
+          "agg_params": null,
+          "metadata": null,
+          "non_additive_dimension": {
+            "name": "snapshot_date",
+            "window_choice": "max",
+            "window_groupings": [
+              "account"
+            ]
+          },
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        },
+        {
+          "name": "per_account_first_value",
+          "agg": "sum",
+          "description": null,
+          "create_metric": null,
+          "expr": "value",
+          "agg_params": null,
+          "metadata": null,
+          "non_additive_dimension": {
+            "name": "snapshot_date",
+            "window_choice": "min",
+            "window_groupings": [
+              "account"
+            ]
+          },
+          "agg_time_dimension": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "dimensions": [
+        {
+          "name": "snapshot_date",
+          "description": null,
+          "type": "time",
+          "is_partition": false,
+          "type_params": {
+            "time_granularity": "day",
+            "validity_params": null
+          },
+          "expr": "snapshot_date",
+          "metadata": null,
+          "label": null,
+          "config": null
+        }
+      ],
+      "label": null,
+      "metadata": null,
+      "config": null
+    }
+  ],
+  "metrics": [
+    {
+      "name": "daily_active_accounts",
+      "description": null,
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "distinct_active_accounts",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "account_id",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "distinct_active_accounts",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "daily_account_activity",
+          "agg": "count_distinct",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": null,
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "active_accounts",
+      "description": null,
+      "type": "cumulative",
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": null,
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": {
+          "window": {
+            "count": 7,
+            "granularity": "day"
+          },
+          "grain_to_date": null,
+          "period_agg": "last",
+          "metric": {
+            "name": "daily_active_accounts",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        },
+        "input_measures": [],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": {
+        "where_filters": [
+          {
+            "where_sql_template": "{{ Dimension('account_day__active_users') }} >= 1"
+          }
+        ]
+      },
+      "metadata": null,
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "core_accounts",
+      "description": null,
+      "type": "cumulative",
+      "type_params": {
+        "measure": null,
+        "numerator": null,
+        "denominator": null,
+        "expr": null,
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": {
+          "window": {
+            "count": 7,
+            "granularity": "day"
+          },
+          "grain_to_date": null,
+          "period_agg": "last",
+          "metric": {
+            "name": "daily_active_accounts",
+            "filter": null,
+            "alias": null,
+            "offset_window": null,
+            "offset_to_grain": null
+          }
+        },
+        "input_measures": [],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": {
+        "where_filters": [
+          {
+            "where_sql_template": "{{ Dimension('account_day__core_actions') }} >= 1"
+          }
+        ]
+      },
+      "metadata": null,
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "mrr",
+      "description": null,
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "account_mrr",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "mrr_usd",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "account_mrr",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "monthly_account_mrr",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": {
+            "name": "snapshot_date",
+            "window_choice": "max",
+            "window_groupings": []
+          }
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": null,
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "paid_accounts",
+      "description": null,
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "paying_account_count",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "CASE WHEN mrr_usd > 0 THEN 1 ELSE 0 END",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "paying_account_count",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "monthly_account_mrr",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": {
+            "name": "snapshot_date",
+            "window_choice": "max",
+            "window_groupings": []
+          }
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": null,
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "prior_mrr",
+      "description": null,
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "prior_paid_mrr",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "CASE WHEN prior_mrr > 0 THEN prior_mrr ELSE 0 END",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "prior_paid_mrr",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "monthly_account_mrr",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": {
+            "name": "snapshot_date",
+            "window_choice": "max",
+            "window_groupings": []
+          }
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": null,
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "retained",
+      "description": null,
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "retained_mrr",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "CASE WHEN prior_mrr > 0 THEN mrr_usd ELSE 0 END",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "retained_mrr",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "monthly_account_mrr",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": {
+            "name": "snapshot_date",
+            "window_choice": "max",
+            "window_groupings": []
+          }
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": null,
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "capped",
+      "description": null,
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "capped_mrr",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "CASE WHEN prior_mrr > 0 THEN LEAST(mrr_usd, prior_mrr) ELSE 0 END",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "capped_mrr",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "monthly_account_mrr",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": {
+            "name": "snapshot_date",
+            "window_choice": "max",
+            "window_groupings": []
+          }
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": null,
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "first",
+      "description": null,
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "first_mrr",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "mrr_usd",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "first_mrr",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "monthly_account_mrr",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": {
+            "name": "snapshot_date",
+            "window_choice": "min",
+            "window_groupings": []
+          }
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": null,
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "all_snapshots",
+      "description": null,
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "all_mrr",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "mrr_usd",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "all_mrr",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "monthly_account_mrr",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": null
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": null,
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "arpa",
+      "description": null,
+      "type": "ratio",
+      "type_params": {
+        "measure": null,
+        "numerator": {
+          "name": "mrr",
+          "filter": null,
+          "alias": null,
+          "offset_window": null,
+          "offset_to_grain": null
+        },
+        "denominator": {
+          "name": "paid_accounts",
+          "filter": null,
+          "alias": null,
+          "offset_window": null,
+          "offset_to_grain": null
+        },
+        "expr": null,
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "paying_account_count",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          },
+          {
+            "name": "account_mrr",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": null,
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "nrr",
+      "description": null,
+      "type": "ratio",
+      "type_params": {
+        "measure": null,
+        "numerator": {
+          "name": "retained",
+          "filter": null,
+          "alias": null,
+          "offset_window": null,
+          "offset_to_grain": null
+        },
+        "denominator": {
+          "name": "prior_mrr",
+          "filter": null,
+          "alias": null,
+          "offset_window": null,
+          "offset_to_grain": null
+        },
+        "expr": null,
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "retained_mrr",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          },
+          {
+            "name": "prior_paid_mrr",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": null,
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "grr",
+      "description": null,
+      "type": "ratio",
+      "type_params": {
+        "measure": null,
+        "numerator": {
+          "name": "capped",
+          "filter": null,
+          "alias": null,
+          "offset_window": null,
+          "offset_to_grain": null
+        },
+        "denominator": {
+          "name": "prior_mrr",
+          "filter": null,
+          "alias": null,
+          "offset_window": null,
+          "offset_to_grain": null
+        },
+        "expr": null,
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "prior_paid_mrr",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          },
+          {
+            "name": "capped_mrr",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": null,
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "last_to_first",
+      "description": null,
+      "type": "ratio",
+      "type_params": {
+        "measure": null,
+        "numerator": {
+          "name": "mrr",
+          "filter": null,
+          "alias": null,
+          "offset_window": null,
+          "offset_to_grain": null
+        },
+        "denominator": {
+          "name": "first",
+          "filter": null,
+          "alias": null,
+          "offset_window": null,
+          "offset_to_grain": null
+        },
+        "expr": null,
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "first_mrr",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          },
+          {
+            "name": "account_mrr",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": null,
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "last_to_all",
+      "description": null,
+      "type": "ratio",
+      "type_params": {
+        "measure": null,
+        "numerator": {
+          "name": "mrr",
+          "filter": null,
+          "alias": null,
+          "offset_window": null,
+          "offset_to_grain": null
+        },
+        "denominator": {
+          "name": "all_snapshots",
+          "filter": null,
+          "alias": null,
+          "offset_window": null,
+          "offset_to_grain": null
+        },
+        "expr": null,
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "all_mrr",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          },
+          {
+            "name": "account_mrr",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": null,
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": null,
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "per_account_last",
+      "description": null,
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "per_account_last_value",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "value",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "per_account_last_value",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "irregular_snapshots",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": {
+            "name": "snapshot_date",
+            "window_choice": "max",
+            "window_groupings": [
+              "account"
+            ]
+          }
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": null,
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    },
+    {
+      "name": "per_account_first",
+      "description": null,
+      "type": "simple",
+      "type_params": {
+        "measure": {
+          "name": "per_account_first_value",
+          "filter": null,
+          "alias": null,
+          "join_to_timespine": false,
+          "fill_nulls_with": null
+        },
+        "numerator": null,
+        "denominator": null,
+        "expr": "value",
+        "window": null,
+        "grain_to_date": null,
+        "metrics": null,
+        "conversion_type_params": null,
+        "cumulative_type_params": null,
+        "input_measures": [
+          {
+            "name": "per_account_first_value",
+            "filter": null,
+            "alias": null,
+            "join_to_timespine": false,
+            "fill_nulls_with": null
+          }
+        ],
+        "metric_aggregation_params": {
+          "semantic_model": "irregular_snapshots",
+          "agg": "sum",
+          "agg_params": null,
+          "agg_time_dimension": null,
+          "non_additive_dimension": {
+            "name": "snapshot_date",
+            "window_choice": "min",
+            "window_groupings": [
+              "account"
+            ]
+          }
+        },
+        "join_to_timespine": false,
+        "fill_nulls_with": null,
+        "is_private": false
+      },
+      "filter": null,
+      "metadata": null,
+      "label": null,
+      "config": null,
+      "time_granularity": null
+    }
+  ],
+  "project_configuration": {
+    "time_spine_table_configurations": [
+      {
+        "location": "acme.time_spine_day",
+        "column_name": "date_day",
+        "grain": "day"
+      }
+    ],
+    "metadata": null,
+    "dsi_package_version": {
+      "major_version": "0",
+      "minor_version": "210",
+      "patch_version": "0"
+    },
+    "time_spines": []
+  },
+  "saved_queries": [],
+  "args": {
+    "metric_names": [
+      "mrr"
+    ],
+    "group_by_names": [
+      "account__region"
+    ],
+    "where_constraints": [],
+    "time_constraint_start": "2025-10-13",
+    "time_constraint_end": "2026-10-12"
+  }
+}

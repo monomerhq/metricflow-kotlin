@@ -35,7 +35,12 @@ class SelectorNode(
             // Python-style list pretty-printing (single-quoted strings, comma-space separators).
             val resolver = DEFAULT_RESOLVER
             val names = includeSpecs.allSpecs.map { resolver.resolveSpec(it).columnName }
-            "Select: ${names.joinToString(prefix = "[", postfix = "]") { "'$it'" }}"
+            val compact = names.joinToString(prefix = "[", postfix = "]") { "'$it'" }
+            // Upstream mf_pformat wraps lists beyond its 120-character limit.
+            val formatted = if (compact.length <= 120) compact else {
+                names.joinToString(separator = "\n", prefix = "[\n", postfix = "\n]") { "  '$it'," }
+            }
+            "Select: $formatted"
         }
 
     override fun idPrefix(): IdPrefix = StaticIdPrefix.DATAFLOW_NODE_SELECTOR_ID_PREFIX

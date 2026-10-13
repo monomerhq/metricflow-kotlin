@@ -32,6 +32,7 @@ import cc.monomer.metricflow.domain.dataflow.nodes.OffsetBaseGrainByCustomGrainN
 import cc.monomer.metricflow.domain.dataflow.nodes.OffsetCustomGranularityNode
 import cc.monomer.metricflow.domain.dataflow.nodes.ReadSqlSourceNode
 import cc.monomer.metricflow.domain.dataflow.nodes.SelectorNode
+import cc.monomer.metricflow.domain.dataflow.nodes.SemiAdditiveJoinNode
 import cc.monomer.metricflow.domain.dataflow.nodes.SpecToAlias
 import cc.monomer.metricflow.domain.dataflow.nodes.WhereFilterNode
 import cc.monomer.metricflow.domain.dataflow.nodes.WindowReaggregationNode
@@ -52,6 +53,7 @@ import cc.monomer.metricflow.domain.manifest.model.enums.TimeGranularity
 import cc.monomer.metricflow.domain.metric_evaluation.plan.MetricEvaluationPlan
 import cc.monomer.metricflow.domain.plan_conversion.to_sql_plan.DataflowNodeToSqlSubqueryVisitor
 import cc.monomer.metricflow.domain.semantic_graph.SemanticManifestGraphLookup
+import cc.monomer.metricflow.domain.semantic_graph.metric_input.NonAdditiveDimensionSpecFactory
 import cc.monomer.metricflow.domain.spec.ColumnAssociationResolver
 import cc.monomer.metricflow.domain.spec.InstanceSpec
 import cc.monomer.metricflow.domain.spec.InstanceSpecSet
@@ -338,6 +340,12 @@ class DataflowPlanBuilder(
         }
         val simpleInput = manifestObjectLookup.simpleMetricNameToInput[inputMetric.name]
             ?: error("Cumulative input '${inputMetric.name}' is not a simple metric input.")
+        val inputMetricSpec = MetricSpec.fromReference(inputMetric.asReference)
+        val cumulativeDefinitionFilters = definitionFilters(metricSpec)
+        val cumulativeFilters = cumulativeDefinitionFilters +
+            whereFilterSpecs.filterNot { it in cumulativeDefinitionFilters } +
+            renderFilters(inputMetric.filter, WhereFilterLocation.forInputMetric(inputMetric.asReference)) +
+            definitionFilters(inputMetricSpec)
         val transform = findMetricTimeTransform(
             modelName = simpleInput.modelId.modelName,
             aggregationTimeDimensionName = simpleInput.aggTimeDimensionName,
@@ -369,12 +377,17 @@ class DataflowPlanBuilder(
                 count = cumulativeWindow?.count ?: if (cumulativeGrainToDate == null) 0 else 1,
             )
         }
+        val sourceSpecSet = ((transform.parentNode as ReadSqlSourceNode).dataSet as SqlDataSet).instanceSet.specSet
+        val localLinkableKeys = collectLocalLinkableKeys(sourceSpecSet)
+        val needsEntityJoin = (requiredQuerySpec.linkableSpecs.asTuple + cumulativeFilters.flatMap { it.linkableSpecs })
+            .any { !isLocallyAvailable(it, localLinkableKeys) }
         var cumulativeSource: DataflowPlanNode = expandedSourceConstraint?.let { constraint ->
             constrainTimeRangeWithAliasReservation(transform, constraint).also {
                 // Upstream resolves the adjusted source recipe and its post-join narrowing
                 // selector before final SQL conversion. Both pruned resolutions consume an
                 // observable deterministic alias.
-                repeat(2) { SequentialIdGenerator.createNextId(StaticIdPrefix.SUB_QUERY) }
+                // Entity recipe evaluation resolves the wrapped source once itself.
+                repeat(if (needsEntityJoin) 1 else 2) { SequentialIdGenerator.createNextId(StaticIdPrefix.SUB_QUERY) }
             }
         } ?: transform
         if (requestedAggTimeSpecs.isNotEmpty()) {
@@ -388,15 +401,12 @@ class DataflowPlanBuilder(
             )
         }
 
-        val inputMetricSpec = MetricSpec.fromReference(inputMetric.asReference)
         val aggregatedInput = buildAggregatedNodeForSimpleInputs(
             querySpec = requiredQuerySpec,
             simpleMetricInputNames = listOf(simpleInput.name),
             outputMetricSpecs = listOf(inputMetricSpec),
             outputComputeMetric = false,
-            whereFilterSpecs = whereFilterSpecs +
-                renderFilters(inputMetric.filter, WhereFilterLocation.forInputMetric(inputMetric.asReference)) +
-                definitionFilters(inputMetricSpec),
+            whereFilterSpecs = cumulativeFilters,
             sourceNodeOverride = cumulativeSource,
             sourceTimeRangeConstraint = null,
             preAggregationTimeRangeConstraint = originalTimeRangeConstraint,
@@ -696,7 +706,11 @@ class DataflowPlanBuilder(
         }
 
         val modelsUsed = inputInfos.map { it.modelName to it.aggTimeDim }.toSet()
-        val singleModel = modelsUsed.size == 1
+        val singleModel = modelsUsed.size == 1 && inputInfos.map {
+            NonAdditiveDimensionSpecFactory.createFromSimpleMetricInput(
+                manifestObjectLookup.simpleMetricNameToInput.getValue(it.metricSpec.elementName),
+            )
+        }.distinct().size == 1
         val hasOffsets = inputInfos.any { it.metricSpec.hasTimeOffset }
         val inputFilters = inputInfos.map { it.metricSpec.whereFilterSpecs + definitionFilters(it.metricSpec) }
         val commonInputFilters = inputFilters.distinct().singleOrNull()
@@ -799,13 +813,16 @@ class DataflowPlanBuilder(
         val firstInput = manifestObjectLookup.simpleMetricNameToInput.getValue(simpleMetricInputNames[0])
         val modelName = firstInput.modelId.modelName
         val aggTimeDim = firstInput.aggTimeDimensionName
+        val nonAdditiveSpec = NonAdditiveDimensionSpecFactory.createFromSimpleMetricInput(firstInput)
+        val semiAdditiveSpecs = nonAdditiveSpec?.linkableSpecs(firstInput.aggTimeDimensionGrain).orEmpty()
         check(
             simpleMetricInputNames.all { name ->
                 val sim = manifestObjectLookup.simpleMetricNameToInput.getValue(name)
-                sim.modelId.modelName == modelName && sim.aggTimeDimensionName == aggTimeDim
+                sim.modelId.modelName == modelName && sim.aggTimeDimensionName == aggTimeDim &&
+                    NonAdditiveDimensionSpecFactory.createFromSimpleMetricInput(sim) == nonAdditiveSpec
             },
         ) {
-            "All simple-metric inputs must share (model, agg_time_dim). Got: $simpleMetricInputNames"
+            "All simple-metric inputs must share (model, agg_time_dim, non_additive_dimension). Got: $simpleMetricInputNames"
         }
 
         val transformNode = findMetricTimeTransform(
@@ -836,12 +853,25 @@ class DataflowPlanBuilder(
             }
         }
 
-        val requiredLinkableSpecs = (querySpec.linkableSpecs.asTuple +
+        val requiredLinkableSpecs = (querySpec.linkableSpecs.asTuple + semiAdditiveSpecs +
             whereFilterSpecs.flatMap { it.linkableSpecs }).distinct()
         val (localSpecs, joinSpecs) = requiredLinkableSpecs
             .partition { spec -> isLocallyAvailable(spec, localLinkableKeys) }
 
         var initialSourceNode = sourceNodeOverride ?: transformNode
+        // Snapshot selection needs the constrained source recipe before entity joins,
+        // matching upstream's source-range pushdown and avoiding an unconstrained branch.
+        if (nonAdditiveSpec != null && sourceTimeRangeConstraint != null) {
+            initialSourceNode = if (joinSpecs.isEmpty()) {
+                constrainTimeRangeWithAliasReservation(initialSourceNode, sourceTimeRangeConstraint)
+            } else {
+                ConstrainTimeRangeNode(parentNode = initialSourceNode, timeRangeConstraint = sourceTimeRangeConstraint)
+            }
+        }
+        if (nonAdditiveSpec != null) {
+            // Equivalent inputs still resolve one source recipe per input upstream.
+            repeat(simpleMetricInputNames.size - 1) { SequentialIdGenerator.createNextId(StaticIdPrefix.SUB_QUERY) }
+        }
         var customOffsetAlreadyProvidesCustomGrains = false
         if (customOffsetWindow != null && querySpec.timeDimensionSpecs.isNotEmpty()) {
             val queriedSpecs = querySpec.timeDimensionSpecs
@@ -887,11 +917,8 @@ class DataflowPlanBuilder(
             // No join needed.
             initialSourceNode to localSpecs
         } else {
-            check(sourceNodeOverride == null) {
-                "Source override with entity-link joins is not supported by this planner path."
-            }
             // Build a JoinOnEntities pipeline.
-            buildJoinNodeFor(transformNode, joinSpecs, localSpecs)
+            buildJoinNodeFor(initialSourceNode, joinSpecs, localSpecs)
         }
 
         // Apply time-range constraint at the inner pre-aggregation site so the constraint runs
@@ -906,7 +933,7 @@ class DataflowPlanBuilder(
             )
         }
 
-        val sourceWithTimeConstraint = sourceTimeRangeConstraint?.let { constraint ->
+        val sourceWithTimeConstraint = sourceTimeRangeConstraint?.takeIf { nonAdditiveSpec == null }?.let { constraint ->
             constrainTimeRangeWithAliasReservation(sourceWithCustomGranularities, constraint)
         } ?: sourceWithCustomGranularities
 
@@ -923,11 +950,11 @@ class DataflowPlanBuilder(
         // reference them. Dedup against the aggregation specs so we don't accidentally request a
         // column twice (which would change the comment's "Select: [...]" rendering).
         val filterLinkableSpecs = whereFilterSpecs.flatMap { it.linkableSpecs }
-        val specsToKeepBeforeConstraints = if (filterLinkableSpecs.isEmpty()) {
+        val specsToKeepBeforeConstraints = if (filterLinkableSpecs.isEmpty() && semiAdditiveSpecs.isEmpty()) {
             specsToKeepForAggregation
         } else {
             InstanceSpecSet.createFromSpecs(
-                (specsToKeepList + filterLinkableSpecs).distinct(),
+                (specsToKeepList + filterLinkableSpecs + semiAdditiveSpecs).distinct(),
             )
         }
 
@@ -937,22 +964,37 @@ class DataflowPlanBuilder(
             replaceDescription = null,
             distinct = false,
         )
-        val nodeAfterTimeConstraint = preAggregationTimeRangeConstraint?.let { constraint ->
-            constrainTimeRangeWithAliasReservation(selectorBeforeConstraints, constraint)
-        } ?: selectorBeforeConstraints
         // Add WhereFilterNode between Sel1 and Sel2 when the query carries a non-empty WHERE
         // intersection. Mirrors Python `_build_pre_aggregation_plan` line ~2129-2130.
         val nodeAfterWhere: DataflowPlanNode = if (whereFilterSpecs.isNotEmpty()) {
             WhereFilterNode(
-                parentNode = nodeAfterTimeConstraint,
+                parentNode = selectorBeforeConstraints,
                 filterSpecs = whereFilterSpecs,
                 alwaysApply = false,
             )
         } else {
-            nodeAfterTimeConstraint
+            selectorBeforeConstraints
         }
+        val nodeAfterTimeConstraint = preAggregationTimeRangeConstraint?.let { constraint ->
+            constrainTimeRangeWithAliasReservation(nodeAfterWhere, constraint)
+        } ?: nodeAfterWhere
+        // Upstream selects the snapshot after query/metric filters and time constraints,
+        // and before dropping the non-additive time dimension and window-grouping entities.
+        val nodeAfterSnapshotSelection = nonAdditiveSpec?.let { spec ->
+            SemiAdditiveJoinNode(
+                parentNode = nodeAfterTimeConstraint,
+                entityReferences = spec.windowGroupingReferences,
+                timeDimensionSpec = spec.nameAsTimeDimensionSpec(firstInput.aggTimeDimensionGrain),
+                aggByFunction = spec.windowChoice,
+                queriedTimeDimensionSpec = querySpec.linkableSpecs.asTuple
+                    .filterIsInstance<TimeDimensionSpec>()
+                    .firstOrNull {
+                        it.elementName == spec.name || (spec.name == aggTimeDim && it.isMetricTime)
+                    },
+            )
+        } ?: nodeAfterTimeConstraint
         val selectorForAggregation = SelectorNode(
-            parentNode = nodeAfterWhere,
+            parentNode = nodeAfterSnapshotSelection,
             includeSpecs = specsToKeepForAggregation,
             replaceDescription = null,
             distinct = false,
@@ -1047,7 +1089,7 @@ class DataflowPlanBuilder(
      * are right-side subplans, so intermediate entities and partition constraints remain intact.
      */
     private fun buildJoinNodeFor(
-        transformNode: MetricTimeDimensionTransformNode,
+        sourceNode: DataflowPlanNode,
         joinSpecs: List<LinkableInstanceSpec>,
         localSpecs: List<LinkableInstanceSpec>,
     ): Pair<DataflowPlanNode, List<LinkableInstanceSpec>> {
@@ -1056,7 +1098,7 @@ class DataflowPlanBuilder(
             nodes = sourceNodeSet.sourceNodesForMetricQueries,
             joinType = SqlJoinType.LEFT_OUTER,
         )
-        val leftInstances = nodeOutputResolver.getOutputDataSet(transformNode).instanceSet
+        val leftInstances = nodeOutputResolver.getOutputDataSet(sourceNode).instanceSet
         val joinValidator = JoinDataflowOutputValidator(semanticModelLookup)
         val partitionResolver = PartitionJoinResolver(semanticModelLookup)
         val candidates = mutableListOf<JoinLinkableInstancesRecipe>()
@@ -1107,7 +1149,7 @@ class DataflowPlanBuilder(
             }.filter { it.satisfiableLinkableSpecs.isNotEmpty() }
                 .sortedByDescending { it.satisfiableLinkableSpecs.size }
         }
-        return JoinOnEntitiesNode(leftNode = transformNode, joinTargets = joinTargets) to (localSpecs + joinSpecs)
+        return JoinOnEntitiesNode(leftNode = sourceNode, joinTargets = joinTargets) to (localSpecs + joinSpecs)
     }
 
     /**
