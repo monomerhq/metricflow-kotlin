@@ -11,7 +11,7 @@ What in `python_oracle/upstream/` we have to port to Kotlin, what we drop, and h
 
 `477 + 1 + 96 = 574 files` ✓ — `60,346 + 89 + 7,231 = 67,666 LOC` ✓
 
-The reachable LOC is what we have to translate to Kotlin. With the usual 1.3–1.7× expansion factor for typed Kotlin data classes vs Pydantic, expect **~78k–103k Kotlin LOC** to land. (FEASIBILITY.md §2's 88k–115k estimate stands; the lower bound is ~10k tighter because reachability prunes converters/parsing/test helpers.)
+The reachable LOC is what we have to translate to Kotlin. With the usual 1.3–1.7× expansion factor for typed Kotlin data classes vs Pydantic, expect **~78k–103k Kotlin LOC** to land. (internal/FEASIBILITY.md §2's 88k–115k estimate stands; the lower bound is ~10k tighter because reachability prunes converters/parsing/test helpers.)
 
 ## Per-package reachable vs unreachable
 
@@ -90,7 +90,7 @@ Per CLAUDE.md, the engine produces SQL; it does not run SQL. Anything purely exe
 
 For the Kotlin port these collapse to **two small types** in `application.engine`: `MetricFlowExplainResult { querySpec, dataflowPlan, sql, bindParameters }` and `SqlStatement { sql, bindParameters }`. We do not need a Visitor over Write nodes at all — `explain()` always lands at a write node, so we can take the SQL from the converter directly.
 
-→ See "Proposed updates to FEASIBILITY.md" in the report for the suggested wording fix.
+→ See "Proposed updates to internal/FEASIBILITY.md" in the report for the suggested wording fix.
 
 ## Excluded — other unreachable (96 files / 7,231 LOC)
 
@@ -155,7 +155,7 @@ The trace walks `from X import Y` / `import X` statements, resolves `Y` against 
 
 3. **`metricflow/sql/sql_column.py` — unreachable, but easy to mistake for in-scope.** It defines `SqlColumn`, but our SQL plan model uses `SqlColumnReferenceExpression` (in `metricflow/sql/sql_exprs.py`, reachable). Confirmed by grep: `SqlColumn` (without `Reference`) is referenced only from `tests_metricflow`.
 
-4. **`CommonEntitysRule` (`validations/common_entities.py`) is unreachable.** Defined but not in `DEFAULT_RULES` (line 75–104 of `semantic_manifest_validator.py`). It would warn about entities used on only one semantic model; metricflow ships it disabled. We do not port it. **This means the FEASIBILITY.md "11 rules" figure is significantly wrong — the active set is 28 rules across 16 rule-bearing files. See `validation-rules-inventory.md`.**
+4. **`CommonEntitysRule` (`validations/common_entities.py`) is unreachable.** Defined but not in `DEFAULT_RULES` (line 75–104 of `semantic_manifest_validator.py`). It would warn about entities used on only one semantic model; metricflow ships it disabled. We do not port it. **This means the internal/FEASIBILITY.md "11 rules" figure is significantly wrong — the active set is 28 rules across 16 rule-bearing files. See `validation-rules-inventory.md`.**
 
 5. **`metricflow/dataflow/optimizer/dataflow_optimizer_factory.py`** — reachable (referenced from engine). The whole `dataflow/optimizer/source_scan/` subtree (4 files / 974 LOC) is reachable.
 

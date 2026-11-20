@@ -192,7 +192,7 @@ These are the only cycles. Everything else is a clean acyclic order.
 
 ## Wave proposal (10 waves)
 
-The sort produces 19 strict layers. To match FEASIBILITY.md §5 Phase 3's "8–10 waves" target and to balance per-wave size, I collapse adjacent layers that have no internal dep. Cycles 1–4 above are pre-broken by the suggested refactors before sorting.
+The sort produces 19 strict layers. To match internal/FEASIBILITY.md §5 Phase 3's "8–10 waves" target and to balance per-wave size, I collapse adjacent layers that have no internal dep. Cycles 1–4 above are pre-broken by the suggested refactors before sorting.
 
 | Wave | Modules | Files | LOC | Notes |
 |---|---|---:|---:|---|
@@ -211,7 +211,7 @@ The sort produces 19 strict layers. To match FEASIBILITY.md §5 Phase 3's "8–1
 
 ## Why 10 waves and not 9
 
-FEASIBILITY.md §5 sketched 9 waves. The recon work changed it as follows:
+internal/FEASIBILITY.md §5 sketched 9 waves. The recon work changed it as follows:
 
 - **Old W1 (leaf data) = new W1**, no change.
 - **Old W2 (protocols/transformations) → split** into W2-validation and W2-transformation (parallel).

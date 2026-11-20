@@ -5,7 +5,7 @@ Phase-5 consolidation of every `:common:*` and `:domain:*` module from Phase 3.
 This is the **single library JAR** consumers reach for: manifest model + validation +
 specs + dataflow plan + SQL plan + planner + (default) renderer + engine facade
 plumbing. Dialect renderers and the optional gRPC server live in their own
-artifacts (see PHASE_5_PLAN.md).
+artifacts (see docs/internal/PHASE_5_PLAN.md).
 
 ## What lives here
 
