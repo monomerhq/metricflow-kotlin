@@ -16,7 +16,7 @@ MetricFlow의 의미층 엔진을 Kotlin/JVM으로 **온전히** 포팅한다.
 
 ## 먼저 읽을 것
 
-1. **[FEASIBILITY.md](FEASIBILITY.md)** — 범위, 위험, 5-Phase 계획, 합격 기준.
+1. **[docs/internal/FEASIBILITY.md](docs/internal/FEASIBILITY.md)** — 범위, 위험, 5-Phase 계획, 합격 기준.
 2. **[docs/guides/backend-conventions.md](docs/guides/backend-conventions.md)** — Kotlin/Spring 코딩 규약.
 3. **[python_oracle/README.md](python_oracle/README.md)** — Python 측 oracle 위치와 진입점.
 4. **[python_oracle/upstream/README.md](python_oracle/upstream/README.md), GLOSSARY.md, TENETS.md** — metricflow 자체의 도메인 어휘와 설계 의도. 코드 옮기기 전에 읽을 것.
@@ -91,7 +91,7 @@ gRPC proto는 위 8개 인터페이스를 1:1로 노출.
 ```
 metricflow-kotlin/
 ├── CLAUDE.md                    # 이 파일
-├── FEASIBILITY.md               # 5-Phase 계획
+├── docs/internal/FEASIBILITY.md # 5-Phase 계획 (보관)
 ├── docs/
 │   ├── guides/backend-conventions.md   # 코딩 규약 (monomer에서 복사)
 │   └── (Phase 0 산출물)

@@ -5,7 +5,7 @@ plugins {
 // `:core` is the metricflow-core artifact — the result of the Phase 5 consolidation that
 // absorbed the 17 fine-grained `:common:*` and `:domain:*` Gradle modules from Phase 3.
 //
-// Kotlin packages are preserved verbatim from the source modules (see PHASE_5_PLAN.md
+// Kotlin packages are preserved verbatim from the source modules (see docs/internal/PHASE_5_PLAN.md
 // section 3) so that Python source-path traceability remains intact and `import` lines
 // in dialect renderers / engine facade / diff-runner do not need to be rewritten.
 //
